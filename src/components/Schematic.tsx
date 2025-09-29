@@ -249,7 +249,14 @@ export default function Schematic({ data }: { data: SchematicData }) {
   }
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div style={{  position: "relative",
+    width: "100%",
+    height: "100%",
+    minHeight: 300,  // Provide a minHeight
+    background: "#fafafa",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column", }}>
       <div style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}>
         <button
           onClick={resetView}
