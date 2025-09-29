@@ -554,7 +554,7 @@ export default function App() {
       case "systems":
         return ["Splice"].includes(item.type);
       default:
-        return true;
+        return false;
     }
   });
 
@@ -568,7 +568,7 @@ export default function App() {
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{
+          {/* <div style={{
             width: 48,
             height: 48,
             background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -581,14 +581,14 @@ export default function App() {
             fontWeight: "bold"
           }}>
             ⚡
-          </div>
+          </div> */}
           <div>
             <h1 style={{ margin: 0, color: "#212529", fontSize: "28px", fontWeight: "700" }}>
               ASDM
             </h1>
-            <p style={{ margin: 0, color: "#6c757d", fontSize: "14px" }}>
+            {/* <p style={{ margin: 0, color: "#6c757d", fontSize: "14px" }}>
               Automobile Engineering Harness Dashboard
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

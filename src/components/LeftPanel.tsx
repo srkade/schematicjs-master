@@ -176,7 +176,7 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
                   fontSize: "12px",
                   lineHeight: "1.4"
                 }}>
-                  {item.description}
+                  
                 </p>
               </div>
             </div>

@@ -62,9 +62,9 @@ export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
       <div style={{
         background: "white",
         borderBottom: "1px solid #e9ecef",
-        padding: "20px 24px"
+        padding: "5px 8px"
       }}>
-        <div style={{
+        {/* <div style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between"
@@ -73,13 +73,13 @@ export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
             <div style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              marginBottom: "4px"
+              gap: "3px",
+              marginBottom: "2px"
             }}>
               <span style={{
                 background: "#e3f2fd",
                 color: "#1565c0",
-                padding: "4px 8px",
+                padding: "2px 3px",
                 borderRadius: "6px",
                 fontSize: "12px",
                 fontWeight: "500"
@@ -103,13 +103,13 @@ export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
               ({selectedItem.type})
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Schematic Viewer */}
       <div style={{
         flex: 1,
-        padding: "20px",
+        padding: "5px",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column"
@@ -126,7 +126,7 @@ export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
           <div style={{
             background: "#f8f9fa",
             borderBottom: "1px solid #e9ecef",
-            padding: "12px 16px",
+            padding: "3px 5px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between"
