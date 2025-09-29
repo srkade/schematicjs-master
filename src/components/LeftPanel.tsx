@@ -109,9 +109,9 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
               alignItems: "flex-start",
               gap: "12px"
             }}>
-              <div style={{ fontSize: "28px" }}>
+              {/* <div style={{ fontSize: "28px" }}>
                 {getItemIcon(item.type)}
-              </div>
+              </div> */}
               
               <div style={{ flex: 1 }}>
                 <div style={{
