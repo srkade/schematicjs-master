@@ -31,7 +31,7 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
     }}>
       {/* Panel Header */}
       <div style={{
-        padding: "20px",
+        padding: "15px",
         borderBottom: "1px solid #e9ecef"
       }}>
         <h2 style={{
@@ -75,15 +75,15 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
       <div style={{
         flex: 1,
         overflow: "auto",
-        padding: "16px"
+        padding: "8px"
       }}>
         {data.map((item) => (
           <div
             key={item.code}
             onClick={() => onItemSelect(item)}
             style={{
-              padding: "16px",
-              marginBottom: "12px",
+              padding: "6px",
+              marginBottom: "4px",
               border: `2px solid ${selectedItem?.code === item.code ? '#007bff' : '#e9ecef'}`,
               borderRadius: "12px",
               background: selectedItem?.code === item.code ? '#f0f8ff' : 'white',
@@ -107,7 +107,7 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
             <div style={{
               display: "flex",
               alignItems: "flex-start",
-              gap: "12px"
+              gap: "2px"
             }}>
               {/* <div style={{ fontSize: "28px" }}>
                 {getItemIcon(item.type)}

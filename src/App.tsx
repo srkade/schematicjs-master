@@ -564,7 +564,8 @@ export default function App() {
       <div style={{ 
         background: "white", 
         borderBottom: "1px solid #e9ecef",
-        padding: "16px 24px",
+        padding: "1x 2px",
+        paddingLeft: "24px",
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -583,7 +584,7 @@ export default function App() {
             ⚡
           </div> */}
           <div>
-            <h1 style={{ margin: 0, color: "#212529", fontSize: "28px", fontWeight: "700" }}>
+            <h1 style={{ margin:0, color: "#212529", fontSize: "28px", fontWeight: "700" }}>
               ASDM
             </h1>
             {/* <p style={{ margin: 0, color: "#6c757d", fontSize: "14px" }}>
