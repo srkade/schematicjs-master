@@ -59,52 +59,7 @@ export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
       overflow: "hidden"
     }}>
       {/* Header */}
-      <div style={{
-        background: "white",
-        borderBottom: "1px solid #e9ecef",
-        padding: "5px 8px"
-      }}>
-        {/* <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between"
-        }}>
-          <div>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "3px",
-              marginBottom: "2px"
-            }}>
-              <span style={{
-                background: "#e3f2fd",
-                color: "#1565c0",
-                padding: "2px 3px",
-                borderRadius: "6px",
-                fontSize: "12px",
-                fontWeight: "500"
-              }}>
-                {selectedItem.code}
-              </span>
-              <h2 style={{
-                margin: 0,
-                color: "#212529",
-                fontSize: "20px",
-                fontWeight: "600"
-              }}>
-                {selectedItem.name}
-              </h2>
-            </div>
-            <p style={{
-              margin: 0,
-              color: "#6c757d",
-              fontSize: "14px"
-            }}>
-              ({selectedItem.type})
-            </p>
-          </div>
-        </div> */}
-      </div>
+      
 
       {/* Schematic Viewer */}
       <div style={{

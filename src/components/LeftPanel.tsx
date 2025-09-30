@@ -159,7 +159,7 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
                   {item.type}
                 </p>
                 
-                {item.voltage && (
+                {/* {item.voltage && (
                   <p style={{
                     margin: "0 0 6px 0",
                     color: "#f57c00",
@@ -168,7 +168,7 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
                   }}>
                     {item.voltage}
                   </p>
-                )}
+                )} */}
                 
                 <p style={{
                   margin: 0,

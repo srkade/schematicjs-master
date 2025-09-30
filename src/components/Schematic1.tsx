@@ -1,6 +1,6 @@
 // ...existing code...
 
-import React, { useState, useEffect, useRef, JSX } from "react";
+import React, { useState, useEffect, useRef } from "react";
 type ComponentType = {
   id: string;
   x?: number;
@@ -46,34 +46,11 @@ export default function Schematic({ data }: { data: SchematicData }) {
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(
     null
   );
- //changes reset view box
+
+  // Reset view handler
   const resetView = () => {
-  const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
-
-  const svgWidth = 1500;
-  const svgHeight = 768;
-
-  const margin = 0.1;
-  const scaleX = svgWidth / schematicW;
-  const scaleY = svgHeight / schematicH;
-  let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
-
-  scaleFactor *= 0.6;
-
-  const newW = schematicW * scaleFactor;
-  const newH = schematicH * scaleFactor;
-
-  // Move more to the left by subtracting a larger value
-  const leftX = fitX - (-270); // try 100 units, adjust as needed
-  const centerY = fitY + (schematicH - newH) / 2-(-100);
-
-  setViewBox({
-    x: leftX,
-    y: centerY,
-    w: newW,
-    h: newH,
-  });
-};
+    setViewBox(fitViewBox);
+  };
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -88,33 +65,19 @@ export default function Schematic({ data }: { data: SchematicData }) {
     setDragOrigin(null);
   };
 
-
-
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!dragging || !dragStart || !dragOrigin) return;
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
     setViewBox({
-      x: dragOrigin.x - dx * (viewBox.w / 800),
-      y: dragOrigin.y - dy * (viewBox.h / 600),
+      x: dragOrigin.x - dx * (viewBox.w / 300),
+      y: dragOrigin.y - dy * (viewBox.h / 100),
       w: viewBox.w,
       h: viewBox.h,
     });
   };
-
-  const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
+  const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 300, h: 100 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
-
-
-    //change deafault view box on data change
-useEffect(() => {
-  if (fitViewBox) {
-    resetView();
-  }
-}, [fitViewBox]);
-
-
-
   const [componentNameWidths, setComponentNameWidths] = useState<{
     [id: string]: number;
   }>({});
@@ -199,109 +162,6 @@ useEffect(() => {
     setViewBox({ x, y, w: newW, h: newH });
   };
 
-  function getConnectionOffset(index: number, y1: number, y2: number, offsetStep = 10) {
-    let max = Math.max(y1, y2);
-    let min = Math.min(y1, y2);
-    return (max - min) - ((index + 1) * offsetStep);
-  }
-
-  function getIntersection(
-    xa: number,
-    ya: number,
-    xb: number,
-    yb: number,
-    xc: number,
-    yc: number,
-    xd: number,
-    yd: number
-  ) {
-    // Returns intersection point if line AB and CD intersect
-    const denom = (xb - xa) * (yd - yc) - (yb - ya) * (xd - xc);
-    if (denom === 0) return null;
-    const r = ((ya - yc) * (xd - xc) - (xa - xc) * (yd - yc)) / denom;
-    const s = ((ya - yc) * (xb - xa) - (xa - xc) * (yb - ya)) / denom;
-    if (r > 0 && r < 1 && s > 0 && s < 1) {
-      // Intersection point
-      return {
-        x: xa + r * (xb - xa),
-        y: ya + r * (yb - ya),
-      };
-    }
-    return null;
-  }
-
-  function checkAndReturnIntersection(
-    i: number,
-    x1: number,
-    x2: number,
-    y1: number,
-    y2: number
-  ) : JSX.Element | undefined {
-    let intersection = null;
-    for (let j = 0; j < data.connections.length; j++) {
-      if (i === j) continue;
-      const w2 = data.connections[j];
-      const f2 = w2.from;
-      const f2Tuple = getComponentConnectorTupleFromConnectionPoint(f2);
-      const f2Component = f2Tuple[0];
-      const f2Connector = f2Tuple[1];
-      const t2 = w2.to;
-      const t2Tuple = getComponentConnectorTupleFromConnectionPoint(t2);
-      const t2Component = t2Tuple[0];
-      const t2Connector = t2Tuple[1];
-
-      if (!f2Component || !f2Connector || !t2Component || !t2Connector)
-        continue;
-      const x3 =
-        getXForConnector(f2Connector, f2Component) +
-        getWidthForConnector(f2Connector) / 2;
-      const y3 = getYForConnector(f2Connector, f2Component) + 20 / 2;
-      const x4 =
-        getXForConnector(t2Connector, t2Component) +
-        getWidthForConnector(t2Connector) / 2;
-      const y4 = getYForConnector(t2Connector, t2Component) + 20 / 2;
-      // Check intersection
-      const inter = getIntersection(x1, y1, x2, y2, x3, y3, x4, y4);
-      if (inter && i > j) {
-        intersection = inter;
-        break;
-      }
-    }
-    if (intersection) {
-      const diameter = 10;
-      const radius = diameter / 2;
-      // Direction of the wire
-      const dx_hump = x2 - x1;
-      const dy_hump = y2 - y1;
-      const length_hump = Math.sqrt(dx_hump * dx_hump + dy_hump * dy_hump);
-      // Unit vector along the wire
-      const ux = dx_hump / length_hump;
-      const uy = dy_hump / length_hump;
-      // Points before and after intersection
-      const beforeX = intersection.x - ux * radius;
-      const beforeY = intersection.y - uy * radius;
-      const afterX = intersection.x + ux * radius;
-      const afterY = intersection.y + uy * radius;
-      // Perpendicular unit vector
-      const perpUx = -uy;
-      const perpUy = ux;
-      // Arc control point for semicircle (perpendicular to wire)
-      const arcCtrlX = intersection.x + perpUx * radius;
-      const arcCtrlY = intersection.y + perpUy * radius;
-
-      return (
-        <g>
-          <path
-            d={`M ${x1} ${y1} L ${beforeX} ${beforeY} Q ${arcCtrlX} ${arcCtrlY} ${afterX} ${afterY} L ${x2} ${y2}`}
-            stroke={"red"}
-            strokeWidth="2"
-            fill="none"
-          />
-        </g>
-      );
-    }
-  }
-
   function getWidthForComponent(component: ComponentType): number {
     if (component.connectors.length == 1) {
       return componentNameWidths[component.id] + padding;
@@ -354,7 +214,7 @@ useEffect(() => {
     let width = getWidthForComponent(component) / (componentCount + 1);
     let index = component.connectors.findIndex((c) => c.id === connector.id);
     let connWidth = getWidthForConnector(connector) / 2;
-    return x + width * (index + 1) - connWidth;
+    return x + (width * (index + 1)) - connWidth;
   }
 
   function getYForConnector(
@@ -389,8 +249,6 @@ useEffect(() => {
   }
 
   return (
-
-    //change div for view box
     <div style={{  position: "relative",
     width: "100%",
     height: "100%",
@@ -576,22 +434,155 @@ useEffect(() => {
               : getYForConnector(to, toComponent!);
 
           // Helper to check intersection between two lines
+          function getIntersection(
+            xa: number,
+            ya: number,
+            xb: number,
+            yb: number,
+            xc: number,
+            yc: number,
+            xd: number,
+            yd: number
+          ) {
+            // Returns intersection point if line AB and CD intersect
+            const denom = (xb - xa) * (yd - yc) - (yb - ya) * (xd - xc);
+            if (denom === 0) return null;
+            const r = ((ya - yc) * (xd - xc) - (xa - xc) * (yd - yc)) / denom;
+            const s = ((ya - yc) * (xb - xa) - (xa - xc) * (yb - ya)) / denom;
+            if (r > 0 && r < 1 && s > 0 && s < 1) {
+              // Intersection point
+              return {
+                x: xa + r * (xb - xa),
+                y: ya + r * (yb - ya),
+              };
+            }
+            return null;
+          }
 
           // Find intersection with other wires, only give hump to the wire with higher index
+          let intersection = null;
+          for (let j = 0; j < data.connections.length; j++) {
+            if (i === j) continue;
+            const w2 = data.connections[j];
+            const f2 = w2.from;
+            const f2Tuple = getComponentConnectorTupleFromConnectionPoint(f2);
+            const f2Component = f2Tuple[0];
+            const f2Connector = f2Tuple[1];
+            const t2 = w2.to;
+            const t2Tuple = getComponentConnectorTupleFromConnectionPoint(t2);
+            const t2Component = t2Tuple[0];
+            const t2Connector = t2Tuple[1];
 
-          const offset = getConnectionOffset(i, y1,y2,10);
-          let min = Math.min(y1,y2);
-          let wireElement;        
+            if (!f2Component || !f2Connector || !t2Component || !t2Connector)
+              continue;
+            const x3 =
+              getXForConnector(f2Connector, f2Component) +
+              getWidthForConnector(f2Connector) / 2;
+            const y3 = getYForConnector(f2Connector, f2Component) + 20 / 2;
+            const x4 =
+              getXForConnector(t2Connector, t2Component) +
+              getWidthForConnector(t2Connector) / 2;
+            const y4 = getYForConnector(t2Connector, t2Component) + 20 / 2;
+            // Check intersection
+            const inter = getIntersection(x1, y1, x2, y2, x3, y3, x4, y4);
+            if (inter && i > j) {
+              intersection = inter;
+              break;
+            }
+          }
+
+          let wireElement;
+          // if (intersection) {
+          //   // Direct connection with semicircle hump at intersection
+          //   const diameter = 10;
+          //   const radius = diameter / 2;
+          //   // Direction of the wire
+          //   const dx_hump = x2 - x1;
+          //   const dy_hump = y2 - y1;
+          //   const length_hump = Math.sqrt(
+          //     dx_hump * dx_hump + dy_hump * dy_hump
+          //   );
+          //   // Unit vector along the wire
+          //   const ux = dx_hump / length_hump;
+          //   const uy = dy_hump / length_hump;
+          //   // Points before and after intersection
+          //   const beforeX = intersection.x - ux * radius;
+          //   const beforeY = intersection.y - uy * radius;
+          //   const afterX = intersection.x + ux * radius;
+          //   const afterY = intersection.y + uy * radius;
+          //   // Perpendicular unit vector
+          //   const perpUx = -uy;
+          //   const perpUy = ux;
+          //   // Arc control point for semicircle (perpendicular to wire)
+          //   const arcCtrlX = intersection.x + perpUx * radius;
+          //   const arcCtrlY = intersection.y + perpUy * radius;
+
+          //   wireElement = (
+          //     <g>
+          //       <path
+          //         d={`M ${x1} ${y1} L ${beforeX} ${beforeY} Q ${arcCtrlX} ${arcCtrlY} ${afterX} ${afterY} L ${x2} ${y2}`}
+          //         stroke={wire.color}
+          //         strokeWidth="2"
+          //         fill="none"
+          //       />
+          //     </g>
+          //   );
+          // } else if (wire.label === "Wire-Diode-Resistor") {
+          //   // Curve control point: offset horizontally to avoid intersection
+          //   const cx = (x1 + x2) / 2;
+          //   const cy = Math.min(y1, y2) - 60; // curve above other wires
+          //   wireElement = (
+          //     <path
+          //       d={`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`}
+          //       stroke={wire.color}
+          //       strokeWidth="2"
+          //       fill="none"
+          //     />
+          //   );
+          // } else {
+          //   wireElement = (
+          //     <g>
+          //       <circle cx={x1} cy={y1} r={5} fill={wire.color}></circle>
+          //       <line
+          //         x1={x1}
+          //         y1={y1}
+          //         x2={x2}
+          //         y2={y2}
+          //         stroke={wire.color}
+          //         strokeWidth="2"
+          //       />
+          //       <circle cx={x2} cy={y2} r={5} fill={wire.color}></circle>
+          //       <text x={x1} y={y1} textAnchor="middle" fontSize="5" alignmentBaseline="middle" fill="black">
+          //         {wire.from.cavity}
+          //       </text>
+          //       <text x={x2} y={y2} textAnchor="middle" fontSize="5" alignmentBaseline="middle" fill="black">
+          //         {wire.to.cavity}
+          //       </text>
+          //     </g>
+          //   );
+          // }
           wireElement = (
             <g>
               <circle cx={x1} cy={y1} r={5} fill={wire.color}></circle>
-              <polyline
-                key={i}
-                points={`${x1},${y1} ${x1},${min + offset} ${x2},${min + offset} ${x2},${y2}`}
-                fill="none"
+              <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
                 stroke={wire.color}
-                strokeWidth={2}
-                markerEnd="url(#arrowhead)"
+                strokeWidth="2"
+                onMouseEnter={() => {
+                  // Your hover logic here
+                  console.log("Line hovered!");
+                }}
+                onMouseMove={() => {
+                  // Your hover logic here
+                  console.log("Line moved!");
+                }}
+                onMouseLeave={() => {
+                  // Optional: handle hover out
+                  console.log("Line unhovered!");
+                }}
               />
               <circle cx={x2} cy={y2} r={5} fill={wire.color}></circle>
               <text
@@ -616,6 +607,7 @@ useEffect(() => {
               </text>
             </g>
           );
+
           return <g key={i}>{wireElement}</g>;
         })}
       </svg>
