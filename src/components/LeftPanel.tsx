@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { DashboardItem } from "../App";
 
 interface LeftPanelProps {
@@ -8,18 +8,30 @@ interface LeftPanelProps {
   selectedItem: DashboardItem | null;
 }
 
-const getItemIcon = (type: string) => {
-  const iconMap: { [key: string]: string } = {
-    'Sensor': '📡',
-    'Switch': '🔘',
-    'Transistor': '🔌',
-    'Instrument': '🖥️',
-    'Splice': '🔗',
-  };
-  return iconMap[type] || '🔧';
-};
+// const getItemIcon = (type: string) => {
+//   const iconMap: { [key: string]: string } = {
+//     'Sensor': '📡',
+//     'Switch': '🔘',
+//     'Transistor': '🔌',
+//     'Instrument': '🖥️',
+//     'Splice': '🔗',
+//   };
+//   return iconMap[type] || '🔧';
+// };
 
 export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem }: LeftPanelProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter items based on searchTerm
+  //change
+ const filteredData = data.filter(item =>
+  item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  item.type.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+
+
   return (
     <div style={{
       width: "320px",
@@ -30,10 +42,7 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
       overflow: "hidden"
     }}>
       {/* Panel Header */}
-      <div style={{
-        padding: "15px",
-        borderBottom: "1px solid #e9ecef"
-      }}>
+      <div style={{ padding: "20px", borderBottom: "1px solid #e9ecef" }}>
         <h2 style={{
           margin: "0 0 16px 0",
           color: "#212529",
@@ -48,6 +57,8 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
           <input
             type="text"
             placeholder={`Search ${activeTab}...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             style={{
               width: "100%",
               padding: "10px 12px 10px 40px",
@@ -72,18 +83,14 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
       </div>
 
       {/* Items List */}
-      <div style={{
-        flex: 1,
-        overflow: "auto",
-        padding: "8px"
-      }}>
-        {data.map((item) => (
+      <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
+        {filteredData.map((item) => (
           <div
             key={item.code}
             onClick={() => onItemSelect(item)}
             style={{
-              padding: "6px",
-              marginBottom: "4px",
+              padding: "16px",
+              marginBottom: "12px",
               border: `2px solid ${selectedItem?.code === item.code ? '#007bff' : '#e9ecef'}`,
               borderRadius: "12px",
               background: selectedItem?.code === item.code ? '#f0f8ff' : 'white',
@@ -104,92 +111,32 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
               }
             }}
           >
-            <div style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "2px"
-            }}>
-              {/* <div style={{ fontSize: "28px" }}>
-                {getItemIcon(item.type)}
-              </div> */}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+              {/* <div style={{ fontSize: "28px" }}>{getItemIcon(item.type)}</div> */}
               
               <div style={{ flex: 1 }}>
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginBottom: "6px"
-                }}>
-                  <span style={{
-                    background: "#e3f2fd",
-                    color: "#1565c0",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    fontWeight: "500"
-                  }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                  <span style={{ background: "#e3f2fd", color: "#1565c0", padding: "2px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "500" }}>
                     {item.code}
                   </span>
-                  <span style={{
-                    background: "#e8f5e8",
-                    color: "#2e7d32",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    fontWeight: "500"
-                  }}>
+                  <span style={{ background: "#e8f5e8", color: "#2e7d32", padding: "2px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "500" }}>
                     {item.status}
                   </span>
                 </div>
                 
-                <h3 style={{
-                  margin: "0 0 4px 0",
-                  color: "#212529",
-                  fontSize: "16px",
-                  fontWeight: "600"
-                }}>
+                <h3 style={{ margin: "0 0 4px 0", color: "#212529", fontSize: "16px", fontWeight: "600" }}>
                   {item.name}
                 </h3>
                 
-                <p style={{
-                  margin: "0 0 4px 0",
-                  color: "#6c757d",
-                  fontSize: "13px"
-                }}>
-                  {item.type}
-                </p>
                 
-                {/* {item.voltage && (
-                  <p style={{
-                    margin: "0 0 6px 0",
-                    color: "#f57c00",
-                    fontSize: "13px",
-                    fontWeight: "500"
-                  }}>
-                    {item.voltage}
-                  </p>
-                )} */}
-                
-                <p style={{
-                  margin: 0,
-                  color: "#868e96",
-                  fontSize: "12px",
-                  lineHeight: "1.4"
-                }}>
-                  
-                </p>
               </div>
             </div>
           </div>
         ))}
         
-        {data.length === 0 && (
-          <div style={{
-            padding: "40px 20px",
-            textAlign: "center",
-            color: "#6c757d"
-          }}>
-            <p>No {activeTab} available</p>
+        {filteredData.length === 0 && (
+          <div style={{ padding: "40px 20px", textAlign: "center", color: "#6c757d" }}>
+            <p>No {activeTab} found</p>
           </div>
         )}
       </div>
