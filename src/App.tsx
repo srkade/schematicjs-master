@@ -506,7 +506,7 @@ const S8: SchematicData = {
     {
       color: "violet",
       from: { componentId: "S8", connectorId: "XS8", cavity: "1" },
-      to: { componentId: "SPL1", connectorId: "XSP_767", cavity: "L" },
+      to: { componentId: "SPL2", connectorId: "XSP_767", cavity: "L" },
       label: "",
     },
     {

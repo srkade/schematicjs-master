@@ -46,11 +46,34 @@ export default function Schematic({ data }: { data: SchematicData }) {
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(
     null
   );
-
-  // Reset view handler
+ //changes reset view box
   const resetView = () => {
-    setViewBox(fitViewBox);
-  };
+  const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
+
+  const svgWidth = 1500;
+  const svgHeight = 768;
+
+  const margin = 0.1;
+  const scaleX = svgWidth / schematicW;
+  const scaleY = svgHeight / schematicH;
+  let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+
+  scaleFactor *= 0.6;
+
+  const newW = schematicW * scaleFactor;
+  const newH = schematicH * scaleFactor;
+
+  // Move more to the left by subtracting a larger value
+  const leftX = fitX - (-270); // try 100 units, adjust as needed
+  const centerY = fitY + (schematicH - newH) / 2-(-100);
+
+  setViewBox({
+    x: leftX,
+    y: centerY,
+    w: newW,
+    h: newH,
+  });
+};
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -65,6 +88,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
     setDragOrigin(null);
   };
 
+
+
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!dragging || !dragStart || !dragOrigin) return;
     const dx = e.clientX - dragStart.x;
@@ -76,8 +101,20 @@ export default function Schematic({ data }: { data: SchematicData }) {
       h: viewBox.h,
     });
   };
+
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
+
+
+    //change deafault view box on data change
+useEffect(() => {
+  if (fitViewBox) {
+    resetView();
+  }
+}, [fitViewBox]);
+
+
+
   const [componentNameWidths, setComponentNameWidths] = useState<{
     [id: string]: number;
   }>({});
@@ -91,30 +128,39 @@ export default function Schematic({ data }: { data: SchematicData }) {
     [id: string]: number;
   }>({});
 
-  var connectionPoints: { [id: string]: { x: number; y: number } } = {};
-
   const componentSize = { width: 100, height: 60 };
   const padding = 50;
   const connectorNamePadding = 25;
-
-  var maxX = 0;
-  var maxY =
-    padding +
-    componentSize.height +
-    spaceForWires() +
-    componentSize.height +
-    padding;
+  const spaceForWires = 50;
 
   useEffect(() => {
+    const allRects = [...data.components];
+    if (allRects.length === 0) return;
+
+    const minX = 0;
+    const minY = 0;
+    const maxX = componentSize.width;
+    const maxY = componentSize.height * 2 + spaceForWires;
+
+    const width = maxX - minX + padding * 2;
+    const height = maxY - minY + padding * 2;
+
+    const newBox = {
+      x: minX - padding,
+      y: minY - padding,
+      w: width,
+      h: height,
+    };
+    setViewBox(newBox);
+    setFitViewBox(newBox);
+
     var newWidths: { [id: string]: number } = {};
     var connWidths: { [id: string]: number } = {};
-
-    data.components.forEach((comp, i) => {
+    data.components.forEach((comp) => {
       const ref = componentNameRefs.current[comp.id];
       if (ref) {
         newWidths[comp.id] = ref.getBBox().width;
       }
-      maxX += newWidths[comp.id];
       comp.connectors.forEach((conn) => {
         const ref = connectorNameRefs.current[conn.id];
         if (ref) {
@@ -133,57 +179,41 @@ export default function Schematic({ data }: { data: SchematicData }) {
       connCount[toConnector] = (connCount[toConnector] || 0) + 1;
     });
     setConnectorConnectionCount(connCount);
-
-    const newBox = {
-      x: 0,
-      y: 0,
-      w: maxX,
-      h: maxY,
-    };
-    setViewBox(newBox);
-    setFitViewBox(newBox);
   }, [data]);
 
   // Remove wheel gesture
 
   // Zoom in/out buttons
-  const zoom = (inOrOut: "in" | "out") => {
-    const scaleFactor = 1.1;
-    const { x, y, w, h } = viewBox;
-    let newW = w,
-      newH = h;
-    if (inOrOut === "in") {
-      newW = w / scaleFactor;
-      newH = h / scaleFactor;
-    } else {
-      newW = w * scaleFactor;
-      newH = h * scaleFactor;
-    }
-    setViewBox({ x, y, w: newW, h: newH });
-  };
-
-  function spaceForWires() {
-    let connectionsCount = data.connections.length;
-    return (connectionsCount * 10) + 40; // 10px per connection + padding
+ const zoom = (inOrOut: "in" | "out") => {
+  const scaleFactor = 1.1;
+  const { x, y, w, h } = viewBox;
+  
+  // Calculate the center point of current view
+  const centerX = x + w / 2;
+  const centerY = y + h / 2;
+  
+  // Calculate new dimensions
+  let newW, newH;
+  if (inOrOut === "in") {
+    newW = w / scaleFactor;
+    newH = h / scaleFactor;
+  } else {
+    newW = w * scaleFactor;
+    newH = h * scaleFactor;
   }
+  
+  // Calculate new position to keep center point the same
+  const newX = centerX - newW / 2;
+  const newY = centerY - newH / 2;
+  
+  setViewBox({ x: newX, y: newY, w: newW, h: newH });
+};
 
-  function connectionPointKey(point: ConnectionPoint): string {
-    return `${point.componentId}_${point.connectorId}_${point.cavity}`;
-  }
 
-  function getConnectionOffset(
-    index: number,
-    count: number,
-    y1: number,
-    y2: number,
-    offsetStep = 10
-  ) {
+  function getConnectionOffset(index: number, y1: number, y2: number, offsetStep = 10) {
     let max = Math.max(y1, y2);
     let min = Math.min(y1, y2);
-    let mid = count / 2;
-    let offset = ((index + 1) * offsetStep) + offsetStep
-    let reverseOffset = max - min - ((index + 1) * offsetStep) - offsetStep
-    return index < mid ? offset : reverseOffset; 
+    return (max - min) - ((index + 1) * offsetStep);
   }
 
   function getIntersection(
@@ -217,7 +247,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
     x2: number,
     y1: number,
     y2: number
-  ): JSX.Element | undefined {
+  ) : JSX.Element | undefined {
     let intersection = null;
     for (let j = 0; j < data.connections.length; j++) {
       if (i === j) continue;
@@ -284,13 +314,6 @@ export default function Schematic({ data }: { data: SchematicData }) {
   }
 
   function getWidthForComponent(component: ComponentType): number {
-    let index = data.components.findIndex((c) => c.id === component.id);
-    if (index == 0) {
-      let last = data.components[data.components.length - 1];
-      let lastX = getXForComponent(last);
-      let lastWidth = getWidthForComponent(last);
-      return lastX + lastWidth;
-    }
     if (component.connectors.length == 1) {
       return componentNameWidths[component.id] + padding;
     } else {
@@ -321,7 +344,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
     const y =
       index < 1
         ? padding
-        : padding + componentSize.height + spaceForWires() + componentSize.height;
+        : padding + componentSize.height + spaceForWires + componentSize.height;
     return y;
   }
 
@@ -355,21 +378,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
       : getYForComponent(component) - 10;
   }
 
-  function getConnectionsForConnector(conn: ConnectorType): ConnectionType[] {
-    return data.connections.filter(
-      (c) => c.from.connectorId === conn.id || c.to.connectorId === conn.id
-    );
-  }
-
   function getWidthForConnector(conn: ConnectorType): number {
-    let connections = getConnectionsForConnector(conn);
-    let interConnectionSpacing = 15;
-    if (connections.length > 1) {
-      let connectionsBasedWidth = (connections.length + 1) * interConnectionSpacing;
-      return (
-        Math.max(connectionsBasedWidth, connectorNameWidths[conn.id] + connectorNamePadding)
-      );
-    }
     return connectorNameWidths[conn.id] + connectorNamePadding;
   }
 
@@ -390,23 +399,17 @@ export default function Schematic({ data }: { data: SchematicData }) {
     return [undefined, undefined];
   }
 
-  function getContrastingColor(hex: string): string {
-    // Remove '#' if present
-    hex = hex.replace(/^#/, "");
-    // Parse r, g, b
-    let r = parseInt(hex.substring(0, 2), 16);
-    let g = parseInt(hex.substring(2, 4), 16);
-    let b = parseInt(hex.substring(4, 6), 16);
-
-    // Calculate luminance
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-    // If luminance is high, return black; else, return white
-    return luminance > 0.5 ? "#000000" : "#FFFFFF";
-  }
-
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+
+    //change div for view box
+    <div style={{  position: "relative",
+    width: "100%",
+    height: "100%",
+    minHeight: 300,  // Provide a minHeight
+    background: "#fafafa",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column", }}>
       <div style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}>
         <button
           onClick={resetView}
@@ -449,7 +452,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
       </div>
 
       <svg
-        width={"1024"}
+        width="1024"
         height="768"
         style={{
           border: "1px solid #ccc",
@@ -461,6 +464,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
       >
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
         {data.components.map((comp, componentIndex) => (
           <g key={comp.id}>
             {comp.shape === "rectangle" && (
@@ -476,6 +481,19 @@ export default function Schematic({ data }: { data: SchematicData }) {
                   // Your callback logic here
                   console.log("Rectangle clicked!");
                 }}
+              />
+            )}
+            {comp.shape === "circle" && (
+              <rect
+                x={getXForComponent(comp)}
+                y={getYForComponent(comp)}
+                width={getWidthForComponent(comp)}
+                height={componentSize.height}
+                fill="lightblue"
+                stroke="black"
+                rx={5}
+                ry={5}
+                strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
               />
             )}
             <text
@@ -541,80 +559,55 @@ export default function Schematic({ data }: { data: SchematicData }) {
           let toIndex = data.components.findIndex(
             (c) => c.id === toComponent!.id
           );
+          const fromConnectorX = getXForConnector(from, fromComponent!);
+          const fromConnectorWidth = getWidthForConnector(from);
+          const fromConnectorCount = connectorConnectionCount[from.id] || 1;
+          const fromConnectorOffset =
+            fromConnectorCount == 1
+              ? fromConnectorWidth / 2
+              : (fromConnectorWidth / (fromConnectorCount + 1)) * (i + 1);
+          const x1 = fromConnectorX + fromConnectorOffset;
 
-          var fromStoredConnectionPoint =
-            connectionPoints[connectionPointKey(wire.from)];
+          const y1 =
+            fromIndex == 0
+              ? getYForConnector(from, fromComponent!) + 20
+              : getYForConnector(from, fromComponent!);
 
-          var fromX = fromStoredConnectionPoint?.x;
-          if (fromX == undefined) {
-            const fromConnectorX = getXForConnector(from, fromComponent!);
-            const fromConnectorWidth = getWidthForConnector(from);
-            const fromConnectorCount = connectorConnectionCount[from.id] || 1;
-            const fromConnectorOffset =
-              fromConnectorCount == 1
-                ? fromConnectorWidth / 2
-                : (fromConnectorWidth / (fromConnectorCount + 1)) * (i + 1);
+          const toConnectorX = getXForConnector(to, toComponent!);
+          const toConnectorWidth = getWidthForConnector(to);
+          const toConnectorCount = connectorConnectionCount[to.id] || 1;
+          const toConnectorOffset =
+            toConnectorCount == 1
+              ? toConnectorWidth / 2
+              : (toConnectorWidth / (toConnectorCount + 1)) * (i + 1);
+          const x2 = toConnectorX + toConnectorOffset;
+          const y2 =
+            toIndex == 0
+              ? getYForConnector(to, toComponent!) + 20
+              : getYForConnector(to, toComponent!);
 
-            fromX = fromConnectorX + fromConnectorOffset;
-          }
+          // Helper to check intersection between two lines
 
-          var fromY = fromStoredConnectionPoint?.y;
-          if (fromY == undefined) {
-            fromY =
-              fromIndex == 0
-                ? getYForConnector(from, fromComponent!) + 20
-                : getYForConnector(from, fromComponent!);
-          }
+          // Find intersection with other wires, only give hump to the wire with higher index
 
-          connectionPoints[connectionPointKey(wire.from)] = {
-            x: fromX,
-            y: fromY,
-          };
-
-          var toStoredConnectionPoint =
-            connectionPoints[connectionPointKey(wire.to)];
-          var toX = toStoredConnectionPoint?.x;
-          if (toX == undefined) {
-            const toConnectorX = getXForConnector(to, toComponent!);
-            const toConnectorWidth = getWidthForConnector(to);
-            const toConnectorCount = connectorConnectionCount[to.id] || 1;
-            const toConnectorOffset =
-              toConnectorCount == 1
-                ? toConnectorWidth / 2
-                : (toConnectorWidth / (toConnectorCount + 1)) * (i + 1);
-
-            toX = toConnectorX + toConnectorOffset;
-          }
-          var toY = toStoredConnectionPoint?.y;
-          if (toY == undefined) {
-            toY =
-              toIndex == 0
-                ? getYForConnector(to, toComponent!) + 20
-                : getYForConnector(to, toComponent!);
-          }
-
-          connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
-
-          const offset = getConnectionOffset(i, data.connections.length,fromY, toY, 10);
-          let min = Math.min(fromY, toY);
-          let wireElement;
+          const offset = getConnectionOffset(i, y1,y2,10);
+          let min = Math.min(y1,y2);
+          let wireElement;        
           wireElement = (
             <g>
-              <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle>
+              <circle cx={x1} cy={y1} r={5} fill={wire.color}></circle>
               <polyline
                 key={i}
-                points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
-                  min + offset
-                } ${toX},${toY}`}
+                points={`${x1},${y1} ${x1},${min + offset} ${x2},${min + offset} ${x2},${y2}`}
                 fill="none"
                 stroke={wire.color}
                 strokeWidth={2}
                 markerEnd="url(#arrowhead)"
               />
-              <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle>
+              <circle cx={x2} cy={y2} r={5} fill={wire.color}></circle>
               <text
-                x={fromX}
-                y={fromY}
+                x={x1}
+                y={y1}
                 textAnchor="middle"
                 fontSize="5"
                 alignmentBaseline="middle"
@@ -623,8 +616,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 {wire.from.cavity}
               </text>
               <text
-                x={toX}
-                y={toY}
+                x={x2}
+                y={y2}
                 textAnchor="middle"
                 fontSize="5"
                 alignmentBaseline="middle"
