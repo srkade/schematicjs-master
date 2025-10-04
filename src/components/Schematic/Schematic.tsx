@@ -48,9 +48,33 @@ export default function Schematic({ data }: { data: SchematicData }) {
   );
 
   // Reset view handler
-  const resetView = () => {
-    setViewBox(fitViewBox);
-  };
+ const resetView = () => {
+  const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
+
+  const svgWidth = 1500;
+  const svgHeight = 768;
+
+  const margin = 0.1;
+  const scaleX = svgWidth / schematicW;
+  const scaleY = svgHeight / schematicH;
+  let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+
+  scaleFactor *= 0.6; // If you want a zoomed-out default
+
+  const newW = schematicW * scaleFactor;
+  const newH = schematicH * scaleFactor;
+
+  // Center calculation
+  const centerX = fitX + (schematicW / 2) - (newW / 2);
+  const centerY = fitY + (schematicH / 2) - (newH / 2);
+
+  setViewBox({
+    x: centerX,
+    y: centerY,
+    w: newW,
+    h: newH,
+  });
+};
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -70,14 +94,24 @@ export default function Schematic({ data }: { data: SchematicData }) {
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
     setViewBox({
-      x: dragOrigin.x - dx * (viewBox.w / 800),
-      y: dragOrigin.y - dy * (viewBox.h / 600),
+      x: dragOrigin.x - dx * (viewBox.w / 300),
+      y: dragOrigin.y - dy * (viewBox.h / 100),
       w: viewBox.w,
       h: viewBox.h,
     });
   };
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
+
+  
+      //change deafault view box on data change
+  useEffect(() => {
+    if (fitViewBox) {
+      resetView();
+    }
+  }, [fitViewBox]);
+  
+  
   const [componentNameWidths, setComponentNameWidths] = useState<{
     [id: string]: number;
   }>({});
@@ -94,7 +128,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
   var connectionPoints: { [id: string]: { x: number; y: number } } = {};
 
   const componentSize = { width: 100, height: 60 };
-  const padding = 50;
+  //pin padding changeed
+  const padding = 20;
   const connectorNamePadding = 25;
 
   var maxX = 0;
@@ -367,7 +402,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
     if (connections.length > 1) {
       let connectionsBasedWidth = (connections.length + 1) * interConnectionSpacing;
       return (
-        Math.max(connectionsBasedWidth, connectorNameWidths[conn.id] + connectorNamePadding)
+        // Pin padding changeed
+        Math.max(connectionsBasedWidth, connectorNameWidths[conn.id] + connectorNamePadding,100)
       );
     }
     return connectorNameWidths[conn.id] + connectorNamePadding;
@@ -449,8 +485,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
       </div>
 
       <svg
-        width={"1024"}
-        height="768"
+        width={"1070"}
+        height="600"
         style={{
           border: "1px solid #ccc",
           background: "#fafafa",
