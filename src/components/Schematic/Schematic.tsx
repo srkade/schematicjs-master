@@ -597,21 +597,23 @@ export default function Schematic({ data }: { data: SchematicData }) {
 
           const offset = getConnectionOffset(i, data.connections.length,fromY, toY, 10);
           let min = Math.min(fromY, toY);
+          let radius = 5;
           let wireElement;
           wireElement = (
             <g>
-              <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle>
+              <circle cx={fromX} cy={fromY} r={radius} fill={"white"} stroke={wire.color}></circle>
               <polyline
                 key={i}
-                points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
+                points={`
+                  ${fromX},${fromIndex == 0 ? fromY + radius : fromY - radius} ${fromX},${min + offset} ${toX},${
                   min + offset
-                } ${toX},${toY}`}
+                } ${toX},${toIndex == 0 ? toY + radius : toY - radius}`}
                 fill="none"
                 stroke={wire.color}
                 strokeWidth={2}
                 markerEnd="url(#arrowhead)"
               />
-              <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle>
+              <circle cx={toX} cy={toY} r={5} fill={"white"} stroke={wire.color}></circle>
               <text
                 x={fromX}
                 y={fromY}
