@@ -46,6 +46,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(
     null
   );
+<<<<<<< HEAD
  //changes reset view box
   const resetView = () => {
   const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
@@ -74,6 +75,13 @@ export default function Schematic({ data }: { data: SchematicData }) {
     h: newH,
   });
 };
+=======
+
+  // Reset view handler
+  const resetView = () => {
+    setViewBox(fitViewBox);
+  };
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -88,8 +96,11 @@ export default function Schematic({ data }: { data: SchematicData }) {
     setDragOrigin(null);
   };
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
   const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!dragging || !dragStart || !dragOrigin) return;
     const dx = e.clientX - dragStart.x;
@@ -101,6 +112,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
       h: viewBox.h,
     });
   };
+<<<<<<< HEAD
 
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
@@ -115,6 +127,10 @@ useEffect(() => {
 
 
 
+=======
+  const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
+  const [fitViewBox, setFitViewBox] = useState(viewBox);
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
   const [componentNameWidths, setComponentNameWidths] = useState<{
     [id: string]: number;
   }>({});
@@ -128,6 +144,7 @@ useEffect(() => {
     [id: string]: number;
   }>({});
 
+<<<<<<< HEAD
   const componentSize = { width: 100, height: 60 };
   const padding = 50;
   const connectorNamePadding = 25;
@@ -157,10 +174,35 @@ useEffect(() => {
     var newWidths: { [id: string]: number } = {};
     var connWidths: { [id: string]: number } = {};
     data.components.forEach((comp) => {
+=======
+  var connectionPoints: { [id: string]: { x: number; y: number } } = {};
+
+  const componentSize = { width: 100, height: 60 };
+  const padding = 50;
+  const connectorNamePadding = 25;
+
+  var maxX = 0;
+  var maxY =
+    padding +
+    componentSize.height +
+    spaceForWires() +
+    componentSize.height +
+    padding;
+
+  useEffect(() => {
+    var newWidths: { [id: string]: number } = {};
+    var connWidths: { [id: string]: number } = {};
+
+    data.components.forEach((comp, i) => {
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
       const ref = componentNameRefs.current[comp.id];
       if (ref) {
         newWidths[comp.id] = ref.getBBox().width;
       }
+<<<<<<< HEAD
+=======
+      maxX += newWidths[comp.id];
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
       comp.connectors.forEach((conn) => {
         const ref = connectorNameRefs.current[conn.id];
         if (ref) {
@@ -179,11 +221,24 @@ useEffect(() => {
       connCount[toConnector] = (connCount[toConnector] || 0) + 1;
     });
     setConnectorConnectionCount(connCount);
+<<<<<<< HEAD
+=======
+
+    const newBox = {
+      x: 0,
+      y: 0,
+      w: maxX,
+      h: maxY,
+    };
+    setViewBox(newBox);
+    setFitViewBox(newBox);
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
   }, [data]);
 
   // Remove wheel gesture
 
   // Zoom in/out buttons
+<<<<<<< HEAD
  const zoom = (inOrOut: "in" | "out") => {
   const scaleFactor = 1.1;
   const { x, y, w, h } = viewBox;
@@ -214,6 +269,45 @@ useEffect(() => {
     let max = Math.max(y1, y2);
     let min = Math.min(y1, y2);
     return (max - min) - ((index + 1) * offsetStep);
+=======
+  const zoom = (inOrOut: "in" | "out") => {
+    const scaleFactor = 1.1;
+    const { x, y, w, h } = viewBox;
+    let newW = w,
+      newH = h;
+    if (inOrOut === "in") {
+      newW = w / scaleFactor;
+      newH = h / scaleFactor;
+    } else {
+      newW = w * scaleFactor;
+      newH = h * scaleFactor;
+    }
+    setViewBox({ x, y, w: newW, h: newH });
+  };
+
+  function spaceForWires() {
+    let connectionsCount = data.connections.length;
+    return (connectionsCount * 10) + 40; // 10px per connection + padding
+  }
+
+  function connectionPointKey(point: ConnectionPoint): string {
+    return `${point.componentId}_${point.connectorId}_${point.cavity}`;
+  }
+
+  function getConnectionOffset(
+    index: number,
+    count: number,
+    y1: number,
+    y2: number,
+    offsetStep = 10
+  ) {
+    let max = Math.max(y1, y2);
+    let min = Math.min(y1, y2);
+    let mid = count / 2;
+    let offset = ((index + 1) * offsetStep) + offsetStep
+    let reverseOffset = max - min - ((index + 1) * offsetStep) - offsetStep
+    return index < mid ? offset : reverseOffset; 
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
   }
 
   function getIntersection(
@@ -247,7 +341,11 @@ useEffect(() => {
     x2: number,
     y1: number,
     y2: number
+<<<<<<< HEAD
   ) : JSX.Element | undefined {
+=======
+  ): JSX.Element | undefined {
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
     let intersection = null;
     for (let j = 0; j < data.connections.length; j++) {
       if (i === j) continue;
@@ -314,6 +412,16 @@ useEffect(() => {
   }
 
   function getWidthForComponent(component: ComponentType): number {
+<<<<<<< HEAD
+=======
+    let index = data.components.findIndex((c) => c.id === component.id);
+    if (index == 0) {
+      let last = data.components[data.components.length - 1];
+      let lastX = getXForComponent(last);
+      let lastWidth = getWidthForComponent(last);
+      return lastX + lastWidth;
+    }
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
     if (component.connectors.length == 1) {
       return componentNameWidths[component.id] + padding;
     } else {
@@ -344,7 +452,11 @@ useEffect(() => {
     const y =
       index < 1
         ? padding
+<<<<<<< HEAD
         : padding + componentSize.height + spaceForWires + componentSize.height;
+=======
+        : padding + componentSize.height + spaceForWires() + componentSize.height;
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
     return y;
   }
 
@@ -378,7 +490,25 @@ useEffect(() => {
       : getYForComponent(component) - 10;
   }
 
+<<<<<<< HEAD
   function getWidthForConnector(conn: ConnectorType): number {
+=======
+  function getConnectionsForConnector(conn: ConnectorType): ConnectionType[] {
+    return data.connections.filter(
+      (c) => c.from.connectorId === conn.id || c.to.connectorId === conn.id
+    );
+  }
+
+  function getWidthForConnector(conn: ConnectorType): number {
+    let connections = getConnectionsForConnector(conn);
+    let interConnectionSpacing = 15;
+    if (connections.length > 1) {
+      let connectionsBasedWidth = (connections.length + 1) * interConnectionSpacing;
+      return (
+        Math.max(connectionsBasedWidth, connectorNameWidths[conn.id] + connectorNamePadding)
+      );
+    }
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
     return connectorNameWidths[conn.id] + connectorNamePadding;
   }
 
@@ -399,6 +529,7 @@ useEffect(() => {
     return [undefined, undefined];
   }
 
+<<<<<<< HEAD
   return (
 
     //change div for view box
@@ -410,6 +541,25 @@ useEffect(() => {
     flex: 1,
     display: "flex",
     flexDirection: "column", }}>
+=======
+  function getContrastingColor(hex: string): string {
+    // Remove '#' if present
+    hex = hex.replace(/^#/, "");
+    // Parse r, g, b
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+
+    // Calculate luminance
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    // If luminance is high, return black; else, return white
+    return luminance > 0.5 ? "#000000" : "#FFFFFF";
+  }
+
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
       <div style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}>
         <button
           onClick={resetView}
@@ -452,7 +602,11 @@ useEffect(() => {
       </div>
 
       <svg
+<<<<<<< HEAD
         width="1024"
+=======
+        width={"1024"}
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
         height="768"
         style={{
           border: "1px solid #ccc",
@@ -464,8 +618,11 @@ useEffect(() => {
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
       >
+<<<<<<< HEAD
         <rect width="100%" height="100%" fill="url(#grid)" />
 
+=======
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
         {data.components.map((comp, componentIndex) => (
           <g key={comp.id}>
             {comp.shape === "rectangle" && (
@@ -483,6 +640,7 @@ useEffect(() => {
                 }}
               />
             )}
+<<<<<<< HEAD
             {comp.shape === "circle" && (
               <rect
                 x={getXForComponent(comp)}
@@ -496,6 +654,8 @@ useEffect(() => {
                 strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
               />
             )}
+=======
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
             <text
               ref={(el) => {
                 componentNameRefs.current[comp.id] = el;
@@ -559,6 +719,7 @@ useEffect(() => {
           let toIndex = data.components.findIndex(
             (c) => c.id === toComponent!.id
           );
+<<<<<<< HEAD
           const fromConnectorX = getXForConnector(from, fromComponent!);
           const fromConnectorWidth = getWidthForConnector(from);
           const fromConnectorCount = connectorConnectionCount[from.id] || 1;
@@ -599,15 +760,89 @@ useEffect(() => {
               <polyline
                 key={i}
                 points={`${x1},${y1} ${x1},${min + offset} ${x2},${min + offset} ${x2},${y2}`}
+=======
+
+          var fromStoredConnectionPoint =
+            connectionPoints[connectionPointKey(wire.from)];
+
+          var fromX = fromStoredConnectionPoint?.x;
+          if (fromX == undefined) {
+            const fromConnectorX = getXForConnector(from, fromComponent!);
+            const fromConnectorWidth = getWidthForConnector(from);
+            const fromConnectorCount = connectorConnectionCount[from.id] || 1;
+            const fromConnectorOffset =
+              fromConnectorCount == 1
+                ? fromConnectorWidth / 2
+                : (fromConnectorWidth / (fromConnectorCount + 1)) * (i + 1);
+
+            fromX = fromConnectorX + fromConnectorOffset;
+          }
+
+          var fromY = fromStoredConnectionPoint?.y;
+          if (fromY == undefined) {
+            fromY =
+              fromIndex == 0
+                ? getYForConnector(from, fromComponent!) + 20
+                : getYForConnector(from, fromComponent!);
+          }
+
+          connectionPoints[connectionPointKey(wire.from)] = {
+            x: fromX,
+            y: fromY,
+          };
+
+          var toStoredConnectionPoint =
+            connectionPoints[connectionPointKey(wire.to)];
+          var toX = toStoredConnectionPoint?.x;
+          if (toX == undefined) {
+            const toConnectorX = getXForConnector(to, toComponent!);
+            const toConnectorWidth = getWidthForConnector(to);
+            const toConnectorCount = connectorConnectionCount[to.id] || 1;
+            const toConnectorOffset =
+              toConnectorCount == 1
+                ? toConnectorWidth / 2
+                : (toConnectorWidth / (toConnectorCount + 1)) * (i + 1);
+
+            toX = toConnectorX + toConnectorOffset;
+          }
+          var toY = toStoredConnectionPoint?.y;
+          if (toY == undefined) {
+            toY =
+              toIndex == 0
+                ? getYForConnector(to, toComponent!) + 20
+                : getYForConnector(to, toComponent!);
+          }
+
+          connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
+
+          const offset = getConnectionOffset(i, data.connections.length,fromY, toY, 10);
+          let min = Math.min(fromY, toY);
+          let wireElement;
+          wireElement = (
+            <g>
+              <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle>
+              <polyline
+                key={i}
+                points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
+                  min + offset
+                } ${toX},${toY}`}
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
                 fill="none"
                 stroke={wire.color}
                 strokeWidth={2}
                 markerEnd="url(#arrowhead)"
               />
+<<<<<<< HEAD
               <circle cx={x2} cy={y2} r={5} fill={wire.color}></circle>
               <text
                 x={x1}
                 y={y1}
+=======
+              <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle>
+              <text
+                x={fromX}
+                y={fromY}
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
                 textAnchor="middle"
                 fontSize="5"
                 alignmentBaseline="middle"
@@ -616,8 +851,13 @@ useEffect(() => {
                 {wire.from.cavity}
               </text>
               <text
+<<<<<<< HEAD
                 x={x2}
                 y={y2}
+=======
+                x={toX}
+                y={toY}
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
                 textAnchor="middle"
                 fontSize="5"
                 alignmentBaseline="middle"
@@ -632,4 +872,8 @@ useEffect(() => {
       </svg>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 32bb6c5a4077330a1627252e1399039fc0eb0c4a
