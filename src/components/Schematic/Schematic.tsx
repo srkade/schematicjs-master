@@ -1,7 +1,7 @@
 // ...existing code...
 
 import React, { useState, useEffect, useRef, JSX } from "react";
-
+import TridentShape from "../TridentShape";
 type ComponentType = {
   id: string;
   x?: number;
@@ -40,7 +40,7 @@ const colors = {
 
 export default function Schematic({ data }: { data: SchematicData }) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
-const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Dragging state
   const [dragging, setDragging] = useState(false);
@@ -52,89 +52,87 @@ const [isFullscreen, setIsFullscreen] = useState(false);
   );
 
   // Reset view handler
- const resetView = () => {
-  const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
+  const resetView = () => {
+    const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
-  const svgWidth = 1500;
-  const svgHeight = 768;
+    const svgWidth = 1500;
+    const svgHeight = 768;
 
-  const margin = 0.1;
-  const scaleX = svgWidth / schematicW;
-  const scaleY = svgHeight / schematicH;
-  let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+    const margin = 0.1;
+    const scaleX = svgWidth / schematicW;
+    const scaleY = svgHeight / schematicH;
+    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
 
-  scaleFactor *= 0.6; // If you want a zoomed-out default
+    scaleFactor *= 0.6; // If you want a zoomed-out default
 
-  const newW = schematicW * scaleFactor;
-  const newH = schematicH * scaleFactor;
+    const newW = schematicW * scaleFactor;
+    const newH = schematicH * scaleFactor;
 
-  // Center calculation
-  const centerX = fitX + (schematicW / 2) - (newW / 2);
-  const centerY = fitY + (schematicH / 2) - (newH / 2);
+    // Center calculation
+    const centerX = fitX + schematicW / 2 - newW / 2;
+    const centerY = fitY + schematicH / 2 - newH / 2;
 
-  setViewBox({
-    x: centerX,
-    y: centerY,
-    w: newW,
-    h: newH,
-  });
-};
-
-// Mouse wheel handler for zoom
-const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
-  e.preventDefault();
-  const scaleFactor = 1.1;
-  const mouseX = e.nativeEvent.offsetX;
-  const mouseY = e.nativeEvent.offsetY;
-  let { x, y, w, h } = viewBox;
-
-  // Calculate zoom direction
-  const zoomIn = e.deltaY < 0;
-  // Mouse coordinates in SVG space
-  const svg = e.currentTarget;
-  const bounds = svg.getBoundingClientRect();
-  const svgX = ((mouseX / svg.width.baseVal.value) * w) + x;
-  const svgY = ((mouseY / svg.height.baseVal.value) * h) + y;
-
-  let newW = zoomIn ? w / scaleFactor : w * scaleFactor;
-  let newH = zoomIn ? h / scaleFactor : h * scaleFactor;
-
-  // Keep mouse position centered after zoom
-  const newX = svgX - ((mouseX / svg.width.baseVal.value) * newW);
-  const newY = svgY - ((mouseY / svg.height.baseVal.value) * newH);
-
-  setViewBox({
-    x: newX,
-    y: newY,
-    w: newW,
-    h: newH,
-  });
-};
-
-//  Full screen handlers
-const enterFullscreen = () => {
-  if (svgWrapperRef.current) {
-    svgWrapperRef.current.requestFullscreen();
-  }
-};
-
-const exitFullscreen = () => {
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  }
-};
-
-useEffect(() => {
-  const handleFullscreenChange = () => {
-    setIsFullscreen(!!document.fullscreenElement);
+    setViewBox({
+      x: centerX,
+      y: centerY,
+      w: newW,
+      h: newH,
+    });
   };
-  document.addEventListener("fullscreenchange", handleFullscreenChange);
-  return () => {
-    document.removeEventListener("fullscreenchange", handleFullscreenChange);
+
+  // Mouse wheel handler for zoom
+  const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
+    e.preventDefault();
+    const scaleFactor = 1.1;
+    const mouseX = e.nativeEvent.offsetX;
+    const mouseY = e.nativeEvent.offsetY;
+    let { x, y, w, h } = viewBox;
+
+    // Calculate zoom direction
+    const zoomIn = e.deltaY < 0;
+    // Mouse coordinates in SVG space
+    const svg = e.currentTarget;
+    const bounds = svg.getBoundingClientRect();
+    const svgX = (mouseX / svg.width.baseVal.value) * w + x;
+    const svgY = (mouseY / svg.height.baseVal.value) * h + y;
+
+    let newW = zoomIn ? w / scaleFactor : w * scaleFactor;
+    let newH = zoomIn ? h / scaleFactor : h * scaleFactor;
+
+    // Keep mouse position centered after zoom
+    const newX = svgX - (mouseX / svg.width.baseVal.value) * newW;
+    const newY = svgY - (mouseY / svg.height.baseVal.value) * newH;
+
+    setViewBox({
+      x: newX,
+      y: newY,
+      w: newW,
+      h: newH,
+    });
   };
-}, []);
 
+  //  Full screen handlers
+  const enterFullscreen = () => {
+    if (svgWrapperRef.current) {
+      svgWrapperRef.current.requestFullscreen();
+    }
+  };
 
+  const exitFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -163,15 +161,13 @@ useEffect(() => {
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
 
-  
-      //change deafault view box on data change
+  //change deafault view box on data change
   useEffect(() => {
     if (fitViewBox) {
       resetView();
     }
   }, [fitViewBox]);
-  
-  
+
   const [componentNameWidths, setComponentNameWidths] = useState<{
     [id: string]: number;
   }>({});
@@ -259,7 +255,7 @@ useEffect(() => {
 
   function spaceForWires() {
     let connectionsCount = data.connections.length;
-    return (connectionsCount * 10) + 40; // 10px per connection + padding
+    return connectionsCount * 10 + 40; // 10px per connection + padding
   }
 
   function connectionPointKey(point: ConnectionPoint): string {
@@ -276,9 +272,9 @@ useEffect(() => {
     let max = Math.max(y1, y2);
     let min = Math.min(y1, y2);
     let mid = count / 2;
-    let offset = ((index + 1) * offsetStep) + offsetStep
-    let reverseOffset = max - min - ((index + 1) * offsetStep) - offsetStep
-    return index < mid ? offset : reverseOffset; 
+    let offset = (index + 1) * offsetStep + offsetStep;
+    let reverseOffset = max - min - (index + 1) * offsetStep - offsetStep;
+    return index < mid ? offset : reverseOffset;
   }
 
   function getIntersection(
@@ -416,7 +412,10 @@ useEffect(() => {
     const y =
       index < 1
         ? padding
-        : padding + componentSize.height + spaceForWires() + componentSize.height;
+        : padding +
+          componentSize.height +
+          spaceForWires() +
+          componentSize.height;
     return y;
   }
 
@@ -440,17 +439,17 @@ useEffect(() => {
     return x + width * (index + 1) - connWidth;
   }
 
- function getYForConnector(
+  function getYForConnector(
     connector: ConnectorType,
     component: ComponentType
   ): number {
     let index = data.components.findIndex((c) => c.id === component.id);
-    const gap=1;  //to move green box outside
+    const gap = 1; //to move green box outside
     return index < 1
-      ? getYForComponent(component) + componentSize.height +gap
-      : getYForComponent(component) - gap-20;
+      ? getYForComponent(component) + componentSize.height + gap
+      : getYForComponent(component) - gap - 20;
   }
-  
+
   function getConnectionsForConnector(conn: ConnectorType): ConnectionType[] {
     return data.connections.filter(
       (c) => c.from.connectorId === conn.id || c.to.connectorId === conn.id
@@ -459,12 +458,17 @@ useEffect(() => {
 
   function getWidthForConnector(conn: ConnectorType): number {
     let connections = getConnectionsForConnector(conn);
-    let interConnectionSpacing = 15;
+    let interConnectionSpacing = 35;
     if (connections.length > 1) {
-      let connectionsBasedWidth = (connections.length + 1) * interConnectionSpacing;
+      let connectionsBasedWidth =
+        (connections.length + 1) * interConnectionSpacing;
       return (
         // Pin padding changeed
-        Math.max(connectionsBasedWidth, connectorNameWidths[conn.id] + connectorNamePadding,100)
+        Math.max(
+          connectionsBasedWidth,
+          connectorNameWidths[conn.id] + connectorNamePadding,
+          100
+        )
       );
     }
     return connectorNameWidths[conn.id] + connectorNamePadding;
@@ -501,78 +505,70 @@ useEffect(() => {
     // If luminance is high, return black; else, return white
     return luminance > 0.5 ? "#000000" : "#FFFFFF";
   }
+  const buttonStyle = {
+  padding: "6px 10px",
+  borderRadius: "6px",
+  border: "1px solid #ccc",
+  background: "white",
+  cursor: "pointer",
+};
+
 
   return (
-    <div ref={svgWrapperRef} style={{ position: "relative", display: "inline-block"  }}>
-      <div  style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}>
-        <button
-          onClick={resetView}
-          style={{
-            marginRight: 8,
-            padding: "6px 10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            background: "white",
-            cursor: "pointer",
-          }}
-        >
+    <div
+      ref={svgWrapperRef}
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        width: "100%", // Full width of parent container by default
+        height: isFullscreen ? "100vh" : "600px", // Full viewport height when fullscreen
+        background: "#fafafa", // Or desired background color
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          padding: 8,
+          zIndex: 10,
+          background: "white",
+          display: "flex",
+          gap: 8,
+        }}
+      >
+        <button onClick={resetView} style={buttonStyle}>
           Reset View
         </button>
-        <button
-          onClick={() => zoom("in")}
-          style={{
-            marginRight: 8,
-            padding: "6px 10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            background: "white",
-            cursor: "pointer",
-          }}
-        >
+        <button onClick={() => zoom("in")} style={buttonStyle}>
           Zoom In
         </button>
-        <button
-          onClick={() => zoom("out")}
-          style={{
-            padding: "6px 10px",
-            borderRadius: "6px",
-            border: "1px solid #ccc",
-            background: "white",
-            cursor: "pointer",
-          }}
-        >
+        <button onClick={() => zoom("out")} style={buttonStyle}>
           Zoom Out
         </button>
         <button
-  onClick={isFullscreen ? exitFullscreen : enterFullscreen}
-  style={{
-    marginRight: 8,
-    padding: "6px 10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    background: "white",
-    cursor: "pointer",
-  }}
->
-  {isFullscreen ? "Default Screen" : "Full Screen"}
-</button>
-
+          onClick={isFullscreen ? exitFullscreen : enterFullscreen}
+          style={buttonStyle}
+        >
+          {isFullscreen ? "Default Screen" : "Full Screen"}
+        </button>
       </div>
-      
-    
-      <svg  onWheel={handleWheel}
-        width={"1070"}
-        height="600"
-        style={{
-          border: "1px solid #ccc",
-          background: "#fafafa",
-          cursor: dragging ? "grabbing" : "grab",
-        }}
-        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-      >
+      <div style={{ flex: 1, overflow: "hidden" }}>
+      <svg
+      onWheel={handleWheel}
+      style={{
+        border: "1px solid #ccc",
+        width: "100%",
+        height: "100%",
+        cursor: dragging ? "grabbing" : "grab",
+        display: "block",
+      }}
+      viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseMove={handleMouseMove}
+    >
+
         {data.components.map((comp, componentIndex) => (
           <g key={comp.id}>
             {comp.shape === "rectangle" && (
@@ -618,13 +614,15 @@ useEffect(() => {
                     connectorNameRefs.current[conn.id] = el;
                   }}
                   x={
-                    getXForConnector(conn, comp) +
-                    getWidthForConnector(conn) / 2
+                    getXForConnector(conn, comp)
+                    // + getWidthForConnector(conn) / 2
                   }
-                  y={getYForConnector(conn, comp) + 13}
-                  textAnchor="middle"
+                   y={getYForConnector(conn, comp) + 13}
+                  textAnchor="end"  //change to move text at the left
+                  dominantBaseline="middle" //change to take text left at middle
                   fontSize="10"
                   fill="black"
+                  fontWeight="bold"
                 >
                   {conn.label}
                 </text>
@@ -707,42 +705,72 @@ useEffect(() => {
 
           connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
-          const offset = getConnectionOffset(i, data.connections.length,fromY, toY, 10);
+          const offset = getConnectionOffset(i, data.connections.length, fromY, toY, 10);
           let min = Math.min(fromY, toY);
-            let radius = 5;
+          const midY = min + offset; //middle line start dynamically
+          // Calculate the positions where the tridents should be
+          const fromTridentY = fromY < toY ? midY : fromY - 10; // lift if needed
+          const toTridentY = fromY < toY ? toY : midY + 10;
+          let isFromTop = fromIndex === 0;
+          let isToTop = toIndex === 0;
+          let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
+          let toLabelY = isToTop ? toY - 5 : toY + 15;
+
           let wireElement;
           wireElement = (
             <g>
-              <circle cx={fromX} cy={fromY} r={radius} fill={"white"} stroke={wire.color}></circle>
+              {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
+
+              {isFromTop ? (
+                // top component → trident points UP
+                <TridentShape cx={fromX} cy={fromY - 15} color={wire.color} size={10} />
+              ) : (
+                // bottom component → trident points DOWN
+                <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
+                  <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                </g>
+              )}
               <polyline
                 key={i}
-                points={`
-                  ${fromX},${fromIndex == 0 ? fromY + radius : fromY - radius} ${fromX},${min + offset} ${toX},${
-                  min + offset
-                } ${toX},${toIndex == 0 ? toY + radius : toY - radius}`}
+                points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                  } ${toX},${toY}`}
                 fill="none"
                 stroke={wire.color}
                 strokeWidth={2}
                 markerEnd="url(#arrowhead)"
               />
-              <circle cx={toX} cy={toY} r={5} fill={"white"} stroke={wire.color}></circle>
+              {/* <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle> */}
+
+              {isToTop ? (
+                // top component → trident points UP
+                <TridentShape cx={toX} cy={toY - 15} color={wire.color} size={10} />
+              ) : (
+                // bottom component → trident points DOWN
+                <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
+                  <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                </g>
+              )}
+
+
               <text
-                x={fromX}
-                y={fromY}
-                textAnchor="middle"
-                fontSize="5"
+                x={fromX + 10}
+                y={fromLabelY}
+                textAnchor="start"
+                fontSize="10"
                 alignmentBaseline="middle"
                 fill="black"
+                fontWeight="bold"
               >
                 {wire.from.cavity}
               </text>
               <text
-                x={toX}
-                y={toY}
-                textAnchor="middle"
-                fontSize="5"
+                x={toX + 10}
+                y={toLabelY}
+                textAnchor="start"
+                fontSize="10"
                 alignmentBaseline="middle"
                 fill="black"
+                fontWeight="bold"
               >
                 {wire.to.cavity}
               </text>
@@ -751,6 +779,7 @@ useEffect(() => {
           return <g key={i}>{wireElement}</g>;
         })}
       </svg>
+      </div>
     </div>
   );
 }
