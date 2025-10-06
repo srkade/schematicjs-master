@@ -119,9 +119,9 @@ export default function LeftPanel({ activeTab, data, onItemSelect, selectedItem 
                   <span style={{ background: "#e3f2fd", color: "#1565c0", padding: "2px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "500" }}>
                     {item.code}
                   </span>
-                  <span style={{ background: "#e8f5e8", color: "#2e7d32", padding: "2px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "500" }}>
+                  {/* <span style={{ background: "#e8f5e8", color: "#2e7d32", padding: "2px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "500" }}>
                     {item.status}
-                  </span>
+                  </span> */}
                 </div>
                 
                 <h3 style={{ margin: "0 0 4px 0", color: "#212529", fontSize: "16px", fontWeight: "600" }}>

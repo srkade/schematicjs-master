@@ -334,10 +334,11 @@ import NavigationTabs from "./components/NavigationTabs";
 import LeftPanel from "./components/LeftPanel";
 import MainPanel from "./components/MainPanel";
 import { SchematicData } from "./types/SchematicTypes";
-import { ICC, S4, S9, S8, B3 } from "./components/Schematic/tests";
+import { ICC, S4, S9, S8, B3,CrankingSystem } from "./components/Schematic/tests";
+import LoginPage from "./components/LoginPage";
 
 // Create dashboard items from schematics
-const allSchematics = { B3, S4, S9, S8 };
+const allSchematics = { B3, S4, S9, S8 ,CrankingSystem};
 const dashboardItems = Object.entries(allSchematics).map(([key, schematic]) => ({
   code: key,
   name: schematic.components[0]?.label || "Unknown Component",
@@ -359,6 +360,7 @@ export type DashboardItem = {
 };
 
 export default function App() {
+   const [loggedIn,setLoggedIn]=useState(false);  //track login state
   const [activeTab, setActiveTab] = useState<string>("components");
   const [selectedItem, setSelectedItem] = useState<DashboardItem | null>(null);
 
@@ -375,6 +377,12 @@ export default function App() {
         return false;
     }
   });
+
+  if(!loggedIn)
+  {
+    return <LoginPage onLoginSuccess={()=>setLoggedIn(true)}/>
+
+  }
 
   return (
     <div style={{ height: "100vh", background: "#f8f9fa", display: "flex", flexDirection: "column" }}>

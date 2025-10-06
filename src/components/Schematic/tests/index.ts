@@ -4,5 +4,6 @@ import S4 from './S4';
 import S9 from './S9';
 import B3 from './B3';
 import S8 from './S8';
+import CrankingSystem from './CrankingSystem';
 
-export { ICC, S4, S9, B3, S8 };
+export { ICC, S4, S9, B3, S8, CrankingSystem };

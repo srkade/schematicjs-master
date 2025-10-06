@@ -636,18 +636,18 @@ export default function Schematic({ data }: { data: SchematicData }) {
           let wireElement;
           wireElement = (
             <g>
-              <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle>
+              <circle cx={fromX} cy={fromY} r={5} stroke={wire.color} fill="white"></circle>
               <polyline
                 key={i}
-                points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
+                points={`${fromX},${fromY+5} ${fromX},${min + offset} ${toX},${
                   min + offset
-                } ${toX},${toY}`}
+                } ${toX},${toY-5}`}
                 fill="none"
                 stroke={wire.color}
                 strokeWidth={2}
                 markerEnd="url(#arrowhead)"
               />
-              <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle>
+              <circle cx={toX} cy={toY} r={5} stroke={wire.color} fill="white"></circle>
               <text
                 x={fromX}
                 y={fromY}
