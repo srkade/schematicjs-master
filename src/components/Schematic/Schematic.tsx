@@ -1,6 +1,7 @@
 // ...existing code...
 
 import React, { useState, useEffect, useRef, JSX } from "react";
+
 type ComponentType = {
   id: string;
   x?: number;
@@ -38,6 +39,9 @@ const colors = {
 };
 
 export default function Schematic({ data }: { data: SchematicData }) {
+  const svgWrapperRef = useRef<HTMLDivElement>(null);
+const [isFullscreen, setIsFullscreen] = useState(false);
+
   // Dragging state
   const [dragging, setDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
@@ -75,6 +79,62 @@ export default function Schematic({ data }: { data: SchematicData }) {
     h: newH,
   });
 };
+
+// Mouse wheel handler for zoom
+const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
+  e.preventDefault();
+  const scaleFactor = 1.1;
+  const mouseX = e.nativeEvent.offsetX;
+  const mouseY = e.nativeEvent.offsetY;
+  let { x, y, w, h } = viewBox;
+
+  // Calculate zoom direction
+  const zoomIn = e.deltaY < 0;
+  // Mouse coordinates in SVG space
+  const svg = e.currentTarget;
+  const bounds = svg.getBoundingClientRect();
+  const svgX = ((mouseX / svg.width.baseVal.value) * w) + x;
+  const svgY = ((mouseY / svg.height.baseVal.value) * h) + y;
+
+  let newW = zoomIn ? w / scaleFactor : w * scaleFactor;
+  let newH = zoomIn ? h / scaleFactor : h * scaleFactor;
+
+  // Keep mouse position centered after zoom
+  const newX = svgX - ((mouseX / svg.width.baseVal.value) * newW);
+  const newY = svgY - ((mouseY / svg.height.baseVal.value) * newH);
+
+  setViewBox({
+    x: newX,
+    y: newY,
+    w: newW,
+    h: newH,
+  });
+};
+
+//  Full screen handlers
+const enterFullscreen = () => {
+  if (svgWrapperRef.current) {
+    svgWrapperRef.current.requestFullscreen();
+  }
+};
+
+const exitFullscreen = () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+};
+
+useEffect(() => {
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement);
+  };
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
+  return () => {
+    document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  };
+}, []);
+
+
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -443,8 +503,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
   }
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      <div style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}>
+    <div ref={svgWrapperRef} style={{ position: "relative", display: "inline-block"  }}>
+      <div  style={{ position: "absolute", top: 10, left: 10, zIndex: 10 }}>
         <button
           onClick={resetView}
           style={{
@@ -483,9 +543,24 @@ export default function Schematic({ data }: { data: SchematicData }) {
         >
           Zoom Out
         </button>
-      </div>
+        <button
+  onClick={isFullscreen ? exitFullscreen : enterFullscreen}
+  style={{
+    marginRight: 8,
+    padding: "6px 10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+    background: "white",
+    cursor: "pointer",
+  }}
+>
+  {isFullscreen ? "Default Screen" : "Full Screen"}
+</button>
 
-      <svg
+      </div>
+      
+    
+      <svg  onWheel={handleWheel}
         width={"1070"}
         height="600"
         style={{
