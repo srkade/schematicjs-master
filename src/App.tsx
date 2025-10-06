@@ -339,15 +339,35 @@ import LoginPage from "./components/LoginPage";
 
 // Create dashboard items from schematics
 const allSchematics = { B3, S4, S9, S8 ,CrankingSystem};
-const dashboardItems = Object.entries(allSchematics).map(([key, schematic]) => ({
-  code: key,
-  name: schematic.components[0]?.label || "Unknown Component",
-  type: schematic.components[0]?.category || "Unknown",
-  status: "Active" as const,
-  voltage: key === "B3" ? "12V" : key === "S4" ? "5V" : "12V",
-  description: `Schematic for ${schematic.components[0]?.label}`,
-  schematicData: schematic,
-}));
+const SYSTEM_KEYS = ["CrankingSystem"]; // Add more system keys here as needed
+
+const dashboardItems = Object.entries(allSchematics).map(([key, schematic]) => {
+  const isSystem = SYSTEM_KEYS.includes(key);
+  const label = schematic.components[0]?.label || (isSystem ? key : "Unknown Component");
+  return {
+    code: key,
+    name: label,
+    // **Explicitly set type "System" for matches**
+    type: isSystem 
+      ? "System" 
+      : schematic.components[0]?.category || "Unknown",
+    status: "Active" as const,
+    voltage:
+      isSystem 
+        ? "12V" // Or any system-specific voltage logic
+        : key === "B3"
+        ? "12V"
+        : key === "S4"
+        ? "5V"
+        : "12V",
+    description: isSystem
+      ? `System schematic: ${label}`
+      : `Schematic for ${label}`,
+    schematicData: schematic,
+  };
+});
+
+
 
 export type DashboardItem = {
   code: string;
@@ -371,8 +391,10 @@ export default function App() {
         return ["Sensor", "Switch"].includes(item.type);
       case "controllers":
         return ["Transistor", "Instrument"].includes(item.type);
-      case "systems":
-        return ["Splice"].includes(item.type);
+    case "systems":
+  return ["System"].includes(item.type);  // Only show true system-category items!
+
+
       default:
         return false;
     }
