@@ -380,16 +380,17 @@ export default function Schematic({ data }: { data: SchematicData }) {
     return x + width * (index + 1) - connWidth;
   }
 
-  function getYForConnector(
+ function getYForConnector(
     connector: ConnectorType,
     component: ComponentType
   ): number {
     let index = data.components.findIndex((c) => c.id === component.id);
+    const gap=1;  //to move green box outside
     return index < 1
-      ? getYForComponent(component) + componentSize.height - 10
-      : getYForComponent(component) - 10;
+      ? getYForComponent(component) + componentSize.height +gap
+      : getYForComponent(component) - gap-20;
   }
-
+  
   function getConnectionsForConnector(conn: ConnectorType): ConnectionType[] {
     return data.connections.filter(
       (c) => c.from.connectorId === conn.id || c.to.connectorId === conn.id
@@ -633,18 +634,10 @@ export default function Schematic({ data }: { data: SchematicData }) {
 
           const offset = getConnectionOffset(i, data.connections.length,fromY, toY, 10);
           let min = Math.min(fromY, toY);
-          let radius = 5;
+            let radius = 5;
           let wireElement;
           wireElement = (
             <g>
-<<<<<<< HEAD
-              <circle cx={fromX} cy={fromY} r={5} stroke={wire.color} fill="white"></circle>
-              <polyline
-                key={i}
-                points={`${fromX},${fromY+5} ${fromX},${min + offset} ${toX},${
-                  min + offset
-                } ${toX},${toY-5}`}
-=======
               <circle cx={fromX} cy={fromY} r={radius} fill={"white"} stroke={wire.color}></circle>
               <polyline
                 key={i}
@@ -652,17 +645,12 @@ export default function Schematic({ data }: { data: SchematicData }) {
                   ${fromX},${fromIndex == 0 ? fromY + radius : fromY - radius} ${fromX},${min + offset} ${toX},${
                   min + offset
                 } ${toX},${toIndex == 0 ? toY + radius : toY - radius}`}
->>>>>>> e6e183cbea25e2def9d6a7317e8fcfc1f257dc02
                 fill="none"
                 stroke={wire.color}
                 strokeWidth={2}
                 markerEnd="url(#arrowhead)"
               />
-<<<<<<< HEAD
-              <circle cx={toX} cy={toY} r={5} stroke={wire.color} fill="white"></circle>
-=======
               <circle cx={toX} cy={toY} r={5} fill={"white"} stroke={wire.color}></circle>
->>>>>>> e6e183cbea25e2def9d6a7317e8fcfc1f257dc02
               <text
                 x={fromX}
                 y={fromY}
