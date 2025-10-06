@@ -3,6 +3,7 @@ import React from "react";
 interface NavigationTabsProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onLogout: () => void;
 }
 
 const tabs = [
@@ -15,7 +16,7 @@ const tabs = [
   { id: "harnesses", label: "Harnesses", icon: "🔌" },
 ];
 
-export default function NavigationTabs({ activeTab, onTabChange }: NavigationTabsProps) {
+export default function NavigationTabs({ activeTab, onTabChange,onLogout }: NavigationTabsProps) {
   return (
     <nav style={{
       background: "white",
@@ -60,6 +61,23 @@ export default function NavigationTabs({ activeTab, onTabChange }: NavigationTab
           <span>{tab.label}</span>
         </button>
       ))}
+      <button
+        onClick={onLogout}
+        style={{
+        background: "#dc3545",
+        color: "white",
+        border: "none",
+        padding: "8px 16px",
+        borderRadius: "8px",
+        cursor: "pointer",
+        fontWeight: "bold",
+        fontSize: "14px",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        marginLeft: "auto",
+      }}
+       >
+        Logout
+       </button>
     </nav>
   );
 }

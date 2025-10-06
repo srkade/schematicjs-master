@@ -428,7 +428,7 @@ export default function App() {
       </div>
 
       {/* Navigation Tabs */}
-      <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab}  onLogout={()=>setLoggedIn(false)}  />
 
       {/* Main Content */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
