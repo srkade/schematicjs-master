@@ -14,7 +14,7 @@ export default function LoginPage({onLoginSuccess}:LoginPageProps){
         if(username==="admin" && password==="admin123")
         {
             onLoginSuccess();
-            alert("Login Success")
+           
         }
         else{
             setError("Invalid username or password");
