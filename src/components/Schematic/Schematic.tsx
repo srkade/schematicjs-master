@@ -506,13 +506,12 @@ export default function Schematic({ data }: { data: SchematicData }) {
     return luminance > 0.5 ? "#000000" : "#FFFFFF";
   }
   const buttonStyle = {
-  padding: "6px 10px",
-  borderRadius: "6px",
-  border: "1px solid #ccc",
-  background: "white",
-  cursor: "pointer",
-};
-
+    padding: "6px 10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+    background: "white",
+    cursor: "pointer",
+  };
 
   return (
     <div
@@ -554,231 +553,260 @@ export default function Schematic({ data }: { data: SchematicData }) {
         </button>
       </div>
       <div style={{ flex: 1, overflow: "hidden" }}>
-      <svg
-      onWheel={handleWheel}
-      style={{
-        border: "1px solid #ccc",
-        width: "100%",
-        height: "100%",
-        cursor: dragging ? "grabbing" : "grab",
-        display: "block",
-      }}
-      viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseMove={handleMouseMove}
-    >
-
-        {data.components.map((comp, componentIndex) => (
-          <g key={comp.id}>
-            {comp.shape === "rectangle" && (
-              <rect
-                x={getXForComponent(comp)}
-                y={getYForComponent(comp)}
-                width={getWidthForComponent(comp)}
-                height={componentSize.height}
-                fill="lightblue"
-                stroke="black"
-                strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                onClick={() => {
-                  // Your callback logic here
-                  console.log("Rectangle clicked!");
-                }}
-              />
-            )}
-            <text
-              ref={(el) => {
-                componentNameRefs.current[comp.id] = el;
-              }}
-              x={getXForComponentTitle(comp)}
-              y={getYForComponent(comp) + componentSize.height / 2}
-              textAnchor="middle"
-              fontSize="12"
-              fill="black"
-            >
-              {comp.label + ` (${comp.id})`}
-            </text>
-            {comp.connectors.map((conn) => (
-              <g key={conn.id}>
+        <svg
+          onWheel={handleWheel}
+          style={{
+            border: "1px solid #ccc",
+            width: "100%",
+            height: "100%",
+            cursor: dragging ? "grabbing" : "grab",
+            display: "block",
+          }}
+          viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+        >
+          {data.components.map((comp, componentIndex) => (
+            <g key={comp.id}>
+              {comp.shape === "rectangle" && (
                 <rect
-                  x={getXForConnector(conn, comp)}
-                  y={getYForConnector(conn, comp)}
-                  width={getWidthForConnector(conn)}
-                  height={20}
-                  fill="lightgreen"
+                  x={getXForComponent(comp)}
+                  y={getYForComponent(comp)}
+                  width={getWidthForComponent(comp)}
+                  height={componentSize.height}
+                  fill="lightblue"
                   stroke="black"
                   strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                />
-                <text
-                  ref={(el) => {
-                    connectorNameRefs.current[conn.id] = el;
+                  onClick={() => {
+                    // Your callback logic here
+                    console.log("Rectangle clicked!");
                   }}
-                  x={
-                    getXForConnector(conn, comp)
-                    // + getWidthForConnector(conn) / 2
-                  }
-                   y={getYForConnector(conn, comp) + 13}
-                  textAnchor="end"  //change to move text at the left
-                  dominantBaseline="middle" //change to take text left at middle
+                />
+              )}
+              <text
+                ref={(el) => {
+                  componentNameRefs.current[comp.id] = el;
+                }}
+                x={getXForComponentTitle(comp)}
+                y={getYForComponent(comp) + componentSize.height / 2}
+                textAnchor="middle"
+                fontSize="12"
+                fill="black"
+              >
+                {comp.label + ` (${comp.id})`}
+              </text>
+              {comp.connectors.map((conn) => (
+                <g key={conn.id}>
+                  <rect
+                    x={getXForConnector(conn, comp)}
+                    y={getYForConnector(conn, comp)}
+                    width={getWidthForConnector(conn)}
+                    height={20}
+                    fill="lightgreen"
+                    stroke="black"
+                    strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                  />
+                  <text
+                    ref={(el) => {
+                      connectorNameRefs.current[conn.id] = el;
+                    }}
+                    x={
+                      getXForConnector(conn, comp)
+                      // + getWidthForConnector(conn) / 2
+                    }
+                    y={getYForConnector(conn, comp) + 13}
+                    textAnchor="end" //change to move text at the left
+                    dominantBaseline="middle" //change to take text left at middle
+                    fontSize="10"
+                    fill="black"
+                    fontWeight="bold"
+                  >
+                    {conn.label}
+                  </text>
+                </g>
+              ))}
+            </g>
+          ))}
+
+          {data.connections.map((wire, i) => {
+            const fromConn = wire.from;
+            const toConn = wire.to;
+            const fromData =
+              getComponentConnectorTupleFromConnectionPoint(fromConn);
+            const fromComponent = fromData[0];
+            const from = fromData[1];
+
+            const toData =
+              getComponentConnectorTupleFromConnectionPoint(toConn);
+            const toComponent = toData[0];
+            const to = toData[1];
+
+            if (!from || !to) return null;
+
+            let fromIndex = data.components.findIndex(
+              (c) => c.id === fromComponent!.id
+            );
+            let toIndex = data.components.findIndex(
+              (c) => c.id === toComponent!.id
+            );
+
+            var fromStoredConnectionPoint =
+              connectionPoints[connectionPointKey(wire.from)];
+
+            var fromX = fromStoredConnectionPoint?.x;
+            if (fromX == undefined) {
+              const fromConnectorX = getXForConnector(from, fromComponent!);
+              const fromConnectorWidth = getWidthForConnector(from);
+              const fromConnectorCount = connectorConnectionCount[from.id] || 1;
+              const connIndex = getConnectionsForConnector(from).findIndex(
+                (c) => c === wire
+              );
+              const fromConnectorOffset =
+                fromConnectorCount === 1
+                  ? fromConnectorWidth / 2
+                  : (fromConnectorWidth / (fromConnectorCount + 1)) *
+                    (connIndex + 1);
+
+              fromX = fromConnectorX + fromConnectorOffset;
+            }
+
+            var fromY = fromStoredConnectionPoint?.y;
+            if (fromY == undefined) {
+              fromY =
+                fromIndex == 0
+                  ? getYForConnector(from, fromComponent!) + 20
+                  : getYForConnector(from, fromComponent!);
+            }
+
+            connectionPoints[connectionPointKey(wire.from)] = {
+              x: fromX,
+              y: fromY,
+            };
+            
+
+            var toStoredConnectionPoint =
+              connectionPoints[connectionPointKey(wire.to)];
+            var toX = toStoredConnectionPoint?.x;
+            if (toX == undefined) {
+              const toConnectorX = getXForConnector(to, toComponent!);
+              const toConnectorWidth = getWidthForConnector(to);
+              const toConnectorCount = connectorConnectionCount[to.id] || 1;
+              const connIndexTo = getConnectionsForConnector(to).findIndex(
+                (c) => c === wire
+              );
+              const toConnectorOffset =
+                toConnectorCount === 1
+                  ? toConnectorWidth / 2
+                  : (toConnectorWidth / (toConnectorCount + 1)) *
+                    (connIndexTo + 1);
+
+              toX = toConnectorX + toConnectorOffset;
+            }
+            var toY = toStoredConnectionPoint?.y;
+            if (toY == undefined) {
+              toY =
+                toIndex == 0
+                  ? getYForConnector(to, toComponent!) + 20
+                  : getYForConnector(to, toComponent!);
+            }
+
+            connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
+
+            const offset = getConnectionOffset(
+              i,
+              data.connections.length,
+              fromY,
+              toY,
+              10
+            );
+            let min = Math.min(fromY, toY);
+            const midY = min + offset; //middle line start dynamically
+            // Calculate the positions where the tridents should be
+            const fromTridentY = fromY < toY ? midY : fromY - 10; // lift if needed
+            const toTridentY = fromY < toY ? toY : midY + 10;
+            let isFromTop = fromIndex === 0;
+            let isToTop = toIndex === 0;
+            let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
+            let toLabelY = isToTop ? toY - 5 : toY + 15;
+
+            let wireElement;
+            wireElement = (
+              <g>
+                {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
+
+                {isFromTop ? (
+                  // top component → trident points UP
+                  <TridentShape
+                    cx={fromX}
+                    cy={fromY - 15}
+                    color={wire.color}
+                    size={10}
+                  />
+                ) : (
+                  // bottom component → trident points DOWN
+                  <g
+                    transform={`translate(${fromX}, ${
+                      fromY + 15
+                    }) scale(1, -1)`}
+                  >
+                    <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                  </g>
+                )}
+                <polyline
+                  key={i}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
+                    min + offset
+                  } ${toX},${toY}`}
+                  fill="none"
+                  stroke={wire.color}
+                  strokeWidth={2}
+                  markerEnd="url(#arrowhead)"
+                />
+                {/* <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle> */}
+
+                {isToTop ? (
+                  // top component → trident points UP
+                  <TridentShape
+                    cx={toX}
+                    cy={toY - 15}
+                    color={wire.color}
+                    size={10}
+                  />
+                ) : (
+                  // bottom component → trident points DOWN
+                  <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
+                    <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                  </g>
+                )}
+
+                <text
+                  x={fromX + 10}
+                  y={fromLabelY}
+                  textAnchor="start"
                   fontSize="10"
+                  alignmentBaseline="middle"
                   fill="black"
                   fontWeight="bold"
                 >
-                  {conn.label}
+                  {wire.from.cavity}
+                </text>
+                <text
+                  x={toX + 10}
+                  y={toLabelY}
+                  textAnchor="start"
+                  fontSize="10"
+                  alignmentBaseline="middle"
+                  fill="black"
+                  fontWeight="bold"
+                >
+                  {wire.to.cavity}
                 </text>
               </g>
-            ))}
-          </g>
-        ))}
-
-        {data.connections.map((wire, i) => {
-          const fromConn = wire.from;
-          const toConn = wire.to;
-          const fromData =
-            getComponentConnectorTupleFromConnectionPoint(fromConn);
-          const fromComponent = fromData[0];
-          const from = fromData[1];
-
-          const toData = getComponentConnectorTupleFromConnectionPoint(toConn);
-          const toComponent = toData[0];
-          const to = toData[1];
-
-          if (!from || !to) return null;
-
-          let fromIndex = data.components.findIndex(
-            (c) => c.id === fromComponent!.id
-          );
-          let toIndex = data.components.findIndex(
-            (c) => c.id === toComponent!.id
-          );
-
-          var fromStoredConnectionPoint =
-            connectionPoints[connectionPointKey(wire.from)];
-
-          var fromX = fromStoredConnectionPoint?.x;
-          if (fromX == undefined) {
-            const fromConnectorX = getXForConnector(from, fromComponent!);
-            const fromConnectorWidth = getWidthForConnector(from);
-            const fromConnectorCount = connectorConnectionCount[from.id] || 1;
-            const fromConnectorOffset =
-              fromConnectorCount == 1
-                ? fromConnectorWidth / 2
-                : (fromConnectorWidth / (fromConnectorCount + 1)) * (i + 1);
-
-            fromX = fromConnectorX + fromConnectorOffset;
-          }
-
-          var fromY = fromStoredConnectionPoint?.y;
-          if (fromY == undefined) {
-            fromY =
-              fromIndex == 0
-                ? getYForConnector(from, fromComponent!) + 20
-                : getYForConnector(from, fromComponent!);
-          }
-
-          connectionPoints[connectionPointKey(wire.from)] = {
-            x: fromX,
-            y: fromY,
-          };
-
-          var toStoredConnectionPoint =
-            connectionPoints[connectionPointKey(wire.to)];
-          var toX = toStoredConnectionPoint?.x;
-          if (toX == undefined) {
-            const toConnectorX = getXForConnector(to, toComponent!);
-            const toConnectorWidth = getWidthForConnector(to);
-            const toConnectorCount = connectorConnectionCount[to.id] || 1;
-            const toConnectorOffset =
-              toConnectorCount == 1
-                ? toConnectorWidth / 2
-                : (toConnectorWidth / (toConnectorCount + 1)) * (i + 1);
-
-            toX = toConnectorX + toConnectorOffset;
-          }
-          var toY = toStoredConnectionPoint?.y;
-          if (toY == undefined) {
-            toY =
-              toIndex == 0
-                ? getYForConnector(to, toComponent!) + 20
-                : getYForConnector(to, toComponent!);
-          }
-
-          connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
-
-          const offset = getConnectionOffset(i, data.connections.length, fromY, toY, 10);
-          let min = Math.min(fromY, toY);
-          const midY = min + offset; //middle line start dynamically
-          // Calculate the positions where the tridents should be
-          const fromTridentY = fromY < toY ? midY : fromY - 10; // lift if needed
-          const toTridentY = fromY < toY ? toY : midY + 10;
-          let isFromTop = fromIndex === 0;
-          let isToTop = toIndex === 0;
-          let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
-          let toLabelY = isToTop ? toY - 5 : toY + 15;
-
-          let wireElement;
-          wireElement = (
-            <g>
-              {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
-
-              {isFromTop ? (
-                // top component → trident points UP
-                <TridentShape cx={fromX} cy={fromY - 15} color={wire.color} size={10} />
-              ) : (
-                // bottom component → trident points DOWN
-                <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
-                  <TridentShape cx={0} cy={0} color={wire.color} size={10} />
-                </g>
-              )}
-              <polyline
-                key={i}
-                points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
-                  } ${toX},${toY}`}
-                fill="none"
-                stroke={wire.color}
-                strokeWidth={2}
-                markerEnd="url(#arrowhead)"
-              />
-              {/* <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle> */}
-
-              {isToTop ? (
-                // top component → trident points UP
-                <TridentShape cx={toX} cy={toY - 15} color={wire.color} size={10} />
-              ) : (
-                // bottom component → trident points DOWN
-                <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
-                  <TridentShape cx={0} cy={0} color={wire.color} size={10} />
-                </g>
-              )}
-
-
-              <text
-                x={fromX + 10}
-                y={fromLabelY}
-                textAnchor="start"
-                fontSize="10"
-                alignmentBaseline="middle"
-                fill="black"
-                fontWeight="bold"
-              >
-                {wire.from.cavity}
-              </text>
-              <text
-                x={toX + 10}
-                y={toLabelY}
-                textAnchor="start"
-                fontSize="10"
-                alignmentBaseline="middle"
-                fill="black"
-                fontWeight="bold"
-              >
-                {wire.to.cavity}
-              </text>
-            </g>
-          );
-          return <g key={i}>{wireElement}</g>;
-        })}
-      </svg>
+            );
+            return <g key={i}>{wireElement}</g>;
+          })}
+        </svg>
       </div>
     </div>
   );

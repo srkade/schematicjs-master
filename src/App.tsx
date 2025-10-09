@@ -1,365 +1,34 @@
-// import React from "react";
-// import Schematic from "./Schematic";
-
-// const B3 = {
-//   components: [
-//     {
-//       id: "B3",
-//       label: "Coolant Temperature sensor",
-//       category: "Sensor",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XB3",
-//           label: "XB3",
-//         },
-//       ],
-//     },
-//     {
-//       id: "ICC",
-//       label: "Instrument Cluster Controller",
-//       category: "Transistor",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XJ1",
-//           label: "XJ1",
-//         },
-//       ],
-//     },
-//   ],
-//   connections: [
-//     {
-//       color: "orange",
-//       from: {
-//         componentId: "B3",
-//         connectorId: "XB3",
-//         cavity: "1",
-//       },
-//       to: {
-//         componentId: "ICC",
-//         connectorId: "XJ1",
-//         cavity: "16",
-//       },
-//       label: "",
-//     },
-//   ],
-// };
-
-// const S4 = {
-//   components: [
-//     {
-//       id: "S4",
-//       label: "Seat Switch",
-//       category: "Switch",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XS4",
-//           label: "XS4",
-//         },
-//       ],
-//     },
-//     {
-//       id: "SPL1",
-//       label: "Splice",
-//       category: "Splice",
-//       shape: "circle",
-//       connectors: [
-//         {
-//           id: "XSP_500",
-//           label: "XSP_500",
-//         },
-//       ],
-//     },
-//     {
-//       id: "ICC",
-//       label: "Instrument Cluster Controller",
-//       category: "Instrument",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XJ2",
-//           label: "XJ2",
-//         },
-//       ],
-//     },
-//   ],
-//   connections: [
-//     {
-//       color: "yellow",
-//       from: {
-//         componentId: "S4",
-//         connectorId: "XS4",
-//         cavity: "2",
-//       },
-//       to: {
-//         componentId: "SPL1",
-//         connectorId: "XSP_500",
-//         cavity: "L",
-//       },
-//       label: "",
-//     },
-//     {
-//       color: "pink",
-//       from: {
-//         componentId: "ICC",
-//         connectorId: "XJ2",
-//         cavity: "3",
-//       },
-//       to: {
-//         componentId: "S4",
-//         connectorId: "XS4",
-//         cavity: "4",
-//       },
-//       label: "",
-//     },
-//   ],
-// };
-
-// const S9 = {
-//   components: [
-//     {
-//       id: "S9",
-//       label: "Light switch",
-//       category: "Switch",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XS9",
-//           label: "XS9",
-//         },
-//       ],
-//     },
-//     {
-//       id: "SPL1",
-//       label: "Splice",
-//       category: "Splice",
-//       shape: "circle",
-//       connectors: [
-//         {
-//           id: "XSP_450",
-//           label: "XSP_450",
-//         },
-//       ],
-//     },
-//     {
-//       id: "ICC",
-//       label: "Instrument Cluster Controller",
-//       category: "Instrument",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XJ1",
-//           label: "XJ1",
-//         },
-//       ],
-//     },
-//     {
-//       id: "LC",
-//       label: "Load Center",
-//       category: "Instrument",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "X90",
-//           label: "X90",
-//         },
-//       ],
-//     },
-//     {
-//       id: "HR",
-//       label: "Headlight relay",
-//       category: "Instrument",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XK3",
-//           label: "XK3",
-//         },
-//       ],
-//     },
-//   ],
-//   connections: [
-//     {
-//       color: "yellow",
-//       from: {
-//         componentId: "S9",
-//         connectorId: "XS9",
-//         cavity: "B",
-//       },
-//       to: {
-//         componentId: "SPL1",
-//         connectorId: "XSP_450",
-//         cavity: "L",
-//       },
-//       label: "",
-//     },
-//     {
-//       color: "pink",
-//       from: {
-//         componentId: "ICC",
-//         connectorId: "XJ1",
-//         cavity: "12",
-//       },
-//       to: {
-//         componentId: "S9",
-//         connectorId: "XS9",
-//         cavity: "C",
-//       },
-//       label: "",
-//     },
-//     {
-//       color: "yellow",
-//       from: {
-//         componentId: "LC",
-//         connectorId: "X90",
-//         cavity: "47",
-//       },
-//       to: {
-//         componentId: "S9",
-//         connectorId: "XS9",
-//         cavity: "D",
-//       },
-//       label: "",
-//     },
-//     {
-//       color: "green",
-//       from: {
-//         componentId: "HR",
-//         connectorId: "XK3",
-//         cavity: "19",
-//       },
-//       to: {
-//         componentId: "S9",
-//         connectorId: "XS9",
-//         cavity: "1",
-//       },
-//       label: "",
-//     },
-//   ],
-// };
-
-// const S8 = {
-//   components: [
-//     {
-//       id: "S8",
-//       label: "Brake switch",
-//       category: "Switch",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XS8",
-//           label: "XS8",
-//         },
-//       ],
-//     },
-//     {
-//       id: "SPL1",
-//       label: "Splice",
-//       category: "Splice",
-//       shape: "circle",
-//       connectors: [
-//         {
-//           id: "XSP_500",
-//           label: "XSP_500",
-//         },
-//         {
-//           id: "XSP_767",
-//           label: "XSP_767",
-//         },
-//       ],
-//     },
-//     {
-//       id: "ICC",
-//       label: "Instrument Cluster Controller",
-//       category: "Instrument",
-//       shape: "rectangle",
-//       connectors: [
-//         {
-//           id: "XJ2",
-//           label: "XJ2",
-//         },
-//       ],
-//     },
-//   ],
-//   connections: [
-//     {
-//       color: "yellow",
-//       from: {
-//         componentId: "S8",
-//         connectorId: "XS8",
-//         cavity: "5",
-//       },
-//       to: {
-//         componentId: "SPL1",
-//         connectorId: "XSP_500",
-//         cavity: "L",
-//       },
-//       label: "",
-//     },
-//     {
-//       color: "violet",
-//       from: {
-//         componentId: "S8",
-//         connectorId: "XS8",
-//         cavity: "1",
-//       },
-//       to: {
-//         componentId: "SPL1",
-//         connectorId: "XSP_767",
-//         cavity: "L",
-//       },
-//       label: "",
-//     },
-//     {
-//       color: "violet",
-//       from: {
-//         componentId: "ICC",
-//         connectorId: "XJ2",
-//         cavity: "3",
-//       },
-//       to: {
-//         componentId: "S8",
-//         connectorId: "XS8",
-//         cavity: "1",
-//       },
-//       label: "",
-//     },
-//   ],
-// };
-
 import React, { useState } from "react";
 import NavigationTabs from "./components/NavigationTabs";
 import LeftPanel from "./components/LeftPanel";
 import MainPanel from "./components/MainPanel";
 import { SchematicData } from "./types/SchematicTypes";
-import { ICC, S4, S9, S8, B3,CrankingSystem } from "./components/Schematic/tests";
+import { ICC, S4, S9, S8, B3, CrankingSystem } from "./components/Schematic/tests";
 import LoginPage from "./components/LoginPage";
 
-// Create dashboard items from schematics
-const allSchematics = { B3, S4, S9, S8 ,CrankingSystem};
-const SYSTEM_KEYS = ["CrankingSystem"]; // Add more system keys here as needed
 
+// Create dashboard items from schematics
+const allSchematics = { B3, S4, S9, S8, CrankingSystem };
+const SYSTEM_KEYS = ["CrankingSystem"];
+
+// Create dashboardItems mapping (DO NOT place any hook or selection logic here)
 const dashboardItems = Object.entries(allSchematics).map(([key, schematic]) => {
   const isSystem = SYSTEM_KEYS.includes(key);
   const label = schematic.components[0]?.label || (isSystem ? key : "Unknown Component");
   return {
     code: key,
     name: label,
-    // **Explicitly set type "System" for matches**
-    type: isSystem 
-      ? "System" 
+    type: isSystem
+      ? "System"
       : schematic.components[0]?.category || "Unknown",
     status: "Active" as const,
-    voltage:
-      isSystem 
-        ? "12V" // Or any system-specific voltage logic
-        : key === "B3"
-        ? "12V"
-        : key === "S4"
-        ? "5V"
-        : "12V",
+    voltage: isSystem
+      ? "12V"
+      : key === "B3"
+      ? "12V"
+      : key === "S4"
+      ? "5V"
+      : "12V",
     description: isSystem
       ? `System schematic: ${label}`
       : `Schematic for ${label}`,
@@ -379,10 +48,54 @@ export type DashboardItem = {
   schematicData: SchematicData;
 };
 
+// ===============================
+// Place ALL React state and logic BELOW this line in the main function
+// ===============================
 export default function App() {
-   const [loggedIn,setLoggedIn]=useState(false);  //track login state
+  const [loggedIn, setLoggedIn] = useState(false); // track login state
   const [activeTab, setActiveTab] = useState<string>("components");
   const [selectedItem, setSelectedItem] = useState<DashboardItem | null>(null);
+
+  // Multi-select additions:
+  const [selectedCodes, setSelectedCodes] = useState<string[]>([]);
+  const [mergedSchematic, setMergedSchematic] = useState<SchematicData | null>(null);
+
+ function mergeSchematics(selectedItems: DashboardItem[]): SchematicData {
+  // Flatten all components
+  const allComponents = selectedItems.flatMap(it => it.schematicData.components);
+
+  // Remove duplicates
+  const seen = new Set<string>();
+  const uniqueComponents = allComponents.filter(comp => {
+    if (seen.has(comp.id)) return false;
+    seen.add(comp.id);
+    return true;
+  });
+
+  // Flatten all connections
+  const allConnections = selectedItems.flatMap(it => it.schematicData.connections);
+
+  const connectorIds = new Set(uniqueComponents.flatMap(c => c.connectors?.map(conn => conn.id) || []));
+const mergedConnections = allConnections.filter(
+  conn =>
+    connectorIds.has(conn.from.connectorId) &&
+    connectorIds.has(conn.to.connectorId)
+);
+
+
+  return {
+    components: uniqueComponents,
+    connections: mergedConnections,
+  };
+}
+
+
+  function handleViewSchematic(codes: string[]) {
+    const selectedItems = dashboardItems.filter(it => codes.includes(it.code));
+    const merged = mergeSchematics(selectedItems);
+    setMergedSchematic(merged);
+    setSelectedItem(null); // Optionally deselect single
+  }
 
   // Filter items by category based on active tab
   const filteredItems = dashboardItems.filter(item => {
@@ -391,44 +104,36 @@ export default function App() {
         return ["Sensor", "Switch"].includes(item.type);
       case "controllers":
         return ["Transistor", "Instrument"].includes(item.type);
-    case "systems":
-  return ["System"].includes(item.type);  // Only show true system-category items!
-
-
+      case "systems":
+        return ["System"].includes(item.type);
       default:
         return false;
     }
   });
 
-  if(!loggedIn)
-  {
-    return <LoginPage onLoginSuccess={()=>setLoggedIn(true)}/>
-
+  if (!loggedIn) {
+    return <LoginPage onLoginSuccess={() => setLoggedIn(true)} />;
   }
 
   return (
     <div style={{ height: "100vh", background: "#f8f9fa", display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div style={{ 
-        background: "white", 
+      <div style={{
+        background: "white",
         borderBottom: "1px solid #e9ecef",
         padding: "1x 2px",
         paddingLeft: "24px",
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          
-          <div>
-            <h1 style={{ margin:0, color: "#212529", fontSize: "28px", fontWeight: "700" }}>
-              ASDM
-            </h1>
-            
-          </div>
+          <h1 style={{ margin: 0, color: "#212529", fontSize: "28px", fontWeight: "700" }}>
+            ASDM
+          </h1>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab}  onLogout={()=>setLoggedIn(false)}  />
+      <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} onLogout={() => setLoggedIn(false)} />
 
       {/* Main Content */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
@@ -436,14 +141,30 @@ export default function App() {
         <LeftPanel
           activeTab={activeTab}
           data={filteredItems}
-          onItemSelect={setSelectedItem}
+          onItemSelect={item => {
+            setSelectedItem(item);
+            setMergedSchematic(null); // Reset merge if new single selected
+          }}
           selectedItem={selectedItem}
+          selectedCodes={selectedCodes}
+          setSelectedCodes={setSelectedCodes}
+          onViewSchematic={handleViewSchematic}
         />
 
         {/* Main Panel */}
         <MainPanel
-          selectedItem={selectedItem}
+          // If merged schematic is present, show that; otherwise single selection
+          selectedItem={mergedSchematic ? {
+            code: "MERGED",
+            name: "Merged Schematic",
+            type: "Merged",
+            status: "Active",
+            voltage: "12V",
+            description: "Merged view of selected schematics",
+            schematicData: mergedSchematic,
+          } : selectedItem}
           activeTab={activeTab}
+          isMultipleComponents={!!mergedSchematic}
         />
       </div>
     </div>

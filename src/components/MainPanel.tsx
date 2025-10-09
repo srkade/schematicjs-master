@@ -6,7 +6,9 @@ import { DashboardItem } from "../App";
 interface MainPanelProps {
   selectedItem: DashboardItem | null;
   activeTab: string;
+  isMultipleComponents?: boolean;  // <- new optional prop
 }
+
 
 export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
   if (!selectedItem) {

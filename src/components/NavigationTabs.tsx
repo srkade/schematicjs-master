@@ -64,10 +64,10 @@ export default function NavigationTabs({ activeTab, onTabChange,onLogout }: Navi
       <button
         onClick={onLogout}
         style={{
-        background: "#dc3545",
+        background: "#ea8791ff",
         color: "white",
         border: "none",
-        padding: "8px 16px",
+        padding: "2px 8px",
         borderRadius: "8px",
         cursor: "pointer",
         fontWeight: "bold",
