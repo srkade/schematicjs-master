@@ -491,20 +491,6 @@ export default function Schematic({ data }: { data: SchematicData }) {
     return [undefined, undefined];
   }
 
-  function getContrastingColor(hex: string): string {
-    // Remove '#' if present
-    hex = hex.replace(/^#/, "");
-    // Parse r, g, b
-    let r = parseInt(hex.substring(0, 2), 16);
-    let g = parseInt(hex.substring(2, 4), 16);
-    let b = parseInt(hex.substring(4, 6), 16);
-
-    // Calculate luminance
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-    // If luminance is high, return black; else, return white
-    return luminance > 0.5 ? "#000000" : "#FFFFFF";
-  }
   const buttonStyle = {
     padding: "6px 10px",
     borderRadius: "6px",
