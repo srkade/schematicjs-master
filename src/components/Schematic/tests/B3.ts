@@ -1,4 +1,5 @@
 const B3 = {
+  masterComponents: ["B3"],
   components: [
     {
       id: "B3",

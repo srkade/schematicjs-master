@@ -15,7 +15,7 @@ import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
 
 // Create dashboard items from schematics
-const allSchematics = { B3, S4, S9, S8, CrankingSystem };
+const allSchematics = { B3, S4, S8, S9, ICC };
 const SYSTEM_KEYS = ["CrankingSystem"];
 
 // Create dashboardItems mapping (DO NOT place any hook or selection logic here)
@@ -66,41 +66,6 @@ export default function App() {
     null
   );
 
-  function mergeSchematics(selectedItems: DashboardItem[]): SchematicData {
-    // Flatten all components
-    const allComponents = selectedItems.flatMap(
-      (it) => it.schematicData.components
-    );
-
-    // Remove duplicates
-    const seen = new Set<string>();
-    const uniqueComponents = allComponents.filter((comp) => {
-      if (seen.has(comp.id)) return false;
-      seen.add(comp.id);
-      return true;
-    });
-
-    // Flatten all connections
-    const allConnections = selectedItems.flatMap(
-      (it) => it.schematicData.connections
-    );
-
-    const connectorIds = new Set(
-      uniqueComponents.flatMap(
-        (c) => c.connectors?.map((conn) => conn.id) || []
-      )
-    );
-    const mergedConnections = allConnections.filter(
-      (conn) =>
-        connectorIds.has(conn.from.connectorId) &&
-        connectorIds.has(conn.to.connectorId)
-    );
-
-    return {
-      components: uniqueComponents,
-      connections: mergedConnections,
-    };
-  }
 
   function handleViewSchematic(codes: string[]) {
     const selectedItems = dashboardItems.filter((it) =>

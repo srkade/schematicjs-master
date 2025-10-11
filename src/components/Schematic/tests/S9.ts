@@ -1,6 +1,5 @@
-
-
 const S9 = {
+  masterComponents: ["S9"],
   components: [
     {
       id: "S9",

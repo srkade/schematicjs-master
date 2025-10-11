@@ -1,4 +1,5 @@
 const ICC = {
+  masterComponents: ["ICC"],
   components: [
     {
       id: "ICC",
@@ -243,8 +244,8 @@ const ICC = {
           label: "XS1",
         },
       ],
-    },    
-    
+    },
+
     {
       id: "OPS",
       label: "Oil Pressure Switch",
@@ -571,6 +572,5 @@ const ICC = {
     },
   ],
 };
-
 
 export default ICC;
