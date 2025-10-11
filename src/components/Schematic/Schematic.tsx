@@ -407,9 +407,9 @@ export default function Schematic({ data }: { data: SchematicData }) {
       isMasterComponent
         ? padding
         : padding +
-          componentSize.height +
-          spaceForWires() +
-          componentSize.height;
+        componentSize.height +
+        spaceForWires() +
+        componentSize.height;
     return y;
   }
 
@@ -430,7 +430,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
     let width = getWidthForComponent(component) / (componentCount + 1);
     let index = component.connectors.findIndex((c) => c.id === connector.id);
     let connWidth = getWidthForConnector(connector) / 2;
-    return x + width * (index + 1) - connWidth;
+    const connectorSpacing=30; //change to add spacing between greenbox
+    return x + width * (index + 1) - connWidth+index*connectorSpacing;
   }
 
   function getYForConnector(
@@ -549,21 +550,68 @@ export default function Schematic({ data }: { data: SchematicData }) {
         >
           {data.components.map((comp, componentIndex) => (
             <g key={comp.id}>
-              {comp.shape === "rectangle" && (
-                <rect
-                  x={getXForComponent(comp)}
-                  y={getYForComponent(comp)}
-                  width={getWidthForComponent(comp)}
-                  height={componentSize.height}
-                  fill="lightblue"
-                  stroke="black"
-                  strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                  onClick={() => {
-                    // Your callback logic here
-                    console.log("Rectangle clicked!");
-                  }}
-                />
+              {comp.category?.toLowerCase() === "splice" ? (
+                <g>
+                  {/* Outer green circle */}
+                  <circle
+                    cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
+                    cy={getYForComponent(comp) + componentSize.height / 2 - 40}
+                    r={componentSize.height / 4} // adjust radius as needed
+                    fill="white"
+                    stroke="black"
+                    strokeWidth={2}
+                  />
+                  {/* Inner black dot */}
+                  <circle
+                    cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
+                    cy={getYForComponent(comp) + componentSize.height / 2 - 40}
+                    r={componentSize.height / 6}
+                    fill="black"
+                  />
+                </g>
+              ) : (
+                /* Default rectangle for other components */
+                comp.shape === "rectangle" && (
+                  <rect
+                    x={getXForComponent(comp)}
+                    y={getYForComponent(comp)}
+                    width={getWidthForComponent(comp)}
+                    height={componentSize.height}
+                    fill="lightblue"
+                    stroke="black"
+                    strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                    onClick={() => {
+                      console.log("Rectangle clicked!", comp.id);
+                    }}
+                  />
+                )
               )}
+
+
+              {/* change */}
+              {/* {symbolLibrary[comp.category] && (
+                <g>
+                  {(() => {
+                    const SymbolComponent = symbolLibrary[comp.category];
+                    if (!SymbolComponent) return null;
+
+                    // Calculate  position inside the rectangle
+                    const centerX = getXForComponent(comp) + getWidthForComponent(comp) / 10;
+                    const centerY = getYForComponent(comp) + componentSize.height / 4;
+
+                    return (
+                      <SymbolComponent
+                        x={centerX}    // adjust horizontal offset
+                        y={centerY}    // adjust vertical offset
+                        width={10}          // adjust size to fit rectangle
+                        height={30}
+                        stroke="black"
+                        strokeWidth={1}
+                      />
+                    );
+                  })()}
+                </g>
+              )} */}
               <text
                 ref={(el) => {
                   componentNameRefs.current[comp.id] = el;
@@ -578,15 +626,18 @@ export default function Schematic({ data }: { data: SchematicData }) {
               </text>
               {comp.connectors.map((conn) => (
                 <g key={conn.id}>
-                  <rect
-                    x={getXForConnector(conn, comp)}
-                    y={getYForConnector(conn, comp)}
-                    width={getWidthForConnector(conn)}
-                    height={20}
-                    fill="lightgreen"
-                    stroke="black"
-                    strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                  />
+                  {/* open conditional rendering when the component is not splice */}
+                  {comp.category?.toLowerCase() !== "splice" && (
+                    <rect
+                      x={getXForConnector(conn, comp)}
+                      y={getYForConnector(conn, comp)}
+                      width={getWidthForConnector(conn)}
+                      height={20}
+                      fill="lightgreen"
+                      stroke="black"
+                      strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                    />
+                  )}
                   <text
                     ref={(el) => {
                       connectorNameRefs.current[conn.id] = el;
@@ -642,7 +693,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -659,7 +710,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
               x: fromX,
               y: fromY,
             };
-            
+
 
             var toStoredConnectionPoint =
               connectionPoints[connectionPointKey(wire.to)];
@@ -675,7 +726,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
@@ -711,49 +762,50 @@ export default function Schematic({ data }: { data: SchematicData }) {
               <g>
                 {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
 
-                {isFromTop ? (
+                {/* {isFromTop ? (
                   // top component → trident points UP
-                  <TridentShape
-                    cx={fromX}
-                    cy={fromY - 15}
-                    color={wire.color}
-                    size={10}
-                  />
+                  <TridentShape cx={fromX} cy={fromY - 15} color={wire.color} size={10} />
                 ) : (
                   // bottom component → trident points DOWN
-                  <g
-                    transform={`translate(${fromX}, ${
-                      fromY + 15
-                    }) scale(1, -1)`}
-                  >
+                  <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
                     <TridentShape cx={0} cy={0} color={wire.color} size={10} />
                   </g>
+                )} */}
+                {fromComponent?.category?.toLowerCase() !== "splice" && (
+                  <>
+                    {isFromTop ? (
+                      // top component → trident points UP
+                      <TridentShape cx={fromX} cy={fromY - 15} color={wire.color} size={10} />
+                    ) : (
+                      // bottom component → trident points DOWN
+                      <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
+                        <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                      </g>
+                    )}
+                  </>
                 )}
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
-                    min + offset
-                  } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                    } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
                   markerEnd="url(#arrowhead)"
                 />
                 {/* <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle> */}
-
-                {isToTop ? (
-                  // top component → trident points UP
-                  <TridentShape
-                    cx={toX}
-                    cy={toY - 15}
-                    color={wire.color}
-                    size={10}
-                  />
-                ) : (
-                  // bottom component → trident points DOWN
-                  <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
-                    <TridentShape cx={0} cy={0} color={wire.color} size={10} />
-                  </g>
+                {toComponent?.category?.toLowerCase() !== "splice" && (
+                  <>
+                    {isToTop ? (
+                      // top component → trident points UP
+                      <TridentShape cx={toX} cy={toY - 15} color={wire.color} size={10} />
+                    ) : (
+                      // bottom component → trident points DOWN
+                      <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
+                        <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                      </g>
+                    )}
+                  </>
                 )}
 
                 <text
