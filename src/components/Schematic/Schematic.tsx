@@ -413,9 +413,9 @@ export default function Schematic({ data }: { data: SchematicData }) {
       index < 1
         ? padding
         : padding +
-          componentSize.height +
-          spaceForWires() +
-          componentSize.height;
+        componentSize.height +
+        spaceForWires() +
+        componentSize.height;
     return y;
   }
 
@@ -436,7 +436,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
     let width = getWidthForComponent(component) / (componentCount + 1);
     let index = component.connectors.findIndex((c) => c.id === connector.id);
     let connWidth = getWidthForConnector(connector) / 2;
-    return x + width * (index + 1) - connWidth;
+    const connectorSpacing=30; //change to add spacing between greenbox
+    return x + width * (index + 1) - connWidth+index*connectorSpacing;
   }
 
   function getYForConnector(
@@ -560,7 +561,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
                   {/* Outer green circle */}
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) + componentSize.height / 2-40}
+                    cy={getYForComponent(comp) + componentSize.height / 2 - 40}
                     r={componentSize.height / 4} // adjust radius as needed
                     fill="white"
                     stroke="black"
@@ -569,7 +570,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
                   {/* Inner black dot */}
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) + componentSize.height / 2-40}
+                    cy={getYForComponent(comp) + componentSize.height / 2 - 40}
                     r={componentSize.height / 6}
                     fill="black"
                   />
@@ -702,7 +703,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -719,7 +720,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
               x: fromX,
               y: fromY,
             };
-            
+
 
             var toStoredConnectionPoint =
               connectionPoints[connectionPointKey(wire.to)];
@@ -735,7 +736,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
@@ -769,7 +770,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
             let wireElement;
             wireElement = (
               <g>
-                 {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
+                {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
 
                 {/* {isFromTop ? (
                   // top component → trident points UP
@@ -795,16 +796,15 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 )}
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
-                    min + offset
-                  } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                    } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
                   markerEnd="url(#arrowhead)"
                 />
                 {/* <circle cx={toX} cy={toY} r={5} fill={wire.color}></circle> */}
- {toComponent?.category?.toLowerCase() !== "splice" && (
+                {toComponent?.category?.toLowerCase() !== "splice" && (
                   <>
                     {isToTop ? (
                       // top component → trident points UP
