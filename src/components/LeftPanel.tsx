@@ -23,13 +23,23 @@ export default function LeftPanel({
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Filter items based on search
-  const filteredData = data.filter(
+  // Filter and sort data
+const filteredData = data
+  .filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  )
+  //  Sort: selected components first
+  .sort((a, b) => {
+    const aSelected = selectedCodes.includes(a.code);
+    const bSelected = selectedCodes.includes(b.code);
+    if (aSelected && !bSelected) return -1; // a goes first
+    if (!aSelected && bSelected) return 1; // b goes later
+    return 0;
+  });
+
 
   // Handle item click
   const handleItemClick = (item: DashboardItem) => {
