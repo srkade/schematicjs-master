@@ -1,5 +1,5 @@
-import React from "react";
-
+import React, { useState } from "react";
+import "../Styles/NavigationTabs.css"
 interface NavigationTabsProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -17,18 +17,33 @@ const tabs = [
 ];
 
 export default function NavigationTabs({ activeTab, onTabChange,onLogout }: NavigationTabsProps) {
-  return (
-    <nav style={{
+   const [menuOpen, setMenuOpen] = useState(false);  //change to dispaly hamberger icon at the time of the mobile screen
+
+   return (  
+
+    <div className="nav-tabs-wrapper" style={{ position: "relative" }}>
+      
+       <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+        ☰
+      </div>
+    <nav 
+    className={`nav-tabs ${menuOpen ? "open" : ""}`} //change to toggle when click on icon
+    style={{
       background: "white",
       borderBottom: "1px solid #e9ecef",
       padding: "0 24px",
       display: "flex",
       gap: "2px"
     }}>
+  
       {tabs.map((tab) => (
         <button
           key={tab.id}
-          onClick={() => onTabChange(tab.id)}
+          className={`nav-tab ${activeTab === tab.id ? "active" : ""}`} 
+          onClick={() => {
+             onTabChange(tab.id);
+              setMenuOpen(false); // close menu on mobile after selecting a tab
+            }}
           style={{
             display: "flex",
             alignItems: "center",
@@ -61,23 +76,7 @@ export default function NavigationTabs({ activeTab, onTabChange,onLogout }: Navi
           <span>{tab.label}</span>
         </button>
       ))}
-      <button
-        onClick={onLogout}
-        style={{
-        background: "#ea8791ff",
-        color: "white",
-        border: "none",
-        padding: "2px 8px",
-        borderRadius: "8px",
-        cursor: "pointer",
-        fontWeight: "bold",
-        fontSize: "14px",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        marginLeft: "auto",
-      }}
-       >
-        Logout
-       </button>
     </nav>
+   </div> 
   );
 }
