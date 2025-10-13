@@ -679,6 +679,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           {data.connections.map((wire, i) => {
             const fromConn = wire.from;
             const toConn = wire.to;
+            
             const fromData =
               getComponentConnectorTupleFromConnectionPoint(fromConn);
             const fromComponent = fromData[0];
@@ -754,6 +755,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 ? getYForConnector(to, toComponent!) + 20
                 : getYForConnector(to, toComponent!);
             }
+            
+            
 
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
@@ -815,6 +818,9 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     )}
                   </>
                 )}
+                
+
+
                 <polyline
                   key={i}
                   points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
