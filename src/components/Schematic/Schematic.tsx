@@ -403,13 +403,9 @@ export default function Schematic({ data }: { data: SchematicData }) {
 
   function getYForComponent(component: ComponentType): number {
     let isMasterComponent = data.masterComponents.includes(component.id);
-    const y =
-      isMasterComponent
-        ? padding
-        : padding +
-        componentSize.height +
-        spaceForWires() +
-        componentSize.height;
+    const y = isMasterComponent
+      ? padding
+      : padding + componentSize.height + spaceForWires() + componentSize.height;
     return y;
   }
 
@@ -430,8 +426,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
     let width = getWidthForComponent(component) / (componentCount + 1);
     let index = component.connectors.findIndex((c) => c.id === connector.id);
     let connWidth = getWidthForConnector(connector) / 2;
-    const connectorSpacing=30; //change to add spacing between greenbox
-    return x + width * (index + 1) - connWidth+index*connectorSpacing;
+    const connectorSpacing = 30; //change to add spacing between greenbox
+    return x + width * (index + 1) - connWidth + index * connectorSpacing;
   }
 
   function getYForConnector(
@@ -487,7 +483,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
   }
 
   const buttonStyle = {
-    padding: "6px 10px",
+    padding: "3px 7px",
     borderRadius: "6px",
     border: "1px solid #ccc",
     background: "white",
@@ -542,6 +538,11 @@ export default function Schematic({ data }: { data: SchematicData }) {
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
+            backgroundColor: "#d6d3c3ff",
+            userSelect: dragging ? "none" : "auto", // Disable text selection while dragging
+            WebkitUserSelect: dragging ? "none" : "auto", // For Safari
+            MozUserSelect: dragging ? "none" : "auto", // For Firefox
+            msUserSelect: dragging ? ("none" as any) : ("auto" as any),
           }}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
           onMouseDown={handleMouseDown}
@@ -586,7 +587,6 @@ export default function Schematic({ data }: { data: SchematicData }) {
                   />
                 )
               )}
-
 
               {/* change */}
               {/* {symbolLibrary[comp.category] && (
@@ -675,8 +675,12 @@ export default function Schematic({ data }: { data: SchematicData }) {
 
             if (!from || !to) return null;
 
-            let isFromMasterComponent = data.masterComponents.includes(fromComponent!.id);
-            let isToMasterComponent = data.masterComponents.includes(toComponent!.id);
+            let isFromMasterComponent = data.masterComponents.includes(
+              fromComponent!.id
+            );
+            let isToMasterComponent = data.masterComponents.includes(
+              toComponent!.id
+            );
 
             var fromStoredConnectionPoint =
               connectionPoints[connectionPointKey(wire.from)];
@@ -693,24 +697,22 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                  (connIndex + 1);
+                    (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
 
             var fromY = fromStoredConnectionPoint?.y;
             if (fromY == undefined) {
-              fromY =
-                isFromMasterComponent
-                  ? getYForConnector(from, fromComponent!) + 20
-                  : getYForConnector(from, fromComponent!);
+              fromY = isFromMasterComponent
+                ? getYForConnector(from, fromComponent!) + 20
+                : getYForConnector(from, fromComponent!);
             }
 
             connectionPoints[connectionPointKey(wire.from)] = {
               x: fromX,
               y: fromY,
             };
-
 
             var toStoredConnectionPoint =
               connectionPoints[connectionPointKey(wire.to)];
@@ -726,16 +728,15 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                  (connIndexTo + 1);
+                    (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
             var toY = toStoredConnectionPoint?.y;
             if (toY == undefined) {
-              toY =
-                isToMasterComponent
-                  ? getYForConnector(to, toComponent!) + 20
-                  : getYForConnector(to, toComponent!);
+              toY = isToMasterComponent
+                ? getYForConnector(to, toComponent!) + 20
+                : getYForConnector(to, toComponent!);
             }
 
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
@@ -775,19 +776,34 @@ export default function Schematic({ data }: { data: SchematicData }) {
                   <>
                     {isFromTop ? (
                       // top component → trident points UP
-                      <TridentShape cx={fromX} cy={fromY - 15} color={wire.color} size={10} />
+                      <TridentShape
+                        cx={fromX}
+                        cy={fromY - 15}
+                        color={wire.color}
+                        size={10}
+                      />
                     ) : (
                       // bottom component → trident points DOWN
-                      <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
-                        <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                      <g
+                        transform={`translate(${fromX}, ${
+                          fromY + 15
+                        }) scale(1, -1)`}
+                      >
+                        <TridentShape
+                          cx={0}
+                          cy={0}
+                          color={wire.color}
+                          size={10}
+                        />
                       </g>
                     )}
                   </>
                 )}
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
-                    } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
+                    min + offset
+                  } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
@@ -798,11 +814,25 @@ export default function Schematic({ data }: { data: SchematicData }) {
                   <>
                     {isToTop ? (
                       // top component → trident points UP
-                      <TridentShape cx={toX} cy={toY - 15} color={wire.color} size={10} />
+                      <TridentShape
+                        cx={toX}
+                        cy={toY - 15}
+                        color={wire.color}
+                        size={10}
+                      />
                     ) : (
                       // bottom component → trident points DOWN
-                      <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
-                        <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                      <g
+                        transform={`translate(${toX}, ${
+                          toY + 15
+                        }) scale(1, -1)`}
+                      >
+                        <TridentShape
+                          cx={0}
+                          cy={0}
+                          color={wire.color}
+                          size={10}
+                        />
                       </g>
                     )}
                   </>
