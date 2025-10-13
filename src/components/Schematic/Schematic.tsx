@@ -29,6 +29,7 @@ type ConnectionType = {
   label: string;
 };
 type SchematicData = {
+  masterComponents: string[];
   components: ComponentType[];
   connections: ConnectionType[];
 };
@@ -375,13 +376,6 @@ export default function Schematic({ data }: { data: SchematicData }) {
   }
 
   function getWidthForComponent(component: ComponentType): number {
-    let index = data.components.findIndex((c) => c.id === component.id);
-    if (index == 0) {
-      let last = data.components[data.components.length - 1];
-      let lastX = getXForComponent(last);
-      let lastWidth = getWidthForComponent(last);
-      return lastX + lastWidth;
-    }
     if (component.connectors.length == 1) {
       return componentNameWidths[component.id] + padding;
     } else {
@@ -408,9 +402,9 @@ export default function Schematic({ data }: { data: SchematicData }) {
   }
 
   function getYForComponent(component: ComponentType): number {
-    let index = data.components.findIndex((c) => c.id === component.id);
+    let isMasterComponent = data.masterComponents.includes(component.id);
     const y =
-      index < 1
+      isMasterComponent
         ? padding
         : padding +
         componentSize.height +
@@ -444,9 +438,9 @@ export default function Schematic({ data }: { data: SchematicData }) {
     connector: ConnectorType,
     component: ComponentType
   ): number {
-    let index = data.components.findIndex((c) => c.id === component.id);
+    let isMasterComponent = data.masterComponents.includes(component.id);
     const gap = 1; //to move green box outside
-    return index < 1
+    return isMasterComponent
       ? getYForComponent(component) + componentSize.height + gap
       : getYForComponent(component) - gap - 20;
   }
@@ -681,12 +675,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
 
             if (!from || !to) return null;
 
-            let fromIndex = data.components.findIndex(
-              (c) => c.id === fromComponent!.id
-            );
-            let toIndex = data.components.findIndex(
-              (c) => c.id === toComponent!.id
-            );
+            let isFromMasterComponent = data.masterComponents.includes(fromComponent!.id);
+            let isToMasterComponent = data.masterComponents.includes(toComponent!.id);
 
             var fromStoredConnectionPoint =
               connectionPoints[connectionPointKey(wire.from)];
@@ -711,7 +701,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
             var fromY = fromStoredConnectionPoint?.y;
             if (fromY == undefined) {
               fromY =
-                fromIndex == 0
+                isFromMasterComponent
                   ? getYForConnector(from, fromComponent!) + 20
                   : getYForConnector(from, fromComponent!);
             }
@@ -743,7 +733,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
             var toY = toStoredConnectionPoint?.y;
             if (toY == undefined) {
               toY =
-                toIndex == 0
+                isToMasterComponent
                   ? getYForConnector(to, toComponent!) + 20
                   : getYForConnector(to, toComponent!);
             }
@@ -762,8 +752,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
             // Calculate the positions where the tridents should be
             const fromTridentY = fromY < toY ? midY : fromY - 10; // lift if needed
             const toTridentY = fromY < toY ? toY : midY + 10;
-            let isFromTop = fromIndex === 0;
-            let isToTop = toIndex === 0;
+            let isFromTop = isFromMasterComponent;
+            let isToTop = isToMasterComponent;
             let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
             let toLabelY = isToTop ? toY - 5 : toY + 15;
 

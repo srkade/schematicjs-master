@@ -29,6 +29,7 @@ export type ConnectionType = {
 };
 
 export type SchematicData = {
+  masterComponents: string[];
   components: ComponentType[];
   connections: ConnectionType[];
 };

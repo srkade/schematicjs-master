@@ -1,3 +1,5 @@
+import { SchematicData } from "../types/SchematicTypes";
+
 interface Connector {
   id: string;
   label: string;
@@ -27,16 +29,13 @@ interface Connection {
 }
 
 interface SchematicConfig {
+  masterComponents: string[];
   components: Component[];
   connections: Connection[];
 }
 
-interface MergedResult {
-  components: Component[];
-  connections: Connection[];
-}
 
-export function mergeSchematicConfigs(...configs: SchematicConfig[]): MergedResult {
+export function mergeSchematicConfigs(...configs: SchematicConfig[]): SchematicData {
   const mergedComponents: Component[] = [];
   const mergedConnections: Connection[] = [];
   
@@ -45,6 +44,7 @@ export function mergeSchematicConfigs(...configs: SchematicConfig[]): MergedResu
   
   // Process components from all configs
   const allComponents = configs.flatMap(config => config.components);
+  const mergedMasterComponents = configs.flatMap(config => config.masterComponents);
   
   for (const component of allComponents) {
     if (componentMap.has(component.id)) {
@@ -80,6 +80,7 @@ export function mergeSchematicConfigs(...configs: SchematicConfig[]): MergedResu
   mergedConnections.push(...allConnections);
   
   return {
+    masterComponents: Array.from(new Set(mergedMasterComponents)),
     components: mergedComponents,
     connections: mergedConnections
   };
