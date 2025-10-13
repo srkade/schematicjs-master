@@ -39,7 +39,7 @@ const colors = {
   OG: "orange",
 };
 
-export default function Schematic({ data }: { data: SchematicData }) {
+export default function Schematic({ data, scale = 1 }: { data: SchematicData; scale?: number }) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -430,8 +430,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
     let width = getWidthForComponent(component) / (componentCount + 1);
     let index = component.connectors.findIndex((c) => c.id === connector.id);
     let connWidth = getWidthForConnector(connector) / 2;
-    const connectorSpacing=30; //change to add spacing between greenbox
-    return x + width * (index + 1) - connWidth+index*connectorSpacing;
+    const connectorSpacing = 30; //change to add spacing between greenbox
+    return x + width * (index + 1) - connWidth + index * connectorSpacing;
   }
 
   function getYForConnector(
@@ -453,7 +453,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
 
   function getWidthForConnector(conn: ConnectorType): number {
     let connections = getConnectionsForConnector(conn);
-    let interConnectionSpacing = 35;
+    let interConnectionSpacing = 30;
     if (connections.length > 1) {
       let connectionsBasedWidth =
         (connections.length + 1) * interConnectionSpacing;
@@ -542,11 +542,33 @@ export default function Schematic({ data }: { data: SchematicData }) {
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
+            touchAction: "none"
           }}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
+
+          onTouchStart={(e) => {
+            e.preventDefault();
+            const t = e.touches[0];
+            handleMouseDown({
+              clientX: t.clientX,
+              clientY: t.clientY,
+            } as unknown as React.MouseEvent<SVGSVGElement>);
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            const t = e.touches[0];
+            handleMouseMove({
+              clientX: t.clientX,
+              clientY: t.clientY,
+            } as unknown as React.MouseEvent<SVGSVGElement>);
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            handleMouseUp();
+          }}
         >
           {data.components.map((comp, componentIndex) => (
             <g key={comp.id}>

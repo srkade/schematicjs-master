@@ -1,27 +1,31 @@
 import React from "react";
 import Schematic from "./Schematic/Schematic";
-import {ICC, S4, S9,S8 , B3} from "./Schematic/tests";
+import { ICC, S4, S9, S8, B3 } from "./Schematic/tests";
 import { DashboardItem } from "../App";
+import "../Styles/MainPanel.css"
 
 interface MainPanelProps {
   selectedItem: DashboardItem | null;
   activeTab: string;
   isMultipleComponents?: boolean;  // <- new optional prop
+  isMobile: boolean;
 }
 
 
-export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
+export default function MainPanel({ selectedItem, activeTab,isMobile }: MainPanelProps) {
   if (!selectedItem) {
     return (
-      <div style={{
-        flex: 1,
-        background: "#f8f9fa",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        padding: "40px"
-      }}>
+      <div
+        className="main-panel empty"
+        style={{
+          flex: 1,
+          background: "#f8f9fa",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          padding: "40px"
+        }}>
         <div style={{
           textAlign: "center",
           maxWidth: "400px"
@@ -54,15 +58,17 @@ export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
   }
 
   return (
-    <div style={{
-      flex: 1,
-      background: "#f8f9fa",
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden"
-    }}>
+    <div
+      className={`main-panel-wrapper ${selectedItem ? "has-selection" : ""}`}
+      style={{
+        flex: 1,
+        background: "#f8f9fa",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden"
+      }}>
       {/* Header */}
-      
+
 
       {/* Schematic Viewer */}
       <div style={{
@@ -98,16 +104,21 @@ export default function MainPanel({ selectedItem, activeTab }: MainPanelProps) {
               Schematic Viewer
             </h3>
           </div>
-          
-          <div style={{
-            flex: 1,
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <Schematic data={selectedItem.schematicData} />
-          </div>
+
+          {/* Only show schematic on desktop */}
+          {!isMobile && (
+            <div
+              style={{
+                flex: 1,
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Schematic data={selectedItem.schematicData} />
+            </div>
+          )}
         </div>
       </div>
     </div>
