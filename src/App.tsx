@@ -14,8 +14,20 @@ import {
 import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
 
+
+const wrapSchematic = (schematic: any): any => ({
+  masterComponents: [], // add this line
+  ...schematic
+});
 // Create dashboard items from schematics
-const allSchematics = { B3, S4, S8, S9, ICC };
+const allSchematics = {
+  ICC: wrapSchematic(ICC),
+  B3: wrapSchematic(B3),
+  S4: wrapSchematic(S4),
+  S8: wrapSchematic(S8),
+  S9: wrapSchematic(S9),
+  CrankingSystem: wrapSchematic(CrankingSystem)
+};
 const SYSTEM_KEYS = ["CrankingSystem"];
 
 // Create dashboardItems mapping (DO NOT place any hook or selection logic here)
