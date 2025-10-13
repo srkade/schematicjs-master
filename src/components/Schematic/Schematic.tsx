@@ -538,6 +538,11 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
+            // backgroundColor: "#f0e086ff",
+            userSelect: dragging ? "none" : "auto", // Disable text selection while dragging
+            WebkitUserSelect: dragging ? "none" : "auto", // For Safari
+            MozUserSelect: dragging ? "none" : "auto", // For Firefox
+            msUserSelect: dragging ? ("none" as any) : ("auto" as any),
           }}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
           onMouseDown={handleMouseDown}
@@ -679,7 +684,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           {data.connections.map((wire, i) => {
             const fromConn = wire.from;
             const toConn = wire.to;
-            
+
             const fromData =
               getComponentConnectorTupleFromConnectionPoint(fromConn);
             const fromComponent = fromData[0];
@@ -714,7 +719,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -745,7 +750,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
@@ -755,8 +760,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 ? getYForConnector(to, toComponent!) + 20
                 : getYForConnector(to, toComponent!);
             }
-            
-            
+
+
 
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
@@ -804,9 +809,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${fromX}, ${
-                          fromY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${fromX}, ${fromY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -818,14 +822,13 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     )}
                   </>
                 )}
-                
+
 
 
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
-                    min + offset
-                  } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                    } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
@@ -845,9 +848,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${toX}, ${
-                          toY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${toX}, ${toY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
