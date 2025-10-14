@@ -62,9 +62,10 @@ export default function LeftPanel({
 
   return (
     <div
-      className="left-panel"
+      className="left_panel"
       style={{
         width: "320px",
+        minWidth:"320px",
         background: "white",
         borderRight: "1px solid #e9ecef",
         display: "flex",
