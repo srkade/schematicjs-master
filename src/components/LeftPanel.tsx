@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+
 import { DashboardItem } from "../App";
+
 import "../Styles/LeftPanel.css";
+
 import Schematic from "./Schematic/Schematic";
 
 interface LeftPanelProps {
@@ -24,9 +27,8 @@ export default function LeftPanel({
   onViewSchematic,
   isMobile,
 }: LeftPanelProps) {
-  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isPanelOpen, setIsPanelOpen] = useState(false); // CHANGE: Mobile toggle state
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   // Filter and sort data
   const filteredData = data
@@ -45,11 +47,12 @@ export default function LeftPanel({
       return 0;
     });
 
-  // Handle item click
+  // Handle item click (for regular selection)
   const handleItemClick = (item: DashboardItem) => {
     onItemSelect(item);
     if(isMobile) setIsPanelOpen(false);
   };
+
   // Handle checkbox change
   const handleCheckboxChange = (item: DashboardItem) => {
     const code = item.code;
@@ -71,9 +74,10 @@ export default function LeftPanel({
 
   return (
     <div
-      className="left-panel"
+      className="left_panel"
       style={{
         width: "320px",
+        minWidth:"320px",
         background: "white",
         borderRight: "1px solid #e9ecef",
         display: "flex",
@@ -126,7 +130,7 @@ export default function LeftPanel({
         </div>
       </div>
 
-     {/* Clear Selection Button (only show when items are selected) */}
+      {/* Clear Selection Button (only show when items are selected) */}
       {selectedCodes.length > 0 && (
         <div
           style={{
@@ -155,12 +159,12 @@ export default function LeftPanel({
       {/* Items List */}
       <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
         {filteredData.map((item) => {
-           const isSelected = selectedItem?.code === item.code;
+          const isSelected = selectedItem?.code === item.code;
           const isChecked = selectedCodes.includes(item.code);
 
           return (
             <div key={item.code}>
-               <div
+              <div
                 style={{
                   padding: "16px",
                   marginBottom: "12px",
@@ -189,15 +193,15 @@ export default function LeftPanel({
                   }
                 }}
               >
+                {/* Checkbox */}
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "12px",
+                    position: "absolute",
+                    top: "12px",
+                    left: "12px",
                   }}
                 >
-                 
-                    <input
+                  <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => handleCheckboxChange(item)}
@@ -208,60 +212,61 @@ export default function LeftPanel({
                       cursor: "pointer",
                     }}
                   />
-                  
+                </div>
 
-                  <div style={{ flex: 1 }}>
-                    <div
+                {/* Item Content */}
+                <div
+                  onClick={() => handleItemClick(item)}
+                  style={{
+                    marginLeft: "24px", // Space for checkbox
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <span
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          background: "#e3f2fd",
-                          color: "#1565c0",
-                          padding: "2px 8px",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        {item.code}
-                      </span>
-                    </div>
-
-                    <h3
-                      style={{
-                        margin: "0 0 4px 0",
-                        color: "#212529",
-                        fontSize: "16px",
+                        fontSize: "14px",
                         fontWeight: "600",
+                        color: "#007bff",
+                        background: "#e7f3ff",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        marginRight: "12px",
                       }}
                     >
-                      {item.name}
-                    </h3>
+                      {item.code}
+                    </span>
                   </div>
+
+                  <h4
+                    style={{
+                      margin: "0 0 4px 0",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: "#212529",
+                    }}
+                  >
+                    {item.name}
+                  </h4>
+
+                  
                 </div>
+
+                {/* Mobile Schematic Display */}
+                {isMobile && selectedItem?.code === item.code && selectedItem?.schematicData && (
+                  <div style={{ marginTop: "16px" }}>
+                    <Schematic
+                      data={selectedItem.schematicData}
+                     
+                    />
+                  </div>
+                )}
               </div>
-
-              {/* FIX: Wrapped schematic block correctly (moved inside div, fixed brackets) */}
-              {/* {selectedItem?.code === item.code &&
-                selectedItem?.schematicData && (
-                  <div className="mobile-only" style={{ marginBottom: "12px" }}>
-                    <Schematic data={selectedItem.schematicData} scale={0.6} />
-                  </div>
-                )} */}
-              {isMobile && selectedItem?.code === item.code && selectedItem?.schematicData && (
-                <div style={{ marginBottom: "12px" }}>
-                  <Schematic data={selectedItem.schematicData} scale={0.6} />
-                </div>
-              )}
-
-
-              {/* FIX END */}
             </div>
           );
         })}
@@ -269,12 +274,19 @@ export default function LeftPanel({
         {filteredData.length === 0 && (
           <div
             style={{
-              padding: "40px 20px",
               textAlign: "center",
+              padding: "40px 20px",
               color: "#6c757d",
             }}
           >
-            <p>No {activeTab} found</p>
+            <p style={{ margin: 0, fontSize: "16px" }}>
+              No {activeTab} found
+            </p>
+            {searchTerm && (
+              <p style={{ margin: "8px 0 0 0", fontSize: "14px" }}>
+                Try adjusting your search terms
+              </p>
+            )}
           </div>
         )}
       </div>
