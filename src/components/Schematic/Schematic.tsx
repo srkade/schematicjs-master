@@ -39,7 +39,7 @@ const colors = {
   OG: "orange",
 };
 
-export default function Schematic({ data }: { data: SchematicData }) {
+export default function Schematic({ data, scale = 1 }: { data: SchematicData; scale?: number }) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -456,7 +456,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
 
   function getWidthForConnector(conn: ConnectorType): number {
     let connections = getConnectionsForConnector(conn);
-    let interConnectionSpacing = 35;
+    let interConnectionSpacing = 30;
     if (connections.length > 1) {
       let connectionsBasedWidth =
         (connections.length + 1) * interConnectionSpacing;
@@ -490,7 +490,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
   }
 
   const buttonStyle = {
-    padding: "6px 10px",
+    padding: "3px 7px",
     borderRadius: "6px",
     border: "1px solid #ccc",
     background: "white",
@@ -545,11 +545,37 @@ export default function Schematic({ data }: { data: SchematicData }) {
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
+            // backgroundColor: "#f0e086ff",
+            userSelect: dragging ? "none" : "auto", // Disable text selection while dragging
+            WebkitUserSelect: dragging ? "none" : "auto", // For Safari
+            MozUserSelect: dragging ? "none" : "auto", // For Firefox
+            msUserSelect: dragging ? ("none" as any) : ("auto" as any),
           }}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
+
+          onTouchStart={(e) => {
+            e.preventDefault();
+            const t = e.touches[0];
+            handleMouseDown({
+              clientX: t.clientX,
+              clientY: t.clientY,
+            } as unknown as React.MouseEvent<SVGSVGElement>);
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            const t = e.touches[0];
+            handleMouseMove({
+              clientX: t.clientX,
+              clientY: t.clientY,
+            } as unknown as React.MouseEvent<SVGSVGElement>);
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            handleMouseUp();
+          }}
         >
           {data.components.map((comp, componentIndex) => (
             <g key={comp.id}>
@@ -665,6 +691,7 @@ export default function Schematic({ data }: { data: SchematicData }) {
           {data.connections.map((wire, i) => {
             const fromConn = wire.from;
             const toConn = wire.to;
+
             const fromData =
               getComponentConnectorTupleFromConnectionPoint(fromConn);
             const fromComponent = fromData[0];
@@ -741,6 +768,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
                 : getYForConnector(to, toComponent!);
             }
 
+
+
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
             const offset = getConnectionOffset(
@@ -787,9 +816,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${fromX}, ${
-                          fromY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${fromX}, ${fromY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -801,6 +829,9 @@ export default function Schematic({ data }: { data: SchematicData }) {
                     )}
                   </>
                 )}
+
+
+
                 <polyline
                   key={i}
                   points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
@@ -825,9 +856,8 @@ export default function Schematic({ data }: { data: SchematicData }) {
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${toX}, ${
-                          toY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${toX}, ${toY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}

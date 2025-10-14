@@ -1,5 +1,10 @@
 import React, { useState } from "react";
+
 import { DashboardItem } from "../App";
+
+import "../Styles/LeftPanel.css";
+
+import Schematic from "./Schematic/Schematic";
 
 interface LeftPanelProps {
   activeTab: string;
@@ -9,6 +14,7 @@ interface LeftPanelProps {
   selectedCodes: string[];
   setSelectedCodes: React.Dispatch<React.SetStateAction<string[]>>;
   onViewSchematic: (selectedCodes: string[]) => void;
+  isMobile: boolean;
 }
 
 export default function LeftPanel({
@@ -19,45 +25,59 @@ export default function LeftPanel({
   selectedCodes,
   setSelectedCodes,
   onViewSchematic,
+  isMobile,
 }: LeftPanelProps) {
-  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   // Filter and sort data
-const filteredData = data
-  .filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.type.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-  //  Sort: selected components first
-  .sort((a, b) => {
-    const aSelected = selectedCodes.includes(a.code);
-    const bSelected = selectedCodes.includes(b.code);
-    if (aSelected && !bSelected) return -1; // a goes first
-    if (!aSelected && bSelected) return 1; // b goes later
-    return 0;
-  });
+  const filteredData = data
+    .filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.type.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    // Sort: selected components first
+    .sort((a, b) => {
+      const aSelected = selectedCodes.includes(a.code);
+      const bSelected = selectedCodes.includes(b.code);
+      if (aSelected && !bSelected) return -1;
+      if (!aSelected && bSelected) return 1;
+      return 0;
+    });
 
-
-  // Handle item click
+  // Handle item click (for regular selection)
   const handleItemClick = (item: DashboardItem) => {
-    const code = item.code;
+    onItemSelect(item);
+    if(isMobile) setIsPanelOpen(false);
+  };
 
-    if (isMultiSelectMode) {
-      setSelectedCodes((prev) =>
-        prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-      );
+  // Handle checkbox change
+  const handleCheckboxChange = (item: DashboardItem) => {
+    const code = item.code;
+    let newSelectedCodes: string[];
+    
+    if (selectedCodes.includes(code)) {
+      newSelectedCodes = selectedCodes.filter((c) => c !== code);
     } else {
-      onItemSelect(item);
+      newSelectedCodes = [...selectedCodes, code];
+    }
+    
+    setSelectedCodes(newSelectedCodes);
+    
+    // Automatically view schematic with updated selection
+    if (newSelectedCodes.length > 0) {
+      onViewSchematic(newSelectedCodes);
     }
   };
 
   return (
     <div
+      className="left_panel"
       style={{
         width: "320px",
+        minWidth:"320px",
         background: "white",
         borderRight: "1px solid #e9ecef",
         display: "flex",
@@ -110,58 +130,28 @@ const filteredData = data
         </div>
       </div>
 
-      {/* Multi-Select Toggle */}
-      <div style={{ padding: "8px 16px", borderBottom: "1px solid #e9ecef" }}>
-        <label style={{ fontSize: "14px", color: "#212529" }}>
-          <input
-            type="checkbox"
-            checked={isMultiSelectMode}
-            onChange={(e) => {
-              setIsMultiSelectMode(e.target.checked);
-              if (!e.target.checked) setSelectedCodes([]); // clear when disabling
-            }}
-            style={{ marginRight: "8px" }}
-          />
-          Multi-Select Mode
-        </label>
-      </div>
-
-      {/* Buttons when multi-select active */}
-      {isMultiSelectMode && selectedCodes.length > 0 && (
+      {/* Clear Selection Button (only show when items are selected) */}
+      {selectedCodes.length > 0 && (
         <div
           style={{
             padding: "8px 16px",
-            display: "flex",
-            gap: 8,
             borderBottom: "1px solid #e9ecef",
           }}
         >
           <button
-            onClick={() => onViewSchematic(selectedCodes)}
-            style={{
-              background: "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              padding: "6px 12px",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            View Schematic
-          </button>
-          <button
             onClick={() => setSelectedCodes([])}
             style={{
+              width: "100%",
               background: "#f1f3f5",
               border: "1px solid #ced4da",
               borderRadius: "6px",
-              padding: "6px 12px",
+              padding: "8px 12px",
               cursor: "pointer",
               fontSize: "14px",
+              color: "#495057",
             }}
           >
-            Clear Selection
+            Clear Selection ({selectedCodes.length})
           </button>
         </div>
       )}
@@ -169,93 +159,113 @@ const filteredData = data
       {/* Items List */}
       <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
         {filteredData.map((item) => {
-          const isSelected = isMultiSelectMode
-            ? selectedCodes.includes(item.code)
-            : selectedItem?.code === item.code;
+          const isSelected = selectedItem?.code === item.code;
+          const isChecked = selectedCodes.includes(item.code);
 
           return (
-            <div
-              key={item.code}
-              onClick={() => handleItemClick(item)}
-              style={{
-                padding: "16px",
-                marginBottom: "12px",
-                border: `2px solid ${isSelected ? "#007bff" : "#e9ecef"}`,
-                borderRadius: "12px",
-                background: isSelected ? "#f0f8ff" : "white",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                boxShadow: isSelected
-                  ? "0 4px 12px rgba(0,123,255,0.15)"
-                  : "0 2px 4px rgba(0,0,0,0.1)",
-              }}
-              onMouseEnter={(e) => {
-                if (!isSelected) {
-                  (e.currentTarget as HTMLElement).style.borderColor = "#007bff";
-                  (e.currentTarget as HTMLElement).style.background = "#f8f9fa";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) {
-                  (e.currentTarget as HTMLElement).style.borderColor = "#e9ecef";
-                  (e.currentTarget as HTMLElement).style.background = "white";
-                }
-              }}
-            >
+            <div key={item.code}>
               <div
-                style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}
+                style={{
+                  padding: "16px",
+                  marginBottom: "12px",
+                  border: `2px solid ${isSelected ? "#007bff" : isChecked ? "#28a745" : "#e9ecef"}`,
+                  borderRadius: "12px",
+                  background: isSelected ? "#f0f8ff" : isChecked ? "#f0fff4" : "white",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: isSelected
+                    ? "0 4px 12px rgba(0,123,255,0.15)"
+                    : isChecked
+                    ? "0 4px 12px rgba(40,167,69,0.15)"
+                    : "0 2px 4px rgba(0,0,0,0.1)",
+                  position: "relative",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isSelected && !isChecked) {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#007bff";
+                    (e.currentTarget as HTMLElement).style.background = "#f8f9fa";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected && !isChecked) {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#e9ecef";
+                    (e.currentTarget as HTMLElement).style.background = "white";
+                  }
+                }}
               >
-                {isMultiSelectMode && (
+                {/* Checkbox */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "12px",
+                    left: "12px",
+                  }}
+                >
                   <input
                     type="checkbox"
-                    checked={selectedCodes.includes(item.code)}
-                    onChange={(e) => {
-                      e.stopPropagation(); // prevent triggering parent onClick
-                      const code = item.code;
-                      setSelectedCodes((prev) =>
-                        e.target.checked
-                          ? [...prev, code]
-                          : prev.filter((c) => c !== code)
-                      );
+                    checked={isChecked}
+                    onChange={() => handleCheckboxChange(item)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      cursor: "pointer",
                     }}
-                    style={{ marginTop: "4px" }}
                   />
-                )}
+                </div>
 
-                <div style={{ flex: 1 }}>
+                {/* Item Content */}
+                <div
+                  onClick={() => handleItemClick(item)}
+                  style={{
+                    marginLeft: "24px", // Space for checkbox
+                  }}
+                >
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "6px",
+                      marginBottom: "8px",
                     }}
                   >
                     <span
                       style={{
-                        background: "#e3f2fd",
-                        color: "#1565c0",
-                        padding: "2px 8px",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#007bff",
+                        background: "#e7f3ff",
+                        padding: "4px 8px",
                         borderRadius: "4px",
-                        fontSize: "12px",
-                        fontWeight: "500",
+                        marginRight: "12px",
                       }}
                     >
                       {item.code}
                     </span>
                   </div>
 
-                  <h3
+                  <h4
                     style={{
                       margin: "0 0 4px 0",
-                      color: "#212529",
                       fontSize: "16px",
                       fontWeight: "600",
+                      color: "#212529",
                     }}
                   >
                     {item.name}
-                  </h3>
+                  </h4>
+
+                  
                 </div>
+
+                {/* Mobile Schematic Display */}
+                {isMobile && selectedItem?.code === item.code && selectedItem?.schematicData && (
+                  <div style={{ marginTop: "16px" }}>
+                    <Schematic
+                      data={selectedItem.schematicData}
+                     
+                    />
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -264,12 +274,19 @@ const filteredData = data
         {filteredData.length === 0 && (
           <div
             style={{
-              padding: "40px 20px",
               textAlign: "center",
+              padding: "40px 20px",
               color: "#6c757d",
             }}
           >
-            <p>No {activeTab} found</p>
+            <p style={{ margin: 0, fontSize: "16px" }}>
+              No {activeTab} found
+            </p>
+            {searchTerm && (
+              <p style={{ margin: "8px 0 0 0", fontSize: "14px" }}>
+                Try adjusting your search terms
+              </p>
+            )}
           </div>
         )}
       </div>

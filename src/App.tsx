@@ -1,8 +1,9 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect } from "react";
 import NavigationTabs from "./components/NavigationTabs";
 import LeftPanel from "./components/LeftPanel";
 import MainPanel from "./components/MainPanel";
 import { SchematicData } from "./types/SchematicTypes";
+import Schematic from "./components/Schematic/Schematic";
 import {
   ICC,
   S4,
@@ -14,8 +15,20 @@ import {
 import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
 
+
+const wrapSchematic = (schematic: any): any => ({
+  masterComponents: [], // add this line
+  ...schematic
+});
 // Create dashboard items from schematics
-const allSchematics = { B3, S4, S8, S9, ICC };
+const allSchematics = {
+  ICC: wrapSchematic(ICC),
+  B3: wrapSchematic(B3),
+  S4: wrapSchematic(S4),
+  S8: wrapSchematic(S8),
+  S9: wrapSchematic(S9),
+  CrankingSystem: wrapSchematic(CrankingSystem)
+};
 const SYSTEM_KEYS = ["CrankingSystem"];
 
 // Create dashboardItems mapping (DO NOT place any hook or selection logic here)
@@ -31,10 +44,10 @@ const dashboardItems = Object.entries(allSchematics).map(([key, schematic]) => {
     voltage: isSystem
       ? "12V"
       : key === "B3"
-      ? "12V"
-      : key === "S4"
-      ? "5V"
-      : "12V",
+        ? "12V"
+        : key === "S4"
+          ? "5V"
+          : "12V",
     description: isSystem
       ? `System schematic: ${label}`
       : `Schematic for ${label}`,
@@ -60,12 +73,28 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>("components");
   const [selectedItem, setSelectedItem] = useState<DashboardItem | null>(null);
 
+
   // Multi-select additions:
   const [selectedCodes, setSelectedCodes] = useState<string[]>([]);
   const [mergedSchematic, setMergedSchematic] = useState<SchematicData | null>(
     null
   );
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const nowMobile = window.innerWidth <= 768;
+      setIsMobile(nowMobile);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Run once when component mounts (to ensure correct initial size)
+    handleResize();
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   function handleViewSchematic(codes: string[]) {
     const selectedItems = dashboardItems.filter((it) =>
@@ -150,7 +179,11 @@ export default function App() {
           selectedCodes={selectedCodes}
           setSelectedCodes={setSelectedCodes}
           onViewSchematic={handleViewSchematic}
+          isMobile={isMobile}
         />
+        {!isMobile && selectedItem?.schematicData && (
+          <Schematic data={selectedItem.schematicData} />
+        )}
 
         {/* Main Panel */}
         <MainPanel
@@ -158,18 +191,19 @@ export default function App() {
           selectedItem={
             mergedSchematic
               ? {
-                  code: "MERGED",
-                  name: "Merged Schematic",
-                  type: "Merged",
-                  status: "Active",
-                  voltage: "12V",
-                  description: "Merged view of selected schematics",
-                  schematicData: mergedSchematic,
-                }
+                code: "MERGED",
+                name: "Merged Schematic",
+                type: "Merged",
+                status: "Active",
+                voltage: "12V",
+                description: "Merged view of selected schematics",
+                schematicData: mergedSchematic,
+              }
               : selectedItem
           }
           activeTab={activeTab}
           isMultipleComponents={!!mergedSchematic}
+          isMobile={isMobile}
         />
       </div>
     </div>
