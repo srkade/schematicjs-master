@@ -47,25 +47,33 @@ export default function LeftPanel({
 
   // Handle item click
   const handleItemClick = (item: DashboardItem) => {
+    onItemSelect(item);
+    if(isMobile) setIsPanelOpen(false);
+  };
+  // Handle checkbox change
+  const handleCheckboxChange = (item: DashboardItem) => {
     const code = item.code;
-
-    if (isMultiSelectMode) {
-      setSelectedCodes((prev) =>
-        prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-      );
+    let newSelectedCodes: string[];
+    
+    if (selectedCodes.includes(code)) {
+      newSelectedCodes = selectedCodes.filter((c) => c !== code);
     } else {
-      onItemSelect(item);
-      if(isMobile) setIsPanelOpen(false);
+      newSelectedCodes = [...selectedCodes, code];
+    }
+    
+    setSelectedCodes(newSelectedCodes);
+    
+    // Automatically view schematic with updated selection
+    if (newSelectedCodes.length > 0) {
+      onViewSchematic(newSelectedCodes);
     }
   };
-  
 
   return (
     <div
-      className="left_panel"
+      className="left-panel"
       style={{
         width: "320px",
-        minWidth:"320px",
         background: "white",
         borderRight: "1px solid #e9ecef",
         display: "flex",
@@ -118,58 +126,28 @@ export default function LeftPanel({
         </div>
       </div>
 
-      {/* Multi-Select Toggle */}
-      <div style={{ padding: "8px 16px", borderBottom: "1px solid #e9ecef" }}>
-        <label style={{ fontSize: "14px", color: "#212529" }}>
-          <input
-            type="checkbox"
-            checked={isMultiSelectMode}
-            onChange={(e) => {
-              setIsMultiSelectMode(e.target.checked);
-              if (!e.target.checked) setSelectedCodes([]);
-            }}
-            style={{ marginRight: "8px" }}
-          />
-          Multi-Select Mode
-        </label>
-      </div>
-
-      {/* Buttons when multi-select active */}
-      {isMultiSelectMode && selectedCodes.length > 0 && (
+     {/* Clear Selection Button (only show when items are selected) */}
+      {selectedCodes.length > 0 && (
         <div
           style={{
             padding: "8px 16px",
-            display: "flex",
-            gap: 8,
             borderBottom: "1px solid #e9ecef",
           }}
         >
           <button
-            onClick={() => onViewSchematic(selectedCodes)}
-            style={{
-              background: "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              padding: "6px 12px",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            View Schematic
-          </button>
-          <button
             onClick={() => setSelectedCodes([])}
             style={{
+              width: "100%",
               background: "#f1f3f5",
               border: "1px solid #ced4da",
               borderRadius: "6px",
-              padding: "6px 12px",
+              padding: "8px 12px",
               cursor: "pointer",
               fontSize: "14px",
+              color: "#495057",
             }}
           >
-            Clear Selection
+            Clear Selection ({selectedCodes.length})
           </button>
         </div>
       )}
@@ -177,38 +155,36 @@ export default function LeftPanel({
       {/* Items List */}
       <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
         {filteredData.map((item) => {
-          const isSelected = isMultiSelectMode
-            ? selectedCodes.includes(item.code)
-            : selectedItem?.code === item.code;
+           const isSelected = selectedItem?.code === item.code;
+          const isChecked = selectedCodes.includes(item.code);
 
           return (
             <div key={item.code}>
-              <div
-                onClick={() => handleItemClick(item)}
+               <div
                 style={{
                   padding: "16px",
                   marginBottom: "12px",
-                  border: `2px solid ${isSelected ? "#007bff" : "#e9ecef"}`,
+                  border: `2px solid ${isSelected ? "#007bff" : isChecked ? "#28a745" : "#e9ecef"}`,
                   borderRadius: "12px",
-                  background: isSelected ? "#f0f8ff" : "white",
+                  background: isSelected ? "#f0f8ff" : isChecked ? "#f0fff4" : "white",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                   boxShadow: isSelected
                     ? "0 4px 12px rgba(0,123,255,0.15)"
+                    : isChecked
+                    ? "0 4px 12px rgba(40,167,69,0.15)"
                     : "0 2px 4px rgba(0,0,0,0.1)",
+                  position: "relative",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    (e.currentTarget as HTMLElement).style.borderColor =
-                      "#007bff";
-                    (e.currentTarget as HTMLElement).style.background =
-                      "#f8f9fa";
+                  if (!isSelected && !isChecked) {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#007bff";
+                    (e.currentTarget as HTMLElement).style.background = "#f8f9fa";
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    (e.currentTarget as HTMLElement).style.borderColor =
-                      "#e9ecef";
+                  if (!isSelected && !isChecked) {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#e9ecef";
                     (e.currentTarget as HTMLElement).style.background = "white";
                   }
                 }}
@@ -220,22 +196,19 @@ export default function LeftPanel({
                     gap: "12px",
                   }}
                 >
-                  {isMultiSelectMode && (
+                 
                     <input
-                      type="checkbox"
-                      checked={selectedCodes.includes(item.code)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        const code = item.code;
-                        setSelectedCodes((prev) =>
-                          e.target.checked
-                            ? [...prev, code]
-                            : prev.filter((c) => c !== code)
-                        );
-                      }}
-                      style={{ marginTop: "4px" }}
-                    />
-                  )}
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handleCheckboxChange(item)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      cursor: "pointer",
+                    }}
+                  />
+                  
 
                   <div style={{ flex: 1 }}>
                     <div
