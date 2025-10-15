@@ -1,7 +1,8 @@
 // ...existing code...
 
-import React, { useState, useEffect, useRef, JSX } from "react";
-import TridentShape from "../TridentShape";
+import React, { useState, useEffect, useRef, JSX, useLayoutEffect } from "react";
+import TridentShape from "../symbols/TridentShape";
+import FuseSymbol from "../symbols/FuseSymbol";
 type ComponentType = {
   id: string;
   x?: number;
@@ -51,6 +52,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(
     null
   );
+
 
   // Reset view handler
   const resetView = () => {
@@ -197,44 +199,53 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     componentSize.height +
     padding;
 
-  useEffect(() => {
-    var newWidths: { [id: string]: number } = {};
-    var connWidths: { [id: string]: number } = {};
+  useLayoutEffect(() => {
+    let newWidths: { [id: string]: number } = {};
+    let connWidths: { [id: string]: number } = {};
+    let tempMaxX = 0;
 
-    data.components.forEach((comp, i) => {
+    data.components.forEach((comp) => {
       const ref = componentNameRefs.current[comp.id];
       if (ref) {
         newWidths[comp.id] = ref.getBBox().width;
+      } else {
+        newWidths[comp.id] = 100; // fallback width
       }
-      maxX += newWidths[comp.id];
+      tempMaxX += newWidths[comp.id];
+
       comp.connectors.forEach((conn) => {
         const ref = connectorNameRefs.current[conn.id];
         if (ref) {
           connWidths[conn.id] = ref.getBBox().width;
+        } else {
+          connWidths[conn.id] = 50; // fallback width
         }
       });
     });
-    setConnectorNameWidths(connWidths);
-    setComponentNameWidths(newWidths);
 
-    var connCount: { [id: string]: number } = {};
+    setComponentNameWidths(newWidths);
+    setConnectorNameWidths(connWidths);
+
+    // Connections count
+    const connCount: { [id: string]: number } = {};
     data.connections.forEach((conn) => {
-      const fromConnector = conn.from.connectorId;
-      const toConnector = conn.to.connectorId;
-      connCount[fromConnector] = (connCount[fromConnector] || 0) + 1;
-      connCount[toConnector] = (connCount[toConnector] || 0) + 1;
+      connCount[conn.from.connectorId] = (connCount[conn.from.connectorId] || 0) + 1;
+      connCount[conn.to.connectorId] = (connCount[conn.to.connectorId] || 0) + 1;
     });
     setConnectorConnectionCount(connCount);
 
+    // Set viewBox and fitViewBox AFTER layout measured
     const newBox = {
       x: 0,
       y: 0,
-      w: maxX,
+      w: tempMaxX,
       h: maxY,
     };
+
     setViewBox(newBox);
     setFitViewBox(newBox);
   }, [data]);
+
 
   // Remove wheel gesture
 
@@ -538,7 +549,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
-            // backgroundColor: "#f0e086ff",
+            //  backgroundColor: "rgba(240, 224, 134, 1)",
             userSelect: dragging ? "none" : "auto", // Disable text selection while dragging
             WebkitUserSelect: dragging ? "none" : "auto", // For Safari
             MozUserSelect: dragging ? "none" : "auto", // For Firefox
@@ -634,11 +645,18 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 </g>
               )} */}
               <text
+                vectorEffect="non-scaling-stroke"
                 ref={(el) => {
                   componentNameRefs.current[comp.id] = el;
                 }}
                 x={getXForComponentTitle(comp)}
-                y={getYForComponent(comp) + componentSize.height / 2}
+                // y={getYForComponent(comp) + componentSize.height / 2}
+                y={
+                  getYForComponent(comp) +
+                  (getYForComponent(comp) + componentSize.height / 2 < viewBox.y + viewBox.h / 2
+                    ? -componentSize.height / 2 //+(-0.10)  // above component
+                    : componentSize.height + 30)       // below component
+                }
                 textAnchor="middle"
                 fontSize="12"
                 fill="black"
@@ -657,6 +675,15 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                       fill="lightgreen"
                       stroke="black"
                       strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                    />
+                  )}
+                  {/* load center fuse symbol */}
+                  {comp.label.toLowerCase() === "load center" && (
+                    <FuseSymbol
+                      cx={getXForConnector(conn, comp) + getWidthForConnector(conn) / 2}
+                      cy={getYForConnector(conn, comp) +50} // adjust vertical offset
+                      size={16}
+                      stroke="black"
                     />
                   )}
                   <text
