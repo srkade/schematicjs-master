@@ -58,8 +58,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
   const resetView = () => {
     if (!svgWrapperRef.current) return;
 
-    const svgWidth = svgWrapperRef.current.clientWidth;
-    const svgHeight = svgWrapperRef.current.clientHeight;
+    // const svgWidth = svgWrapperRef.current.clientWidth;
+    // const svgHeight = svgWrapperRef.current.clientHeight;
 
     const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
