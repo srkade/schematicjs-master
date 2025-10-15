@@ -56,24 +56,32 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
   // Reset view handler
   const resetView = () => {
+    if (!svgWrapperRef.current) return;
+
+    const svgWidth = svgWrapperRef.current.clientWidth;
+    const svgHeight = svgWrapperRef.current.clientHeight;
+
     const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
-    const svgWidth = 1500;
-    const svgHeight = 768;
+    let scaleFactor = 1;
 
-    const margin = 0.1;
-    const scaleX = svgWidth / schematicW;
-    const scaleY = svgHeight / schematicH;
-    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
-
-    scaleFactor *= 0.6; // If you want a zoomed-out default
+    if (data.components.length === 1) {
+      // Single component: apply default zoom factor
+      scaleFactor =scaleFactor*0.6; // Zoomed out default
+    } else {
+      // Multiple components: scale to fit SVG
+      const margin = 0.05;
+      const scaleX = svgWidth / schematicW;
+      const scaleY = svgHeight / schematicH;
+      scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+    }
 
     const newW = schematicW * scaleFactor;
     const newH = schematicH * scaleFactor;
 
-    // Center calculation
-    const centerX = fitX + schematicW / 2 - newW / 2;
-    const centerY = fitY + schematicH / 2 - newH / 2;
+    // Center schematic
+    const centerX = fitX + (schematicW - newW) / 2;
+    const centerY = fitY + (schematicH - newH) / 2;
 
     setViewBox({
       x: centerX,
@@ -665,7 +673,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     : componentSize.height + 30)       // below component
                 }
                 textAnchor="middle"
-                fontSize="12"
+                fontSize="20"
                 fill="black"
               >
                 {comp.label + ` (${comp.id})`}
@@ -688,7 +696,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                   {comp.label.toLowerCase() === "load center" && (
                     <FuseSymbol
                       cx={getXForConnector(conn, comp) + getWidthForConnector(conn) / 2}
-                      cy={getYForConnector(conn, comp) +50} // adjust vertical offset
+                      cy={getYForConnector(conn, comp) + 50} // adjust vertical offset
                       size={16}
                       stroke="black"
                     />
@@ -753,7 +761,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -784,7 +792,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
@@ -861,9 +869,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
-                    min + offset
-                  } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                    } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
