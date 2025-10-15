@@ -12,6 +12,7 @@ import {
   B3,
   CrankingSystem,
 } from "./components/Schematic/tests";
+import { DTC_CrankTimeExceeded, DTC_StarterCoolDown } from "./components/Schematic/tests/DTCs"
 import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
 
@@ -27,7 +28,9 @@ const allSchematics = {
   S4: wrapSchematic(S4),
   S8: wrapSchematic(S8),
   S9: wrapSchematic(S9),
-  CrankingSystem: wrapSchematic(CrankingSystem)
+  CrankingSystem: wrapSchematic(CrankingSystem),
+   DTC_CrankTimeExceeded: wrapSchematic(DTC_CrankTimeExceeded),
+  DTC_StarterCoolDown: wrapSchematic(DTC_StarterCoolDown),
 };
 const SYSTEM_KEYS = ["CrankingSystem"];
 
@@ -116,6 +119,8 @@ export default function App() {
         return ["Transistor", "Instrument"].includes(item.type);
       case "systems":
         return ["System"].includes(item.type);
+      case "dtcs":
+        return ["DTC"].includes(item.type);
       default:
         return false;
     }

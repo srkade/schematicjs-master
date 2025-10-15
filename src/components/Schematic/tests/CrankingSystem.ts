@@ -2,7 +2,7 @@ const CrankingSystem = {
   components: [
     {
       id: "Alternator",
-      label: "Alternator",
+      label: "Cranking System",
       category: "Power",
       shape: "rectangle",
       connectors: [
