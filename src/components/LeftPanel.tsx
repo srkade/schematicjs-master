@@ -50,34 +50,37 @@ export default function LeftPanel({
   // Handle item click (for regular selection)
   const handleItemClick = (item: DashboardItem) => {
     onItemSelect(item);
-    if(isMobile) setIsPanelOpen(false);
+    if (isMobile) setIsPanelOpen(false);
   };
 
   // Handle checkbox change
   const handleCheckboxChange = (item: DashboardItem) => {
     const code = item.code;
     let newSelectedCodes: string[];
-    
+
     if (selectedCodes.includes(code)) {
       newSelectedCodes = selectedCodes.filter((c) => c !== code);
     } else {
       newSelectedCodes = [...selectedCodes, code];
     }
-    
+
     setSelectedCodes(newSelectedCodes);
-    
+
     // Automatically view schematic with updated selection
     if (newSelectedCodes.length > 0) {
       onViewSchematic(newSelectedCodes);
     }
   };
 
+  //  CHANGE: decide if checkboxes should be shown for this tab
+  const showCheckbox = activeTab === "components" || activeTab === "dtc";
+
   return (
     <div
       className="left_panel"
       style={{
         width: "320px",
-        minWidth:"320px",
+        minWidth: "320px",
         background: "white",
         borderRight: "1px solid #e9ecef",
         display: "flex",
@@ -131,7 +134,7 @@ export default function LeftPanel({
       </div>
 
       {/* Clear Selection Button (only show when items are selected) */}
-      {selectedCodes.length > 0 && (
+      {selectedCodes.length > 0 && showCheckbox &&(
         <div
           style={{
             padding: "8px 16px",
@@ -176,8 +179,8 @@ export default function LeftPanel({
                   boxShadow: isSelected
                     ? "0 4px 12px rgba(0,123,255,0.15)"
                     : isChecked
-                    ? "0 4px 12px rgba(40,167,69,0.15)"
-                    : "0 2px 4px rgba(0,0,0,0.1)",
+                      ? "0 4px 12px rgba(40,167,69,0.15)"
+                      : "0 2px 4px rgba(0,0,0,0.1)",
                   position: "relative",
                 }}
                 onMouseEnter={(e) => {
@@ -194,13 +197,8 @@ export default function LeftPanel({
                 }}
               >
                 {/* Checkbox */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "12px",
-                    left: "12px",
-                  }}
-                >
+          
+                {showCheckbox && (
                   <input
                     type="checkbox"
                     checked={isChecked}
@@ -210,15 +208,18 @@ export default function LeftPanel({
                       width: "16px",
                       height: "16px",
                       cursor: "pointer",
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
                     }}
                   />
-                </div>
-
+                )}
                 {/* Item Content */}
                 <div
                   onClick={() => handleItemClick(item)}
                   style={{
-                    marginLeft: "24px", // Space for checkbox
+                    marginLeft: showCheckbox ? "24px" : "0px"
+                    // marginLeft: "24px", // Space for checkbox
                   }}
                 >
                   <div
@@ -254,7 +255,7 @@ export default function LeftPanel({
                     {item.name}
                   </h4>
 
-                  
+
                 </div>
 
                 {/* Mobile Schematic Display */}
@@ -262,7 +263,7 @@ export default function LeftPanel({
                   <div style={{ marginTop: "16px" }}>
                     <Schematic
                       data={selectedItem.schematicData}
-                     
+
                     />
                   </div>
                 )}

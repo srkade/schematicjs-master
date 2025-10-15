@@ -56,10 +56,15 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
 
   // Reset view handler
   const resetView = () => {
+    if (!svgWrapperRef.current) return;
+
+    const svgWidth = svgWrapperRef.current.clientWidth;
+    const svgHeight = svgWrapperRef.current.clientHeight;
+
     const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
-    const svgWidth = 2100;
-    const svgHeight =900;
+    const svgWidth = 1500;
+    const svgHeight = 768;
 
     const margin = 0.1;
     const scaleX = svgWidth / schematicW;
@@ -71,9 +76,9 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
     const newW = schematicW * scaleFactor;
     const newH = schematicH * scaleFactor;
 
-    // Center calculation
-    const centerX = fitX + schematicW / 2 - newW / 2;
-    const centerY = fitY + schematicH / 2 - newH / 2;
+    // Center schematic
+    const centerX = fitX + (schematicW - newW) / 2;
+    const centerY = fitY + (schematicH - newH) / 2;
 
     setViewBox({
       x: centerX,
@@ -563,7 +568,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
-            // backgroundColor: "#f0e086ff",
+            //  backgroundColor: "rgba(240, 224, 134, 1)",
             userSelect: dragging ? "none" : "auto", // Disable text selection while dragging
             WebkitUserSelect: dragging ? "none" : "auto", // For Safari
             MozUserSelect: dragging ? "none" : "auto", // For Firefox
@@ -672,7 +677,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                     : componentSize.height + 30)       // below component
                 }
                 textAnchor="middle"
-                fontSize="12"
+                fontSize="20"
                 fill="black"
               >
                 {comp.label + ` (${comp.id})`}
@@ -689,15 +694,6 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                       fill="lightgreen"
                       stroke="black"
                       strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                    />
-                  )}
-                  {/* load center fuse symbol */}
-                  {comp.label.toLowerCase() === "load center" && (
-                    <FuseSymbol
-                      cx={getXForConnector(conn, comp) + getWidthForConnector(conn) / 2}
-                      cy={getYForConnector(conn, comp) +50} // adjust vertical offset
-                      size={16}
-                      stroke="black"
                     />
                   )}
                   <text
