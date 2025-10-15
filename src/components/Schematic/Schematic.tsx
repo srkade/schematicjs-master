@@ -386,16 +386,23 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     }
   }
 
+  function getConnectionsForComponent(component: ComponentType) {
+    return data.connections.filter(
+      (c) => c.from.componentId === component.id || c.to.componentId === component.id
+    );
+  }
+
   function getWidthForComponent(component: ComponentType): number {
-    if (component.connectors.length == 1) {
-      return componentNameWidths[component.id] + padding;
-    } else {
+    const defaultWidth = componentNameWidths[component.id] + padding
+    let connectionCount = getConnectionsForComponent(component).length;
+    if (connectionCount > 1) {
       let width = padding;
       component.connectors.forEach((conn) => {
         width += getWidthForConnector(conn) + padding / 2;
       });
-      return Math.max(width, componentNameWidths[component.id] + padding);
+      return Math.max(width, defaultWidth);
     }
+    return defaultWidth;
   }
 
   function getXForComponent(component: ComponentType): number {
@@ -746,7 +753,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                  (connIndex + 1);
+                    (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -777,7 +784,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                  (connIndexTo + 1);
+                    (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
@@ -854,8 +861,9 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
-                    } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
+                    min + offset
+                  } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}

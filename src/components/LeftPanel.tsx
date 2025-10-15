@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+
 import { DashboardItem } from "../App";
+
 import "../Styles/LeftPanel.css";
+
 import Schematic from "./Schematic/Schematic";
 
 interface LeftPanelProps {
@@ -24,9 +27,8 @@ export default function LeftPanel({
   onViewSchematic,
   isMobile,
 }: LeftPanelProps) {
-  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isPanelOpen, setIsPanelOpen] = useState(false); // CHANGE: Mobile toggle state
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   // Filter and sort data
   const filteredData = data
@@ -45,20 +47,30 @@ export default function LeftPanel({
       return 0;
     });
 
-  // Handle item click
+  // Handle item click (for regular selection)
   const handleItemClick = (item: DashboardItem) => {
-    const code = item.code;
+    onItemSelect(item);
+    if(isMobile) setIsPanelOpen(false);
+  };
 
-    if (isMultiSelectMode) {
-      setSelectedCodes((prev) =>
-        prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-      );
+  // Handle checkbox change
+  const handleCheckboxChange = (item: DashboardItem) => {
+    const code = item.code;
+    let newSelectedCodes: string[];
+    
+    if (selectedCodes.includes(code)) {
+      newSelectedCodes = selectedCodes.filter((c) => c !== code);
     } else {
-      onItemSelect(item);
-      if(isMobile) setIsPanelOpen(false);
+      newSelectedCodes = [...selectedCodes, code];
+    }
+    
+    setSelectedCodes(newSelectedCodes);
+    
+    // Automatically view schematic with updated selection
+    if (newSelectedCodes.length > 0) {
+      onViewSchematic(newSelectedCodes);
     }
   };
-  
 
   return (
     <div
@@ -118,58 +130,28 @@ export default function LeftPanel({
         </div>
       </div>
 
-      {/* Multi-Select Toggle */}
-      <div style={{ padding: "8px 16px", borderBottom: "1px solid #e9ecef" }}>
-        <label style={{ fontSize: "14px", color: "#212529" }}>
-          <input
-            type="checkbox"
-            checked={isMultiSelectMode}
-            onChange={(e) => {
-              setIsMultiSelectMode(e.target.checked);
-              if (!e.target.checked) setSelectedCodes([]);
-            }}
-            style={{ marginRight: "8px" }}
-          />
-          Multi-Select Mode
-        </label>
-      </div>
-
-      {/* Buttons when multi-select active */}
-      {isMultiSelectMode && selectedCodes.length > 0 && (
+      {/* Clear Selection Button (only show when items are selected) */}
+      {selectedCodes.length > 0 && (
         <div
           style={{
             padding: "8px 16px",
-            display: "flex",
-            gap: 8,
             borderBottom: "1px solid #e9ecef",
           }}
         >
           <button
-            onClick={() => onViewSchematic(selectedCodes)}
-            style={{
-              background: "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              padding: "6px 12px",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            View Schematic
-          </button>
-          <button
             onClick={() => setSelectedCodes([])}
             style={{
+              width: "100%",
               background: "#f1f3f5",
               border: "1px solid #ced4da",
               borderRadius: "6px",
-              padding: "6px 12px",
+              padding: "8px 12px",
               cursor: "pointer",
               fontSize: "14px",
+              color: "#495057",
             }}
           >
-            Clear Selection
+            Clear Selection ({selectedCodes.length})
           </button>
         </div>
       )}
@@ -177,118 +159,114 @@ export default function LeftPanel({
       {/* Items List */}
       <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
         {filteredData.map((item) => {
-          const isSelected = isMultiSelectMode
-            ? selectedCodes.includes(item.code)
-            : selectedItem?.code === item.code;
+          const isSelected = selectedItem?.code === item.code;
+          const isChecked = selectedCodes.includes(item.code);
 
           return (
             <div key={item.code}>
               <div
-                onClick={() => handleItemClick(item)}
                 style={{
                   padding: "16px",
                   marginBottom: "12px",
-                  border: `2px solid ${isSelected ? "#007bff" : "#e9ecef"}`,
+                  border: `2px solid ${isSelected ? "#007bff" : isChecked ? "#28a745" : "#e9ecef"}`,
                   borderRadius: "12px",
-                  background: isSelected ? "#f0f8ff" : "white",
+                  background: isSelected ? "#f0f8ff" : isChecked ? "#f0fff4" : "white",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                   boxShadow: isSelected
                     ? "0 4px 12px rgba(0,123,255,0.15)"
+                    : isChecked
+                    ? "0 4px 12px rgba(40,167,69,0.15)"
                     : "0 2px 4px rgba(0,0,0,0.1)",
+                  position: "relative",
                 }}
                 onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    (e.currentTarget as HTMLElement).style.borderColor =
-                      "#007bff";
-                    (e.currentTarget as HTMLElement).style.background =
-                      "#f8f9fa";
+                  if (!isSelected && !isChecked) {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#007bff";
+                    (e.currentTarget as HTMLElement).style.background = "#f8f9fa";
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    (e.currentTarget as HTMLElement).style.borderColor =
-                      "#e9ecef";
+                  if (!isSelected && !isChecked) {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#e9ecef";
                     (e.currentTarget as HTMLElement).style.background = "white";
                   }
                 }}
               >
+                {/* Checkbox */}
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "12px",
+                    position: "absolute",
+                    top: "12px",
+                    left: "12px",
                   }}
                 >
-                  {isMultiSelectMode && (
-                    <input
-                      type="checkbox"
-                      checked={selectedCodes.includes(item.code)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        const code = item.code;
-                        setSelectedCodes((prev) =>
-                          e.target.checked
-                            ? [...prev, code]
-                            : prev.filter((c) => c !== code)
-                        );
-                      }}
-                      style={{ marginTop: "4px" }}
-                    />
-                  )}
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handleCheckboxChange(item)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      cursor: "pointer",
+                    }}
+                  />
+                </div>
 
-                  <div style={{ flex: 1 }}>
-                    <div
+                {/* Item Content */}
+                <div
+                  onClick={() => handleItemClick(item)}
+                  style={{
+                    marginLeft: "24px", // Space for checkbox
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <span
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          background: "#e3f2fd",
-                          color: "#1565c0",
-                          padding: "2px 8px",
-                          borderRadius: "4px",
-                          fontSize: "12px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        {item.code}
-                      </span>
-                    </div>
-
-                    <h3
-                      style={{
-                        margin: "0 0 4px 0",
-                        color: "#212529",
-                        fontSize: "16px",
+                        fontSize: "14px",
                         fontWeight: "600",
+                        color: "#007bff",
+                        background: "#e7f3ff",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        marginRight: "12px",
                       }}
                     >
-                      {item.name}
-                    </h3>
+                      {item.code}
+                    </span>
                   </div>
+
+                  <h4
+                    style={{
+                      margin: "0 0 4px 0",
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      color: "#212529",
+                    }}
+                  >
+                    {item.name}
+                  </h4>
+
+                  
                 </div>
+
+                {/* Mobile Schematic Display */}
+                {isMobile && selectedItem?.code === item.code && selectedItem?.schematicData && (
+                  <div style={{ marginTop: "16px" }}>
+                    <Schematic
+                      data={selectedItem.schematicData}
+                     
+                    />
+                  </div>
+                )}
               </div>
-
-              {/* FIX: Wrapped schematic block correctly (moved inside div, fixed brackets) */}
-              {/* {selectedItem?.code === item.code &&
-                selectedItem?.schematicData && (
-                  <div className="mobile-only" style={{ marginBottom: "12px" }}>
-                    <Schematic data={selectedItem.schematicData} scale={0.6} />
-                  </div>
-                )} */}
-              {isMobile && selectedItem?.code === item.code && selectedItem?.schematicData && (
-                <div style={{ marginBottom: "12px" }}>
-                  <Schematic data={selectedItem.schematicData} scale={0.6} />
-                </div>
-              )}
-
-
-              {/* FIX END */}
             </div>
           );
         })}
@@ -296,12 +274,19 @@ export default function LeftPanel({
         {filteredData.length === 0 && (
           <div
             style={{
-              padding: "40px 20px",
               textAlign: "center",
+              padding: "40px 20px",
               color: "#6c757d",
             }}
           >
-            <p>No {activeTab} found</p>
+            <p style={{ margin: 0, fontSize: "16px" }}>
+              No {activeTab} found
+            </p>
+            {searchTerm && (
+              <p style={{ margin: "8px 0 0 0", fontSize: "14px" }}>
+                Try adjusting your search terms
+              </p>
+            )}
           </div>
         )}
       </div>
