@@ -257,8 +257,6 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
       w: tempMaxX,
       h: maxY,
     };
-
-    setViewBox(newBox);
     setFitViewBox(newBox);
   }, [data]);
 

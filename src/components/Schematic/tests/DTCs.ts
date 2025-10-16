@@ -5,7 +5,7 @@ const DTC_StarterCoolDown = {
      {
       id: "S12",
       label: "Horn switch",
-      category: "Switch",
+      category: "dtc",
       shape: "rectangle",
       connectors: [
         {

@@ -120,7 +120,7 @@ export default function App() {
       case "systems":
         return ["System"].includes(item.type);
       case "dtcs":
-        return ["Horn","Switch"].includes(item.type);
+        return ["dtc"].includes(item.type);
       default:
         return false;
     }
