@@ -40,7 +40,7 @@ const colors = {
   OG: "orange",
 };
 
-export default function Schematic({ data, scale = 5 }: { data: SchematicData; scale?: number }) {
+export default function Schematic({ data, scale = 1 }: { data: SchematicData; scale?: number }) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -58,20 +58,23 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
   const resetView = () => {
     if (!svgWrapperRef.current) return;
 
-    // const svgWidth = svgWrapperRef.current.clientWidth;
-    // const svgHeight = svgWrapperRef.current.clientHeight;
+    const svgWidth = svgWrapperRef.current.clientWidth;
+    const svgHeight = svgWrapperRef.current.clientHeight;
 
     const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
-    const svgWidth = 1500;
-    const svgHeight = 768;
+    let scaleFactor = 1;
 
-    const margin = 0.1;
-    const scaleX = svgWidth / schematicW;
-    const scaleY = svgHeight / schematicH;
-    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
-
-    scaleFactor *= 0.6; // If you want a zoomed-out default
+    if (data.components.length === 1) {
+      // Single component: apply default zoom factor
+      scaleFactor =scaleFactor*0.6; // Zoomed out default
+    } else {
+      // Multiple components: scale to fit SVG
+      const margin = 0.05;
+      const scaleX = svgWidth / schematicW;
+      const scaleY = svgHeight / schematicH;
+      scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+    }
 
     const newW = schematicW * scaleFactor;
     const newH = schematicH * scaleFactor;
@@ -515,30 +518,27 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
 
   return (
     <div
-  ref={svgWrapperRef}
-  style={{
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    height: isFullscreen ? "100vh" : 600,
-    background: "#fafafa",
-    overflow: "hidden",
-    minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
-    maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
-  }}
->
+      ref={svgWrapperRef}
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        width: "100%", // Full width of parent container by default
+        height: isFullscreen ? "100vh" : "600px", // Full viewport height when fullscreen
+        background: "#fafafa", // Or desired background color
+        overflow: "hidden",
+      }}
+    >
       <div
-    style={{
-      position: "relative",
-      padding: 8,
-      zIndex: 10,
-      background: "white",
-      display: "flex",
-      gap: 8,
-      flexShrink: 0, // prevent shrinking if flex adjustments occur
-    }}
-  >
+        style={{
+          position: "relative",
+          padding: 8,
+          zIndex: 10,
+          background: "white",
+          display: "flex",
+          gap: 8,
+        }}
+      >
         <button onClick={resetView} style={buttonStyle}>
           Reset View
         </button>
@@ -555,11 +555,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
           {isFullscreen ? "Default Screen" : "Full Screen"}
         </button>
       </div>
-        <div style={{
-    flex: 1,                  // Dynamically takes all available vertical space
-    overflow: "hidden",
-    display: "flex"
-  }}>
+      <div style={{ flex: 1, overflow: "hidden" }}>
         <svg
           onWheel={handleWheel}
           style={{
@@ -696,6 +692,15 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                       strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
                     />
                   )}
+                  {/* load center fuse symbol */}
+                  {comp.label.toLowerCase() === "load center" && (
+                    <FuseSymbol
+                      cx={getXForConnector(conn, comp) + getWidthForConnector(conn) / 2}
+                      cy={getYForConnector(conn, comp) + 50} // adjust vertical offset
+                      size={16}
+                      stroke="black"
+                    />
+                  )}
                   <text
                     ref={(el) => {
                       connectorNameRefs.current[conn.id] = el;
@@ -721,7 +726,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
           {data.connections.map((wire, i) => {
             const fromConn = wire.from;
             const toConn = wire.to;
-            
+
             const fromData =
               getComponentConnectorTupleFromConnectionPoint(fromConn);
             const fromComponent = fromData[0];
@@ -756,7 +761,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -787,7 +792,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
@@ -797,8 +802,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                 ? getYForConnector(to, toComponent!) + 20
                 : getYForConnector(to, toComponent!);
             }
-            
-            
+
+
 
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
@@ -846,9 +851,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${fromX}, ${
-                          fromY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${fromX}, ${fromY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -860,14 +864,13 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                     )}
                   </>
                 )}
-                
+
 
 
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
-                    min + offset
-                  } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                    } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
@@ -887,9 +890,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${toX}, ${
-                          toY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${toX}, ${toY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
