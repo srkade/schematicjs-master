@@ -40,7 +40,7 @@ const S8 = {
     {
       id: "ICC",
       label: "Instrument Cluster Controller",
-      category: "Instrument",
+      category: "Transistor",
       shape: "rectangle",
       connectors: [
         {

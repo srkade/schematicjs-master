@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useRef, JSX, useLayoutEffect } from "react";
 import TridentShape from "../symbols/TridentShape";
 import FuseSymbol from "../symbols/FuseSymbol";
+import Sensor from "../symbols/Sensor";
+import ElectricalSwitch from "../symbols/ElectricalSwitch";
+import Transistor from "../symbols/Transistor";
 type ComponentType = {
   id: string;
   x?: number;
@@ -53,7 +56,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
     null
   );
 
- const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
+  const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
 
 
   // Reset view handler
@@ -647,11 +650,11 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                       stroke="black"
                       strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
                       onClick={() => {
-                     console.log("Rectangle clicked!", comp.id);
-                    }}
+                        console.log("Rectangle clicked!", comp.id);
+                      }}
                     />
                     {/* Highlight overlay */}
-                    {selectedComponentIds.includes(comp.id)&& (
+                    {selectedComponentIds.includes(comp.id) && (
                       <rect
                         x={getXForComponent(comp) - 15}  //left
                         y={getYForComponent(comp) - 20}   //top
@@ -662,6 +665,39 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                         pointerEvents="none" // so the click still passes through to the base rect
                       />
                     )}
+
+                    {comp.category?.toLowerCase() === "sensor" && (
+                      <Sensor
+                        x={getXForComponent(comp) + 20}                  // left of rectangle
+                        y={getYForComponent(comp) + 15}                  // top of rectangle
+                        width={getWidthForComponent(comp) / 20}          // match rectangle width
+                        height={componentSize.height / 2}               // match rectangle height
+                        stroke="black"
+                        strokeWidth={1}
+                      />
+                    )}
+
+                    {comp.category?.toLowerCase() === "switch" && (
+                      <ElectricalSwitch
+                        x={getXForComponent(comp)}
+                        y={getYForComponent(comp)}
+                        sizeMultiplier={0.5}
+                        stroke="black"
+                        strokeWidth={1}
+                      />
+                    )}
+
+
+                    {comp.category?.toLowerCase() === "transistor" && (
+                      <Transistor
+                        x={getXForComponent(comp) + getWidthForComponent(comp) /12} // horizontal centering
+                        y={getYForComponent(comp) + componentSize.height /2}      // vertical centering
+                        sizeMultiplier={0.3}  // make smaller so it fits neatly inside
+                        stroke="black"
+                        strokeWidth={5}
+                      />
+                    )}
+
                   </g>
                 )
               )}

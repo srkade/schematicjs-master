@@ -28,7 +28,7 @@ const S9 = {
     {
       id: "ICC",
       label: "Instrument Cluster Controller",
-      category: "Instrument",
+      category: "Transistor",
       shape: "rectangle",
       connectors: [
         {
