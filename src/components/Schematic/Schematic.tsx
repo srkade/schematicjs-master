@@ -53,6 +53,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
     null
   );
 
+ const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
+
 
   // Reset view handler
   const resetView = () => {
@@ -515,30 +517,30 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
 
   return (
     <div
-  ref={svgWrapperRef}
-  style={{
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    height: isFullscreen ? "100vh" : 600,
-    background: "#fafafa",
-    overflow: "hidden",
-    minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
-    maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
-  }}
->
+      ref={svgWrapperRef}
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: isFullscreen ? "100vh" : 600,
+        background: "#fafafa",
+        overflow: "hidden",
+        minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
+        maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
+      }}
+    >
       <div
-    style={{
-      position: "relative",
-      padding: 8,
-      zIndex: 10,
-      background: "white",
-      display: "flex",
-      gap: 8,
-      flexShrink: 0, // prevent shrinking if flex adjustments occur
-    }}
-  >
+        style={{
+          position: "relative",
+          padding: 8,
+          zIndex: 10,
+          background: "white",
+          display: "flex",
+          gap: 8,
+          flexShrink: 0, // prevent shrinking if flex adjustments occur
+        }}
+      >
         <button onClick={resetView} style={buttonStyle}>
           Reset View
         </button>
@@ -555,11 +557,11 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
           {isFullscreen ? "Default Screen" : "Full Screen"}
         </button>
       </div>
-        <div style={{
-    flex: 1,                  // Dynamically takes all available vertical space
-    overflow: "hidden",
-    display: "flex"
-  }}>
+      <div style={{
+        flex: 1,                  // Dynamically takes all available vertical space
+        overflow: "hidden",
+        display: "flex"
+      }}>
         <svg
           onWheel={handleWheel}
           style={{
@@ -624,18 +626,43 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
               ) : (
                 /* Default rectangle for other components */
                 comp.shape === "rectangle" && (
-                  <rect
-                    x={getXForComponent(comp)}
-                    y={getYForComponent(comp)}
-                    width={getWidthForComponent(comp)}
-                    height={componentSize.height}
-                    fill="lightblue"
-                    stroke="black"
-                    strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                    onClick={() => {
-                      console.log("Rectangle clicked!", comp.id);
+                  <g onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedComponentIds((prev) => {
+                      if (prev.includes(comp.id)) {
+                        return prev.filter((id) => id !== comp.id); // deselect
+                      } else {
+                        return [...prev, comp.id]; // select
+                      }
+                    });
+                  }}
+                  >
+                    {/* Base blue component */}
+                    <rect
+                      x={getXForComponent(comp)}
+                      y={getYForComponent(comp)}
+                      width={getWidthForComponent(comp)}
+                      height={componentSize.height}
+                      fill="lightblue"
+                      stroke="black"
+                      strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                      onClick={() => {
+                     console.log("Rectangle clicked!", comp.id);
                     }}
-                  />
+                    />
+                    {/* Highlight overlay */}
+                    {selectedComponentIds.includes(comp.id)&& (
+                      <rect
+                        x={getXForComponent(comp) - 15}  //left
+                        y={getYForComponent(comp) - 20}   //top
+                        width={getWidthForComponent(comp) + 35} //right
+                        height={componentSize.height + 35}//bottom
+                        fill="yellow"
+                        opacity={0.3}
+                        pointerEvents="none" // so the click still passes through to the base rect
+                      />
+                    )}
+                  </g>
                 )
               )}
 
@@ -721,7 +748,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
           {data.connections.map((wire, i) => {
             const fromConn = wire.from;
             const toConn = wire.to;
-            
+
             const fromData =
               getComponentConnectorTupleFromConnectionPoint(fromConn);
             const fromComponent = fromData[0];
@@ -756,7 +783,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -787,7 +814,7 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX = toConnectorX + toConnectorOffset;
             }
@@ -797,8 +824,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                 ? getYForConnector(to, toComponent!) + 20
                 : getYForConnector(to, toComponent!);
             }
-            
-            
+
+
 
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
@@ -846,9 +873,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${fromX}, ${
-                          fromY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${fromX}, ${fromY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -860,14 +886,13 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                     )}
                   </>
                 )}
-                
+
 
 
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${
-                    min + offset
-                  } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                    } ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
@@ -887,9 +912,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${toX}, ${
-                          toY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${toX}, ${toY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
