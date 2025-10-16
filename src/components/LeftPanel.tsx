@@ -73,8 +73,7 @@ export default function LeftPanel({
   };
 
   //  CHANGE: decide if checkboxes should be shown for this tab
-  const showCheckbox = activeTab === "components" || activeTab === "dtc";
-
+  const showCheckbox = ["components", "dtcs"].includes(activeTab.toLowerCase());
   return (
     <div
       className="left_panel"
@@ -134,7 +133,7 @@ export default function LeftPanel({
       </div>
 
       {/* Clear Selection Button (only show when items are selected) */}
-      {selectedCodes.length > 0 && showCheckbox &&(
+      {selectedCodes.length > 0 && showCheckbox && (
         <div
           style={{
             padding: "8px 16px",
@@ -154,7 +153,8 @@ export default function LeftPanel({
               color: "#495057",
             }}
           >
-            Clear Selection ({selectedCodes.length})
+            Clear Selection 
+            {/* ({selectedCodes.length}) */}
           </button>
         </div>
       )}
@@ -197,7 +197,7 @@ export default function LeftPanel({
                 }}
               >
                 {/* Checkbox */}
-          
+
                 {showCheckbox && (
                   <input
                     type="checkbox"
