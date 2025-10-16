@@ -43,7 +43,7 @@ const colors = {
   OG: "orange",
 };
 
-export default function Schematic({ data, scale = 5 }: { data: SchematicData; scale?: number }) {
+export default function Schematic({ data, scale = 1 }: { data: SchematicData; scale?: number }) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -64,20 +64,23 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
   const resetView = () => {
     if (!svgWrapperRef.current) return;
 
-    // const svgWidth = svgWrapperRef.current.clientWidth;
-    // const svgHeight = svgWrapperRef.current.clientHeight;
+    const svgWidth = svgWrapperRef.current.clientWidth;
+    const svgHeight = svgWrapperRef.current.clientHeight;
 
     const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
-    const svgWidth = 1500;
-    const svgHeight = 768;
+    let scaleFactor = 1;
 
-    const margin = 0.1;
-    const scaleX = svgWidth / schematicW;
-    const scaleY = svgHeight / schematicH;
-    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
-
-    scaleFactor *= 0.6; // If you want a zoomed-out default
+    if (data.components.length === 1) {
+      // Single component: apply default zoom factor
+      scaleFactor =scaleFactor*0.6; // Zoomed out default
+    } else {
+      // Multiple components: scale to fit SVG
+      const margin = 0.05;
+      const scaleX = svgWidth / schematicW;
+      const scaleY = svgHeight / schematicH;
+      scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+    }
 
     const newW = schematicW * scaleFactor;
     const newH = schematicH * scaleFactor;
@@ -523,30 +526,30 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
 
   return (
     <div
-      ref={svgWrapperRef}
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        height: isFullscreen ? "100vh" : 600,
-        background: "#fafafa",
-        overflow: "hidden",
-        minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
-        maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
-      }}
-    >
+  ref={svgWrapperRef}
+  style={{
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    height: isFullscreen ? "100vh" : 600,
+    background: "#fafafa",
+    overflow: "hidden",
+    minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
+    maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
+  }}
+>
       <div
-        style={{
-          position: "relative",
-          padding: 8,
-          zIndex: 10,
-          background: "white",
-          display: "flex",
-          gap: 8,
-          flexShrink: 0, // prevent shrinking if flex adjustments occur
-        }}
-      >
+    style={{
+      position: "relative",
+      padding: 8,
+      zIndex: 10,
+      background: "white",
+      display: "flex",
+      gap: 8,
+      flexShrink: 0, // prevent shrinking if flex adjustments occur
+    }}
+  >
         <button onClick={resetView} style={buttonStyle}>
           Reset View
         </button>
@@ -563,11 +566,11 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
           {isFullscreen ? "Default Screen" : "Full Screen"}
         </button>
       </div>
-      <div style={{
-        flex: 1,                  // Dynamically takes all available vertical space
-        overflow: "hidden",
-        display: "flex"
-      }}>
+        <div style={{
+    flex: 1,                  // Dynamically takes all available vertical space
+    overflow: "hidden",
+    display: "flex"
+  }}>
         <svg
           onWheel={handleWheel}
           style={{
@@ -780,6 +783,15 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
                       fill="lightgreen"
                       stroke="black"
                       strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                    />
+                  )}
+                  {/* load center fuse symbol */}
+                  {comp.label.toLowerCase() === "load center" && (
+                    <FuseSymbol
+                      cx={getXForConnector(conn, comp) + getWidthForConnector(conn) / 2}
+                      cy={getYForConnector(conn, comp) + 50} // adjust vertical offset
+                      size={16}
+                      stroke="black"
                     />
                   )}
                   <text
