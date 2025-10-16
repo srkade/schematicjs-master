@@ -53,6 +53,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     null
   );
 
+ const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
+
 
   // Reset view handler
   const resetView = () => {
@@ -518,27 +520,30 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
   return (
     <div
-      ref={svgWrapperRef}
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        width: "100%", // Full width of parent container by default
-        height: isFullscreen ? "100vh" : "600px", // Full viewport height when fullscreen
-        background: "#fafafa", // Or desired background color
-        overflow: "hidden",
-      }}
-    >
+  ref={svgWrapperRef}
+  style={{
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    height: isFullscreen ? "100vh" : 600,
+    background: "#fafafa",
+    overflow: "hidden",
+    minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
+    maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
+  }}
+>
       <div
-        style={{
-          position: "relative",
-          padding: 8,
-          zIndex: 10,
-          background: "white",
-          display: "flex",
-          gap: 8,
-        }}
-      >
+    style={{
+      position: "relative",
+      padding: 8,
+      zIndex: 10,
+      background: "white",
+      display: "flex",
+      gap: 8,
+      flexShrink: 0, // prevent shrinking if flex adjustments occur
+    }}
+  >
         <button onClick={resetView} style={buttonStyle}>
           Reset View
         </button>
@@ -555,7 +560,11 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           {isFullscreen ? "Default Screen" : "Full Screen"}
         </button>
       </div>
-      <div style={{ flex: 1, overflow: "hidden" }}>
+        <div style={{
+    flex: 1,                  // Dynamically takes all available vertical space
+    overflow: "hidden",
+    display: "flex"
+  }}>
         <svg
           onWheel={handleWheel}
           style={{
@@ -620,18 +629,43 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
               ) : (
                 /* Default rectangle for other components */
                 comp.shape === "rectangle" && (
-                  <rect
-                    x={getXForComponent(comp)}
-                    y={getYForComponent(comp)}
-                    width={getWidthForComponent(comp)}
-                    height={componentSize.height}
-                    fill="lightblue"
-                    stroke="black"
-                    strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                    onClick={() => {
-                      console.log("Rectangle clicked!", comp.id);
+                  <g onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedComponentIds((prev) => {
+                      if (prev.includes(comp.id)) {
+                        return prev.filter((id) => id !== comp.id); // deselect
+                      } else {
+                        return [...prev, comp.id]; // select
+                      }
+                    });
+                  }}
+                  >
+                    {/* Base blue component */}
+                    <rect
+                      x={getXForComponent(comp)}
+                      y={getYForComponent(comp)}
+                      width={getWidthForComponent(comp)}
+                      height={componentSize.height}
+                      fill="lightblue"
+                      stroke="black"
+                      strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                      onClick={() => {
+                     console.log("Rectangle clicked!", comp.id);
                     }}
-                  />
+                    />
+                    {/* Highlight overlay */}
+                    {selectedComponentIds.includes(comp.id)&& (
+                      <rect
+                        x={getXForComponent(comp) - 15}  //left
+                        y={getYForComponent(comp) - 20}   //top
+                        width={getWidthForComponent(comp) + 35} //right
+                        height={componentSize.height + 35}//bottom
+                        fill="yellow"
+                        opacity={0.3}
+                        pointerEvents="none" // so the click still passes through to the base rect
+                      />
+                    )}
+                  </g>
                 )
               )}
 
