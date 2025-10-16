@@ -57,7 +57,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
   );
 
   const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
-
+  const [popupComponent, setPopupComponent] = useState<ComponentType | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Reset view handler
   const resetView = () => {
@@ -190,6 +191,8 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
 
   const componentNameRefs = useRef<{ [id: string]: SVGTextElement | null }>({});
   const connectorNameRefs = useRef<{ [id: string]: SVGTextElement | null }>({});
+  const clickTimeout = useRef<number | null>(null);
+
   const [connectorConnectionCount, setConnectorConnectionCount] = useState<{
     [id: string]: number;
   }>({});
@@ -629,16 +632,34 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
               ) : (
                 /* Default rectangle for other components */
                 comp.shape === "rectangle" && (
-                  <g onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedComponentIds((prev) => {
-                      if (prev.includes(comp.id)) {
-                        return prev.filter((id) => id !== comp.id); // deselect
-                      } else {
-                        return [...prev, comp.id]; // select
+                  <g
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (clickTimeout.current) {
+                        clearTimeout(clickTimeout.current);
+                        clickTimeout.current = null;
                       }
-                    });
-                  }}
+                      clickTimeout.current = window.setTimeout(() => {
+                        setPopupComponent(comp);
+                        setPopupPosition({
+                          x: getXForComponent(comp) + getWidthForComponent(comp) + 900,
+                          y: getYForComponent(comp) + componentSize.height +100,
+                        });
+                        clickTimeout.current = null;
+                      }, 250);
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      if (clickTimeout.current) {
+                        clearTimeout(clickTimeout.current);
+                        clickTimeout.current = null;
+                      }
+                      setSelectedComponentIds((prev) =>
+                        prev.includes(comp.id)
+                          ? prev.filter((id) => id !== comp.id)
+                          : [...prev, comp.id]
+                      );
+                    }}
                   >
                     {/* Base blue component */}
                     <rect
@@ -690,13 +711,15 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
 
                     {comp.category?.toLowerCase() === "transistor" && (
                       <Transistor
-                        x={getXForComponent(comp) + getWidthForComponent(comp) /12} // horizontal centering
-                        y={getYForComponent(comp) + componentSize.height /2}      // vertical centering
+                        x={getXForComponent(comp) + getWidthForComponent(comp) / 12} // horizontal centering
+                        y={getYForComponent(comp) + componentSize.height / 2}      // vertical centering
                         sizeMultiplier={0.3}  // make smaller so it fits neatly inside
                         stroke="black"
                         strokeWidth={5}
                       />
                     )}
+
+
 
                   </g>
                 )
@@ -989,6 +1012,29 @@ export default function Schematic({ data, scale = 5 }: { data: SchematicData; sc
             return <g key={i}>{wireElement}</g>;
           })}
         </svg>
+        {popupComponent && (
+          <div
+            style={{
+              position: "absolute",
+              left: popupPosition.x,
+              top: popupPosition.y,
+              transform: "translate(0%, -30%)",
+              background: "white",
+              border: "1px solid black",
+              padding: "8px",
+              borderRadius: "6px",
+              zIndex: 1000,
+            }}
+          >
+            <h4>{popupComponent.label}</h4>
+            <p>
+              Category: {popupComponent.category}<br />
+              Connectors: {popupComponent.connectors.map(c => c.label).join(", ")}
+            </p>
+            <button onClick={() => setPopupComponent(null)}>Close</button>
+          </div>
+        )}
+
       </div>
     </div>
   );
