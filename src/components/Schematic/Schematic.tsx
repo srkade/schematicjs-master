@@ -1060,7 +1060,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 )}
 
                 <text
-                  x={fromX + 25}
+                  x={fromX + 10}
                   y={fromLabelY}
                   textAnchor="start"
                   fontSize="10"
@@ -1071,7 +1071,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                   {wire.from.cavity}
                 </text>
                 <text
-                  x={toX + 25}
+                  x={toX + 10}
                   y={toLabelY}
                   textAnchor="start"
                   fontSize="10"
