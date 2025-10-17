@@ -40,7 +40,7 @@ const S9 = {
     {
       id: "LC",
       label: "Load Center",
-      category: "Instrument",
+      category: "Transformer",
       shape: "rectangle",
       connectors: [
         {

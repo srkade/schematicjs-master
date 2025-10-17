@@ -6,6 +6,7 @@ import FuseSymbol from "../symbols/FuseSymbol";
 import Sensor from "../symbols/Sensor";
 import ElectricalSwitch from "../symbols/ElectricalSwitch";
 import Transistor from "../symbols/Transistor";
+import Transformer from "../symbols/Transformer";
 type ComponentType = {
   id: string;
   x?: number;
@@ -73,7 +74,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
     if (data.components.length === 1) {
       // Single component: apply default zoom factor
-      scaleFactor =scaleFactor*0.6; // Zoomed out default
+      scaleFactor = scaleFactor * 0.6; // Zoomed out default
     } else {
       // Multiple components: scale to fit SVG
       const margin = 0.05;
@@ -524,30 +525,30 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
   return (
     <div
-  ref={svgWrapperRef}
-  style={{
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    height: isFullscreen ? "100vh" : 600,
-    background: "#fafafa",
-    overflow: "hidden",
-    minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
-    maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
-  }}
->
+      ref={svgWrapperRef}
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: isFullscreen ? "100vh" : 600,
+        background: "#fafafa",
+        overflow: "hidden",
+        minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
+        maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
+      }}
+    >
       <div
-    style={{
-      position: "relative",
-      padding: 8,
-      zIndex: 10,
-      background: "white",
-      display: "flex",
-      gap: 8,
-      flexShrink: 0, // prevent shrinking if flex adjustments occur
-    }}
-  >
+        style={{
+          position: "relative",
+          padding: 8,
+          zIndex: 10,
+          background: "white",
+          display: "flex",
+          gap: 8,
+          flexShrink: 0, // prevent shrinking if flex adjustments occur
+        }}
+      >
         <button onClick={resetView} style={buttonStyle}>
           Reset View
         </button>
@@ -564,11 +565,11 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           {isFullscreen ? "Default Screen" : "Full Screen"}
         </button>
       </div>
-        <div style={{
-    flex: 1,                  // Dynamically takes all available vertical space
-    overflow: "hidden",
-    display: "flex"
-  }}>
+      <div style={{
+        flex: 1,                  // Dynamically takes all available vertical space
+        overflow: "hidden",
+        display: "flex"
+      }}>
         <svg
           onWheel={handleWheel}
           style={{
@@ -644,7 +645,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                         setPopupComponent(comp);
                         setPopupPosition({
                           x: getXForComponent(comp) + getWidthForComponent(comp) + 900,
-                          y: getYForComponent(comp) + componentSize.height +100,
+                          y: getYForComponent(comp) + componentSize.height + 100,
                         });
                         clickTimeout.current = null;
                       }, 250);
@@ -719,8 +720,16 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                         strokeWidth={5}
                       />
                     )}
-
-
+                    {comp.category?.toLowerCase() === "transformer" && (
+                      <Transformer
+                        x={getXForComponent(comp) + getWidthForComponent(comp) / 16} // horizontal centering
+                        y={getYForComponent(comp) + componentSize.height / 6}        // vertical centering
+                        sizeMultiplier={0.2}                                         // scale it down to fit
+                        stroke="black"
+                        strokeWidth={1}
+                        fill="black"
+                      />
+                    )}
 
                   </g>
                 )
@@ -784,14 +793,14 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     />
                   )}
                   {/* load center fuse symbol */}
-                  {comp.label.toLowerCase() === "load center" && (
+                  {/* {comp.label.toLowerCase() === "load center" && (
                     <FuseSymbol
                       cx={getXForConnector(conn, comp) + getWidthForConnector(conn) / 2}
                       cy={getYForConnector(conn, comp) + 50} // adjust vertical offset
                       size={16}
                       stroke="black"
                     />
-                  )}
+                  )} */}
                   <text
                     ref={(el) => {
                       connectorNameRefs.current[conn.id] = el;
@@ -1021,6 +1030,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             );
             return <g key={i}>{wireElement}</g>;
           })}
+
         </svg>
         {popupComponent && (
           <div
