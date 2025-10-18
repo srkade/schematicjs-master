@@ -1,59 +1,65 @@
 const S8 = {
   masterComponents: ["S8"],
   components: [
-    {
-      id: "S8",
-      label: "Brake switch",
-      category: "Switch",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XS8",
-          label: "XS8",
-        },
-      ],
-      
-    },
-    {
-      id: "SPL1",
-      label: "Splice",
-      category: "Splice",
-      shape: "circle",
-      connectors: [
-        {
-          id: "XSP_500",
-          label: "XSP_500",
-        },
-      ],
-      
-    },
-    {
-      id: "SPL2",
-      label: "Splice",
-      category: "Splice",
-      shape: "circle",
-      connectors: [
-        {
-          id: "XSP_767",
-          label: "XSP_767",
-        },
-      ],
-      
-    },
-    {
-      id: "ICC",
-      label: "Instrument Cluster Controller",
-      category: "Transistor",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XJ2",
-          label: "XJ2",
-        },
-      ],
-     
-    },
-  ],
+  {
+    id: "S8",
+    label: "Brake switch",
+    category: "Switch",
+    shape: "rectangle",
+    connectors: [
+      {
+        id: "XS8",
+        label: "XS8",
+      },
+    ],
+    engineering_component_name: "Brake switch",
+    engineering_manufacturer: "Bosch",
+    primary_part_number: "57M14183",
+    harness_name: "MAIN WIRING HARNESS (W1)",
+    component_type: "Component",
+    connector_type: "Direct",
+    remove: false,
+    manufacturer: "Molex",
+    connector_part_number: "57M14183",
+    gender: "Female"
+  },
+  {
+    id: "SPL1",
+    label: "Splice",
+    category: "Splice",
+    shape: "circle",
+    connectors: [
+      {
+        id: "XSP_500",
+        label: "XSP_500",
+      },
+    ],
+  },
+  {
+    id: "SPL2",
+    label: "Splice",
+    category: "Splice",
+    shape: "circle",
+    connectors: [
+      {
+        id: "XSP_767",
+        label: "XSP_767",
+      },
+    ],
+  },
+  {
+    id: "ICC",
+    label: "Instrument Cluster Controller",
+    category: "Transistor",
+    shape: "rectangle",
+    connectors: [
+      {
+        id: "XJ2",
+        label: "XJ2",
+      },
+    ],
+  },
+],
   connections: [
     {
       color: "yellow",

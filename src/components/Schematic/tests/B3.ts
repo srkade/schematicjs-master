@@ -26,7 +26,7 @@ const B3 = {
     {
       id: "ICC",
       label: "Instrument Cluster Controller",
-      category: "Transistor",
+      category: "Transformar",
       shape: "rectangle",
       connectors: [
         {
