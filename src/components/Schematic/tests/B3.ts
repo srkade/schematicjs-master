@@ -1,6 +1,6 @@
 const B3 = {
   masterComponents: ["B3"],
-  components: [
+   components: [
     {
       id: "B3",
       label: "Coolant Temperature sensor",
@@ -9,37 +9,19 @@ const B3 = {
       connectors: [
         {
           id: "XB3",
-          label: "XB3",
-        },
-      ],
-      // Extra wire details for popup when clicking XB3
-      wireDetails310A: {
-        circuitNumber: "310A",
-        wireSize: 0.8,
-        wireColor: "OG",
-        wireLength: 960,
-        wireType: "Regular",
-        twistId: "",        // No value given above, so empty string
-        shieldId: "",       // No value given above, so empty string
-        wireOption: "",
-        mark: "",
-        from: {
-          connectorNumber: "XB3",
-          devName: "Coolant Temperature Sensor",
-          connPartNumber: "57M10968",
-          termPartNo: "57M10968",
-          sealPartNo: "",
-          cavity: "1"
-        },
-        to: {
-          connectorNumber: "XJ1",
-          devName: "Instrument Cluster Controller",
-          connPartNumber: "57M12666",
-          termPartNo: "57M11448",
-          sealPartNo: "",
-          cavity: "16"
+          label: "XB3"
         }
-      }
+      ],
+      engineering_component_name: "Coolant Temperature Sensor",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M10968",
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      component_type: "Component",
+      connector_type: "Direct",
+      remove: false,
+      manufacturer: "ALPHA",
+      connector_part_number: "57M10968",
+      gender: "Female"
     },
     {
       id: "ICC",
@@ -49,38 +31,10 @@ const B3 = {
       connectors: [
         {
           id: "XJ1",
-          label: "XJ1",
-        },
-      ],
-      // Extra wire details for popup when clicking XJ1 side of this wire
-      wireDetails310A: {
-        circuitNumber: "310A",
-        wireSize: 0.8,
-        wireColor: "OG",
-        wireLength: 960,
-        wireType: "Regular",
-        twistId: "",
-        shieldId: "",
-        wireOption: "",
-        mark: "",
-        from: {
-          connectorNumber: "XB3",
-          devName: "Coolant Temperature Sensor",
-          connPartNumber: "57M10968",
-          termPartNo: "57M10968",
-          sealPartNo: "",
-          cavity: "1"
-        },
-        to: {
-          connectorNumber: "XJ1",
-          devName: "Instrument Cluster Controller",
-          connPartNumber: "57M12666",
-          termPartNo: "57M11448",
-          sealPartNo: "",
-          cavity: "16"
+          label: "XJ1"
         }
-      }
-    },
+      ]
+    }
   ],
   connections: [
     {

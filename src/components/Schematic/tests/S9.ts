@@ -12,6 +12,7 @@ const S9 = {
           label: "XS9",
         },
       ],
+    
     },
     {
       id: "SPL1",
@@ -24,6 +25,7 @@ const S9 = {
           label: "XSP_450",
         },
       ],
+      
     },
     {
       id: "ICC",
@@ -36,6 +38,7 @@ const S9 = {
           label: "XJ1",
         },
       ],
+     
     },
     {
       id: "LC",
@@ -48,6 +51,7 @@ const S9 = {
           label: "X90",
         },
       ],
+      
     },
     {
       id: "HR",
@@ -60,7 +64,8 @@ const S9 = {
           label: "XK3",
         },
       ],
-    },
+      
+    }
   ],
   connections: [
     {
@@ -76,28 +81,41 @@ const S9 = {
         cavity: "L",
       },
       label: "",
-    },
-    {
-      color: "pink",
-      from: {
-        componentId: "ICC",
-        connectorId: "XJ1",
-        cavity: "12",
+      wireDetails: {
+        circuitNumber: "450A",
+        wireSize: 1,
+        wireColor: "YE",
+        wireLength: 1339,
+        wireType: "Regular",
+        twistId: "",
+        shieldId: "",
+        wireOption: "",
+        mark: "",
+        from: {
+          connectorNumber: "XS9",
+          devName: "Light switch",
+          connPartNumber: "57M9361",
+          termPartNo: "57M9200",
+          sealPartNo: "",
+          cavity: "B",
+        },
+        to: {
+          connectorNumber: "XSP_450",
+          devName: "Splice",
+          connPartNumber: "",
+          termPartNo: "",
+          sealPartNo: "",
+          cavity: "L",
+        },
       },
-      to: {
-        componentId: "S9",
-        connectorId: "XS9",
-        cavity: "C",
-      },
-      label: "",
     },
+    
     {
       color: "yellow",
       from: {
         componentId: "LC",
         connectorId: "X90",
         cavity: "47",
-        
       },
       to: {
         componentId: "S9",
@@ -105,6 +123,33 @@ const S9 = {
         cavity: "D",
       },
       label: "",
+      wireDetails: {
+        circuitNumber: "400A",
+        wireSize: 1,
+        wireColor: "YE",
+        wireLength: 571,
+        wireType: "Regular",
+        twistId: "",
+        shieldId: "",
+        wireOption: "",
+        mark: "",
+        from: {
+          connectorNumber: "X90",
+          devName: "Load center",
+          connPartNumber: "57M13428",
+          termPartNo: "57M7491",
+          sealPartNo: "57M9219",
+          cavity: "47"
+        },
+        to: {
+          connectorNumber: "XS9",
+          devName: "Light switch",
+          connPartNumber: "57M9361",
+          termPartNo: "57M9200",
+          sealPartNo: "",
+          cavity: "D"
+        }
+      }
     },
     {
       color: "green",
@@ -119,8 +164,34 @@ const S9 = {
         cavity: "1",
       },
       label: "",
-    },
+      wireDetails: {
+        circuitNumber: "456A-1",
+        wireSize: 0.8,
+        wireColor: "GN",
+        wireLength: "",
+        wireType: "Regular",
+        twistId: "",
+        shieldId: "",
+        wireOption: "",
+        mark: "",
+        from: {
+          connectorNumber: "XK3",
+          devName: "Headlight relay",
+          connPartNumber: "",
+          termPartNo: "",
+          sealPartNo: "",
+          cavity: "19"
+        },
+        to: {
+          connectorNumber: "XS9",
+          devName: "Light switch",
+          connPartNumber: "57M9361",
+          termPartNo: "57M9200",
+          sealPartNo: "",
+          cavity: "1"
+        }
+      }
+    }
   ],
 };
-
 export default S9;
