@@ -70,7 +70,7 @@ const ChargingSystem = {
     {
       id: "X90",
       label: "Load center",
-      category: "Transformator",
+      category: "Transformer",
       shape: "rectangle",
       connectors: [
         {
@@ -114,7 +114,7 @@ const ChargingSystem = {
     {
       id: "S9",
       label: "Light switch",
-      category: "Component",
+      category: "Switch",
       shape: "rectangle",
       connectors: [
         {
@@ -136,7 +136,7 @@ const ChargingSystem = {
     {
       id: "J2",
       label: "Instrument Cluster Controller",
-      category: "Component",
+      category: "Transistor",
       shape: "rectangle",
       connectors: [
         {
@@ -158,7 +158,7 @@ const ChargingSystem = {
     {
       id: "S2",
       label: "Power port switch",
-      category: "Component",
+      category: "Switch",
       shape: "rectangle",
       connectors: [
         {
@@ -180,7 +180,7 @@ const ChargingSystem = {
     {
       id: "J1",
       label: "Instrument Cluster Controller",
-      category: "Component",
+      category: "Transistor",
       shape: "rectangle",
       connectors: [
         {

@@ -48,11 +48,13 @@ const S4 = {
         componentId: "S4",
         connectorId: "XS4",
         cavity: "2",
+         gender: ""
       },
       to: {
         componentId: "SPL1",
         connectorId: "XSP_500",
         cavity: "L",
+        gender: ""
       },
       label: "",
       wireDetails: {
@@ -89,11 +91,13 @@ const S4 = {
         componentId: "ICC",
         connectorId: "XJ2",
         cavity: "3",
+        gender: ""
       },
       to: {
         componentId: "S4",
         connectorId: "XS4",
         cavity: "4",
+        gender: ""
       },
       label: "",
       wireDetails: {
@@ -113,6 +117,7 @@ const S4 = {
           termPartNo: "57M11448",
           sealPartNo: "",
           cavity: "3",
+          gender: ""
         },
         to: {
           connectorNumber: "XS4",
@@ -121,6 +126,7 @@ const S4 = {
           termPartNo: "57M7546",
           sealPartNo: "",
           cavity: "4",
+          gender: ""
         },
       },
     },

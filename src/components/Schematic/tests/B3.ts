@@ -1,6 +1,6 @@
 const B3 = {
   masterComponents: ["B3"],
-   components: [
+  components: [
     {
       id: "B3",
       label: "Coolant Temperature sensor",
@@ -21,7 +21,7 @@ const B3 = {
       remove: false,
       manufacturer: "ALPHA",
       connector_part_number: "57M10968",
-      gender: "Female"
+      
     },
     {
       id: "ICC",
@@ -43,11 +43,13 @@ const B3 = {
         componentId: "B3",
         connectorId: "XB3",
         cavity: "1",
+        gender: "Female"
       },
       to: {
         componentId: "ICC",
         connectorId: "XJ1",
         cavity: "16",
+        gender: "Female"
       },
       label: "",
       // Extra wire data if you want at connection level instead:
