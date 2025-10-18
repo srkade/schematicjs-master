@@ -74,11 +74,13 @@ const S9 = {
         componentId: "S9",
         connectorId: "XS9",
         cavity: "B",
+        gender: ""
       },
       to: {
         componentId: "SPL1",
         connectorId: "XSP_450",
         cavity: "L",
+        gender: ""
       },
       label: "",
       wireDetails: {
