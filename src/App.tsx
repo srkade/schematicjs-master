@@ -11,6 +11,7 @@ import {
   S8,
   B3,
   CrankingSystem,
+  ChargingSystem
 } from "./components/Schematic/tests";
 import {  DTC_StarterCoolDown } from "./components/Schematic/tests/DTCs"
 import LoginPage from "./components/LoginPage";
@@ -29,10 +30,11 @@ const allSchematics = {
   S8: wrapSchematic(S8),
   S9: wrapSchematic(S9),
   CrankingSystem: wrapSchematic(CrankingSystem),
+  ChargingSystem: wrapSchematic(ChargingSystem),
   
   DTC_StarterCoolDown: wrapSchematic(DTC_StarterCoolDown),
 };
-const SYSTEM_KEYS = ["CrankingSystem"];
+const SYSTEM_KEYS = ["CrankingSystem", "ChargingSystem"];
 
 // Create dashboardItems mapping (DO NOT place any hook or selection logic here)
 const dashboardItems = Object.entries(allSchematics).map(([key, schematic]) => {

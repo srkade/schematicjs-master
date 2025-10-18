@@ -5,5 +5,6 @@ import S9 from './S9';
 import B3 from './B3';
 import S8 from './S8';
 import CrankingSystem from './CrankingSystem';
+import ChargingSystem from './ChargingSystem';
 
-export { ICC, S4, S9, B3, S8, CrankingSystem };
+export { ICC, S4, S9, B3, S8, CrankingSystem , ChargingSystem};
