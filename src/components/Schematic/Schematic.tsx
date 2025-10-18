@@ -151,6 +151,18 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!svgWrapperRef.current?.contains(e.target as Node)) {
+        setSelectedComponentIds([]);
+        setPopupComponent(null);
+        setPopupClosedManually(false); // reset manual close
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -178,6 +190,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
   };
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
+  // Track if popup was manually closed
+  const [popupClosedManually, setPopupClosedManually] = useState(false);
 
   //change deafault view box on data change
   useEffect(() => {
@@ -580,6 +594,14 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
         display: "flex"
       }}>
         <svg
+          onClick={(e) => {
+            // Only deselect if click is on the SVG itself, not on components
+            if ((e.target as SVGElement).tagName === "svg") {
+              setSelectedComponentIds([]);
+              setPopupComponent(null);
+              setPopupClosedManually(false);
+            }
+          }}
           onWheel={handleWheel}
           style={{
             border: "1px solid #ccc",
@@ -646,30 +668,18 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                   <g
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (clickTimeout.current) {
-                        clearTimeout(clickTimeout.current);
-                        clickTimeout.current = null;
-                      }
-                      clickTimeout.current = window.setTimeout(() => {
+
+                      // Select this component
+                      setSelectedComponentIds([comp.id]);
+
+                      // Show popup only if it wasn't manually closed
+                      if (!popupClosedManually) {
                         setPopupComponent(comp);
                         setPopupPosition({
                           x: getXForComponent(comp) + getWidthForComponent(comp) + 900,
                           y: getYForComponent(comp) + componentSize.height + 100,
                         });
-                        clickTimeout.current = null;
-                      }, 250);
-                    }}
-                    onDoubleClick={(e) => {
-                      e.stopPropagation();
-                      if (clickTimeout.current) {
-                        clearTimeout(clickTimeout.current);
-                        clickTimeout.current = null;
                       }
-                      setSelectedComponentIds((prev) =>
-                        prev.includes(comp.id)
-                          ? prev.filter((id) => id !== comp.id)
-                          : [...prev, comp.id]
-                      );
                     }}
                   >
                     {/* Base blue component */}
@@ -688,11 +698,15 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     {/* Highlight overlay */}
                     {selectedComponentIds.includes(comp.id) && (
                       <rect
-                        x={getXForComponent(comp) - 15}  //left
-                        y={getYForComponent(comp) - 20}   //top
-                        width={getWidthForComponent(comp) + 35} //right
-                        height={componentSize.height + 35}//bottom
-                        fill="yellow"
+                        x={getXForComponent(comp) }  
+                        y={
+                          getYForComponent(comp)<viewBox.y+viewBox.h/2
+                          ?getYForComponent(comp)-60
+                          :getYForComponent(comp)+60
+                        }   
+                        width={getWidthForComponent(comp) } 
+                        height={componentSize.height }
+                        fill="#3390FF"
                         opacity={0.3}
                         pointerEvents="none" // so the click still passes through to the base rect
                       />
@@ -1106,7 +1120,16 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
               Category: {popupComponent.category}<br />
               Connectors: {popupComponent.connectors.map(c => c.label).join(", ")}
             </p>
-            <button onClick={() => setPopupComponent(null)}>Close</button>
+            <button
+              onClick={() => {
+                setSelectedComponentIds([]);
+                setPopupComponent(null);
+                setPopupClosedManually(false); // now clicking a component again can show popup
+              }}
+            >
+              Close
+            </button>
+
           </div>
         )}
 
