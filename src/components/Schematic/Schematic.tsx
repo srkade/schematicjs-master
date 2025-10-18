@@ -514,6 +514,15 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     }
     return [undefined, undefined];
   }
+  function getXForWireToSplice(component: ComponentType, wireIndex: number, totalWires: number) {
+    // always attach in center horizontally
+    const centerX = getXForComponent(component) + getWidthForComponent(component) / 2;
+    // optionally spread vertically slightly
+    const spacing = 10; // space between multiple wires
+    const offsetY = (wireIndex - (totalWires - 1) / 2) * spacing;
+    return { x: centerX, offsetY };
+  }
+
 
   const buttonStyle = {
     padding: "3px 7px",
@@ -578,7 +587,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
-              backgroundColor: "rgba(204, 202, 195, 1)",
+            //  backgroundColor: "rgba(240, 224, 134, 1)",
             userSelect: dragging ? "none" : "auto", // Disable text selection while dragging
             WebkitUserSelect: dragging ? "none" : "auto", // For Safari
             MozUserSelect: dragging ? "none" : "auto", // For Firefox
@@ -617,7 +626,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                   {/* Outer green circle */}
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) + componentSize.height / 2 - 40}
+                    cy={getYForComponent(comp) + componentSize.height / 2 + 10}
                     r={componentSize.height / 4} // adjust radius as needed
                     fill="white"
                     stroke="black"
@@ -626,7 +635,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                   {/* Inner black dot */}
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) + componentSize.height / 2 - 40}
+                    cy={getYForComponent(comp) + componentSize.height / 2 + 10}
                     r={componentSize.height / 6}
                     fill="black"
                   />
@@ -907,22 +916,67 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
-            const offset = getConnectionOffset(
-              i,
-              data.connections.length,
-              fromY,
-              toY,
-              10
-            );
-            let min = Math.min(fromY, toY);
-            const midY = min + offset; //middle line start dynamically
+            // Handle multiple wires connected to splice
+            if (fromComponent?.category.toLowerCase() === "splice") {
+              const spliceConnections = getConnectionsForComponent(fromComponent);
+              const spliceIndex = spliceConnections.findIndex(c => c === wire);
+              const totalWires = spliceConnections.length;
+              const spacing = 10; // space between wires
+
+              const centerX = getXForComponent(fromComponent) + getWidthForComponent(fromComponent) / 2;
+              const centerY = getYForComponent(fromComponent) + componentSize.height / 2;
+
+              // spread wires in a small fan/grid pattern
+              const horizontalOffset = (spliceIndex - (totalWires - 1) / 2) * spacing;
+              const verticalOffset = (spliceIndex % 2 === 0 ? 1 : -1) * spacing * Math.ceil(spliceIndex / 2);
+
+              fromX = centerX + horizontalOffset;
+              fromY = centerY + verticalOffset;
+            }
+
+            if (toComponent?.category.toLowerCase() === "splice") {
+              const spliceConnections = getConnectionsForComponent(toComponent);
+              const spliceIndex = spliceConnections.findIndex(c => c === wire);
+              const totalWires = spliceConnections.length;
+              const spacing = 10;
+
+              const centerX = getXForComponent(toComponent) + getWidthForComponent(toComponent) / 2;
+              const centerY = getYForComponent(toComponent) + componentSize.height / 2;
+
+              const horizontalOffset = (spliceIndex - (totalWires - 1) / 2) * spacing;
+              const verticalOffset = (spliceIndex % 2 === 0 ? 1 : -1) * spacing * Math.ceil(spliceIndex / 2);
+
+              toX = centerX + horizontalOffset;
+              toY = centerY + verticalOffset;
+            }
+
+
+
+            // --- Adjust midY calculation ---
+            let midY;
+            if (
+              fromComponent?.category.toLowerCase() === "splice" ||
+              toComponent?.category.toLowerCase() === "splice"
+            ) {
+              // Use straight midpoint for splice connections
+              midY = fromY + (toY - fromY) / 2;
+            } else {
+              // Use offset for normal wires
+              const offset = getConnectionOffset(i, data.connections.length, fromY, toY, 10);
+              let min = Math.min(fromY, toY);
+              midY = min + offset;
+            }
+
             // Calculate the positions where the tridents should be
             const fromTridentY = fromY < toY ? midY : fromY - 10; // lift if needed
             const toTridentY = fromY < toY ? toY : midY + 10;
+
             let isFromTop = isFromMasterComponent;
             let isToTop = isToMasterComponent;
+
             let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
             let toLabelY = isToTop ? toY - 5 : toY + 15;
+
 
             let wireElement;
             wireElement = (
@@ -969,8 +1023,9 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
                 <polyline
                   key={i}
-                  points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
-                    } ${toX},${toY}`}
+                  // points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
+                  //   } ${toX},${toY}`}
+                  points={`${fromX},${fromY} ${fromX},${midY} ${toX},${midY} ${toX},${toY}`}
                   fill="none"
                   stroke={wire.color}
                   strokeWidth={2}
@@ -1058,4 +1113,4 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
       </div>
     </div>
   );
-}
+} 
