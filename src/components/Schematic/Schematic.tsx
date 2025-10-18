@@ -609,7 +609,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             height: "100%",
             cursor: dragging ? "grabbing" : "grab",
             display: "block",
-            //  backgroundColor: "rgba(240, 224, 134, 1)",
+            backgroundColor: "#e5e5e5",
             userSelect: dragging ? "none" : "auto", // Disable text selection while dragging
             WebkitUserSelect: dragging ? "none" : "auto", // For Safari
             MozUserSelect: dragging ? "none" : "auto", // For Firefox
