@@ -186,18 +186,6 @@ const ICC = {
       ],
     },
     {
-      id: "ARS",
-      label: "Air Restriction Sensor",
-      category: "Sensor",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XB1",
-          label: "XB1",
-        },
-      ],
-    },
-    {
       id: "KS",
       label: "Key Switch",
       category: "Key Switch",
@@ -206,6 +194,54 @@ const ICC = {
         {
           id: "XS1",
           label: "XS1",
+        },
+      ],
+    },
+        {
+      id: "MCHPTO",
+      label: "Main Chassis Harness to PTO Switch Harness Connector",
+      category: "Connector",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "X6",
+          label: "X6",
+        },
+      ],
+    },
+    {
+      id: "SPL_500",
+      label: "Splice",
+      category: "Splice",
+      shape: "circle",
+      connectors: [
+        {
+          id: "XSP_500",
+          label: "XSP_500",
+        },
+      ],
+    },
+    {
+      id: "LC",
+      label: "Load Center",
+      category: "Load Center",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "X90",
+          label: "X90",
+        },
+      ],
+    },
+        {
+      id: "ARS",
+      label: "Air Restriction Sensor",
+      category: "Sensor",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "XB1",
+          label: "XB1",
         },
       ],
     },
@@ -305,42 +341,6 @@ const ICC = {
         },
       ],
     },
-    {
-      id: "MCHPTO",
-      label: "Main Chassis Harness to PTO Switch Harness Connector",
-      category: "Connector",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "X6",
-          label: "X6",
-        },
-      ],
-    },
-    {
-      id: "SPL_500",
-      label: "Splice",
-      category: "Splice",
-      shape: "circle",
-      connectors: [
-        {
-          id: "XSP_500",
-          label: "XSP_500",
-        },
-      ],
-    },
-    {
-      id: "LC",
-      label: "Load Center",
-      category: "Load Center",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "X90",
-          label: "X90",
-        },
-      ],
-    },
   ],
   connections: [
     {
@@ -354,20 +354,6 @@ const ICC = {
       label: "",
     },
     {
-      color: "blue",
-      from: {
-        componentId: "MCHPTO",
-        connectorId: "X6",
-        cavity: "B",
-      },
-      to: {
-        componentId: "ICC",
-        connectorId: "XJ1",
-        cavity: "14",
-      },
-      label: "",
-    },
-    {
       color: "pink",
       from: {
         componentId: "ICC",
@@ -375,16 +361,6 @@ const ICC = {
         cavity: "7",
       },
       to: { componentId: "FS", connectorId: "Y3", cavity: "B" },
-      label: "",
-    },
-    {
-      color: "red",
-      from: { componentId: "LC", connectorId: "X90", cavity: "48" },
-      to: {
-        componentId: "ICC",
-        connectorId: "XJ1",
-        cavity: "10",
-      },
       label: "",
     },
     {
@@ -566,6 +542,30 @@ const ICC = {
         componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
+      },
+      label: "",
+    },
+    {
+      color: "blue",
+      from: {
+        componentId: "MCHPTO",
+        connectorId: "X6",
+        cavity: "B",
+      },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ1",
+        cavity: "14",
+      },
+      label: "",
+    },
+    {
+      color: "red",
+      from: { componentId: "LC", connectorId: "X90", cavity: "48" },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ1",
+        cavity: "10",
       },
       label: "",
     },

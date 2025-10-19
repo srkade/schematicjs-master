@@ -923,7 +923,10 @@ export default function Schematic({
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
                     (connIndex + 1);
 
-              fromX = fromConnectorX + fromConnectorOffset;
+              fromX =
+                fromComponent?.shape === "circle"
+                  ? fromConnectorX + fromConnectorWidth / 2
+                  : fromConnectorX + fromConnectorOffset;
             }
 
             var fromY = fromStoredConnectionPoint?.y;
