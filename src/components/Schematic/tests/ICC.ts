@@ -18,7 +18,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL5",
+      id: "SPL_757",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -26,18 +26,6 @@ const ICC = {
         {
           id: "XSP_757",
           label: "XSP_757",
-        },
-      ],
-    },
-    {
-      id: "MCHPTO",
-      label: "Main Chassis Harness to PTO Switch Harness Connector",
-      category: "Connector",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "X6",
-          label: "X6",
         },
       ],
     },
@@ -50,18 +38,6 @@ const ICC = {
         {
           id: "Y3",
           label: "Y3",
-        },
-      ],
-    },
-    {
-      id: "LC",
-      label: "Load Center",
-      category: "Load Center",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "X90",
-          label: "X90",
         },
       ],
     },
@@ -114,7 +90,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL6",
+      id: "SPL_904",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -126,7 +102,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL7",
+      id: "SPL_905",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -162,7 +138,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL9",
+      id: "SPL_623",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -174,7 +150,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL1",
+      id: "SPL_100B",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -210,18 +186,6 @@ const ICC = {
       ],
     },
     {
-      id: "SPL2",
-      label: "Splice",
-      category: "Splice",
-      shape: "circle",
-      connectors: [
-        {
-          id: "XSP_500",
-          label: "XSP_500",
-        },
-      ],
-    },
-    {
       id: "ARS",
       label: "Air Restriction Sensor",
       category: "Sensor",
@@ -245,7 +209,6 @@ const ICC = {
         },
       ],
     },
-
     {
       id: "OPS",
       label: "Oil Pressure Switch",
@@ -259,7 +222,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL3",
+      id: "SPL_754",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -271,7 +234,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL4",
+      id: "SPL_755",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -319,7 +282,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL8",
+      id: "SPL_767",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -331,7 +294,7 @@ const ICC = {
       ],
     },
     {
-      id: "SPL10",
+      id: "SPL_624",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -339,6 +302,42 @@ const ICC = {
         {
           id: "XSP_624",
           label: "XSP_624",
+        },
+      ],
+    },
+    {
+      id: "MCHPTO",
+      label: "Main Chassis Harness to PTO Switch Harness Connector",
+      category: "Connector",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "X6",
+          label: "X6",
+        },
+      ],
+    },
+    {
+      id: "SPL_500",
+      label: "Splice",
+      category: "Splice",
+      shape: "circle",
+      connectors: [
+        {
+          id: "XSP_500",
+          label: "XSP_500",
+        },
+      ],
+    },
+    {
+      id: "LC",
+      label: "Load Center",
+      category: "Load Center",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "X90",
+          label: "X90",
         },
       ],
     },
@@ -351,7 +350,7 @@ const ICC = {
         connectorId: "XJ1",
         cavity: "8",
       },
-      to: { componentId: "SPL5", connectorId: "XSP_757", cavity: "L" },
+      to: { componentId: "SPL_757", connectorId: "XSP_757", cavity: "L" },
       label: "",
     },
     {
@@ -434,7 +433,7 @@ const ICC = {
         cavity: "A",
       },
       to: {
-        componentId: "Instrument Cluster Controller",
+        componentId: "ICC",
         connectorId: "XJ1",
         cavity: "17",
       },
@@ -447,7 +446,7 @@ const ICC = {
         connectorId: "XJ1",
         cavity: "18",
       },
-      to: { componentId: "SPL6", connectorId: "XSP_904", cavity: "L" },
+      to: { componentId: "SPL_904", connectorId: "XSP_904", cavity: "L" },
       label: "",
     },
     {
@@ -457,7 +456,7 @@ const ICC = {
         connectorId: "XJ1",
         cavity: "19",
       },
-      to: { componentId: "SPL7", connectorId: "XSP_905", cavity: "L" },
+      to: { componentId: "SPL_905", connectorId: "XSP_905", cavity: "L" },
       label: "",
     },
     {
@@ -487,7 +486,7 @@ const ICC = {
         connectorId: "XJ1",
         cavity: "15",
       },
-      to: { componentId: "SPL9", connectorId: "XSP_623", cavity: "L" },
+      to: { componentId: "SPL_623", connectorId: "XSP_623", cavity: "L" },
       label: "",
     },
     {
@@ -498,7 +497,7 @@ const ICC = {
         cavity: "20",
       },
       to: {
-        componentId: "SPL1",
+        componentId: "SPL_100B",
         connectorId: "XSP_100B",
         cavity: "L",
       },
@@ -540,7 +539,7 @@ const ICC = {
         cavity: "6",
       },
       to: {
-        componentId: "SPL2",
+        componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
       },
@@ -564,8 +563,204 @@ const ICC = {
         cavity: "11",
       },
       to: {
-        componentId: "SPL2",
+        componentId: "SPL_500",
         connectorId: "XSP_500",
+        cavity: "L",
+      },
+      label: "",
+    },
+    {
+      color: "green",
+      from: {
+        componentId: "ARS",
+        connectorId: "XB1",
+        cavity: "A",
+      },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "9",
+      },
+      label: "",
+    },
+    {
+      color: "yellow",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "19",
+      },
+      to: {
+        componentId: "SPL_500",
+        connectorId: "XSP_500",
+        cavity: "L",
+      },
+      label: "",
+    },
+    {
+      color: "yellow",
+      from: {
+        componentId: "LC",
+        connectorId: "X90",
+        cavity: "8",
+      },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "15",
+      },
+      label: "",
+    },
+    {
+      color: "yellow",
+      from: {
+        componentId: "LC",
+        connectorId: "X90",
+        cavity: "11",
+      },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "16",
+      },
+      label: "",
+    },
+    {
+      color: "green",
+      from: {
+        componentId: "OPS",
+        connectorId: "XB2",
+        cavity: "A",
+      },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "10",
+      },
+      label: "",
+    },
+    {
+      color: "violet",
+      from: {
+        componentId: "LC",
+        connectorId: "X90",
+        cavity: "19",
+      },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "11",
+      },
+      label: "",
+    },
+    {
+      color: "blue",
+      from: {
+        componentId: "MCHPTO",
+        connectorId: "X6",
+        cavity: "A",
+      },
+      to: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "6",
+      },
+      label: "",
+    },
+    {
+      color: "blue",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "2",
+      },
+      to: {
+        componentId: "SPL_754",
+        connectorId: "XSP_754",
+        cavity: "L",
+      },
+      label: "",
+    },
+    {
+      color: "green",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "1",
+      },
+      to: {
+        componentId: "SPL_755",
+        connectorId: "XSP_755",
+        cavity: "L",
+      },
+      label: "",
+    },
+    {
+      color: "violet",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "5",
+      },
+      to: {
+        componentId: "BS",
+        connectorId: "XS8",
+        cavity: "1",
+      },
+      label: "",
+    },
+    {
+      color: "blue",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "4",
+      },
+      to: {
+        componentId: "RS",
+        connectorId: "XS7",
+        cavity: "8",
+      },
+      label: "",
+    },
+    {
+      color: "pink",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "3",
+      },
+      to: {
+        componentId: "SS",
+        connectorId: "XS4",
+        cavity: "4",
+      },
+      label: "",
+    },
+    {
+      color: "violet",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "5",
+      },
+      to: {
+        componentId: "SPL_767",
+        connectorId: "XSP_767",
+        cavity: "L",
+      },
+      label: "",
+    },
+    {
+      color: "blue",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ2",
+        cavity: "13",
+      },
+      to: {
+        componentId: "SPL_624",
+        connectorId: "XSP_624",
         cavity: "L",
       },
       label: "",

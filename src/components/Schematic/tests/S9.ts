@@ -15,7 +15,7 @@ const S9 = {
     
     },
     {
-      id: "SPL1",
+      id: "SPL_450",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -77,7 +77,7 @@ const S9 = {
         gender: ""
       },
       to: {
-        componentId: "SPL1",
+        componentId: "SPL_450",
         connectorId: "XSP_450",
         cavity: "L",
         gender: ""
@@ -111,7 +111,6 @@ const S9 = {
         },
       },
     },
-    
     {
       color: "yellow",
       from: {
@@ -152,6 +151,20 @@ const S9 = {
           cavity: "D"
         }
       }
+    },
+    {
+      color: "pink",
+      from: {
+        componentId: "ICC",
+        connectorId: "XJ1",
+        cavity: "12",
+      },
+      to: {
+        componentId: "S9",
+        connectorId: "XS9",
+        cavity: "C",
+      },
+      label: ""
     },
     {
       color: "green",

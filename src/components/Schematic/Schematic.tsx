@@ -1,6 +1,12 @@
 // ...existing code...
 
-import React, { useState, useEffect, useRef, JSX, useLayoutEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  JSX,
+  useLayoutEffect,
+} from "react";
 import TridentShape from "../symbols/TridentShape";
 import FuseSymbol from "../symbols/FuseSymbol";
 import Sensor from "../symbols/Sensor";
@@ -57,7 +63,13 @@ const colors = {
   OG: "orange",
 };
 
-export default function Schematic({ data, scale = 1 }: { data: SchematicData; scale?: number }) {
+export default function Schematic({
+  data,
+  scale = 1,
+}: {
+  data: SchematicData;
+  scale?: number;
+}) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -70,17 +82,25 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     null
   );
 
-
   //states for managing the component selection
-  const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>([]);
-  const [popupComponent, setPopupComponent] = useState<ComponentType | null>(null);
-  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [selectedComponentIds, setSelectedComponentIds] = useState<string[]>(
+    []
+  );
+  const [popupComponent, setPopupComponent] = useState<ComponentType | null>(
+    null
+  );
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
 
-  //states to manage the wire selection 
+  //states to manage the wire selection
   const [selectedWires, setSelectedWires] = useState<string[]>([]);
   const [popupWire, setPopupWire] = useState<WirePopupType | null>(null);
-  const [popupWirePosition, setPopupWirePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-
+  const [popupWirePosition, setPopupWirePosition] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
 
   // Reset view handler
   const resetView = () => {
@@ -180,13 +200,11 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
         setPopupClosedManually(false); // reset manual close
         setSelectedWires([]);
         setPopupWire(null);
-
       }
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
-
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -242,9 +260,11 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
   var connectionPoints: { [id: string]: { x: number; y: number } } = {};
 
   const componentSize = { width: 100, height: 60 };
+  const connectorHeight = 20;
   //pin padding changeed
   const padding = 20;
   const connectorNamePadding = 25;
+  const connectorSpacing = 30; //change to add spacing between greenbox
 
   var maxX = 0;
   var maxY =
@@ -284,8 +304,10 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     // Connections count
     const connCount: { [id: string]: number } = {};
     data.connections.forEach((conn) => {
-      connCount[conn.from.connectorId] = (connCount[conn.from.connectorId] || 0) + 1;
-      connCount[conn.to.connectorId] = (connCount[conn.to.connectorId] || 0) + 1;
+      connCount[conn.from.connectorId] =
+        (connCount[conn.from.connectorId] || 0) + 1;
+      connCount[conn.to.connectorId] =
+        (connCount[conn.to.connectorId] || 0) + 1;
     });
     setConnectorConnectionCount(connCount);
 
@@ -298,7 +320,6 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     };
     setFitViewBox(newBox);
   }, [data]);
-
 
   // Remove wheel gesture
 
@@ -320,7 +341,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
   function spaceForWires() {
     let connectionsCount = data.connections.length;
-    return connectionsCount * 10 + 40; // 10px per connection + padding
+    return connectionsCount * 20 + 40; // 20px per connection + padding
   }
 
   function connectionPointKey(point: ConnectionPoint): string {
@@ -336,10 +357,8 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
   ) {
     let max = Math.max(y1, y2);
     let min = Math.min(y1, y2);
-    let mid = count / 2;
-    let offset = (index + 1) * offsetStep + offsetStep;
-    let reverseOffset = max - min - (index + 1) * offsetStep - offsetStep;
-    return index < mid ? offset : reverseOffset;
+    let reverseOffset = max - min - index * offsetStep - offsetStep;
+    return reverseOffset;
   }
 
   function getIntersection(
@@ -441,19 +460,22 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
   function getConnectionsForComponent(component: ComponentType) {
     return data.connections.filter(
-      (c) => c.from.componentId === component.id || c.to.componentId === component.id
+      (c) =>
+        c.from.componentId === component.id || c.to.componentId === component.id
     );
   }
 
   function getWidthForComponent(component: ComponentType): number {
-    const defaultWidth = componentNameWidths[component.id] + padding
-    let connectionCount = getConnectionsForComponent(component).length;
-    if (connectionCount > 1) {
-      let width = padding;
-      component.connectors.forEach((conn) => {
-        width += getWidthForConnector(conn) + padding / 2;
-      });
-      return Math.max(width, defaultWidth);
+    const defaultWidth = componentNameWidths[component.id] + padding;
+    if (component.shape === "rectangle") {
+      let connectionCount = getConnectionsForComponent(component).length;
+      if (connectionCount > 1) {
+        let width = connectorSpacing;
+        component.connectors.forEach((conn) => {
+          width += getWidthForConnector(conn) + connectorSpacing;
+        });
+        return Math.max(width, defaultWidth);
+      }
     }
     return defaultWidth;
   }
@@ -476,7 +498,11 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     let isMasterComponent = data.masterComponents.includes(component.id);
     const y = isMasterComponent
       ? padding
-      : padding + componentSize.height + spaceForWires() + componentSize.height;
+      : padding +
+        componentSize.height +
+        spaceForWires() +
+        componentSize.height +
+        padding;
     return y;
   }
 
@@ -493,12 +519,25 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     component: ComponentType
   ): number {
     let x = getXForComponent(component);
-    let componentCount = component.connectors.length;
-    let width = getWidthForComponent(component) / (componentCount + 1);
-    let index = component.connectors.findIndex((c) => c.id === connector.id);
-    let connWidth = getWidthForConnector(connector) / 2;
-    const connectorSpacing = 30; //change to add spacing between greenbox
-    return x + width * (index + 1) - connWidth + index * connectorSpacing;
+    if (component.shape === "rectangle") {
+      let connectorCount = component.connectors.length;
+      let index = component.connectors.findIndex((c) => c.id === connector.id);
+      var connWidth = 0;
+      if (connectorCount > 1) {
+        connWidth += connectorSpacing;
+        for (var i = 0; i < index; i++) {
+          let conn = component.connectors[i];
+          connWidth += getWidthForConnector(conn);
+          connWidth += connectorSpacing;
+        }
+        return x + connWidth;
+      }
+    }
+    return (
+      x +
+      (getWidthForComponent(component) / 2) -
+      (getWidthForConnector(component.connectors[0]) / 2)
+    );
   }
 
   function getYForConnector(
@@ -506,10 +545,9 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     component: ComponentType
   ): number {
     let isMasterComponent = data.masterComponents.includes(component.id);
-    const gap = 1; //to move green box outside
     return isMasterComponent
-      ? getYForComponent(component) + componentSize.height + gap
-      : getYForComponent(component) - gap - 20;
+      ? getYForComponent(component) + componentSize.height
+      : getYForComponent(component) - 20;
   }
 
   function getConnectionsForConnector(conn: ConnectorType): ConnectionType[] {
@@ -521,18 +559,16 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
   function getWidthForConnector(conn: ConnectorType): number {
     let connections = getConnectionsForConnector(conn);
     let interConnectionSpacing = 30;
-    if (connections.length > 1) {
-      let connectionsBasedWidth =
-        (connections.length + 1) * interConnectionSpacing;
-      return (
-        // Pin padding changeed
-        Math.max(
-          connectionsBasedWidth,
-          connectorNameWidths[conn.id] + connectorNamePadding,
-          100
-        )
-      );
-    }
+    let connectionsBasedWidth =
+      (connections.length + 1) * interConnectionSpacing;
+    return (
+      // Pin padding changeed
+      Math.max(
+        connectionsBasedWidth,
+        connectorNameWidths[conn.id] + connectorNamePadding,
+        100
+      )
+    );
     return connectorNameWidths[conn.id] + connectorNamePadding;
   }
 
@@ -552,15 +588,19 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
     }
     return [undefined, undefined];
   }
-  function getXForWireToSplice(component: ComponentType, wireIndex: number, totalWires: number) {
+  function getXForWireToSplice(
+    component: ComponentType,
+    wireIndex: number,
+    totalWires: number
+  ) {
     // always attach in center horizontally
-    const centerX = getXForComponent(component) + getWidthForComponent(component) / 2;
+    const centerX =
+      getXForComponent(component) + getWidthForComponent(component) / 2;
     // optionally spread vertically slightly
     const spacing = 10; // space between multiple wires
     const offsetY = (wireIndex - (totalWires - 1) / 2) * spacing;
     return { x: centerX, offsetY };
   }
-
 
   const buttonStyle = {
     padding: "3px 7px",
@@ -612,11 +652,13 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           {isFullscreen ? "Default Screen" : "Full Screen"}
         </button>
       </div>
-      <div style={{
-        flex: 1,                  // Dynamically takes all available vertical space
-        overflow: "hidden",
-        display: "flex"
-      }}>
+      <div
+        style={{
+          flex: 1, // Dynamically takes all available vertical space
+          overflow: "hidden",
+          display: "flex",
+        }}
+      >
         <svg
           onClick={(e) => {
             // Only deselect if click is on the SVG itself, not on components
@@ -643,7 +685,6 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
-
           onTouchStart={(e) => {
             e.preventDefault();
             const t = e.touches[0];
@@ -669,25 +710,22 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             <g key={comp.id}>
               {comp.category?.toLowerCase() === "splice" ? (
                 <g>
-                  {/* Outer green circle */}
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) + componentSize.height / 2 + 10}
+                    cy={getYForComponent(comp) - connectorHeight / 2}
                     r={componentSize.height / 4} // adjust radius as needed
                     fill="white"
                     stroke="black"
                     strokeWidth={2}
                   />
-                  {/* Inner black dot */}
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) + componentSize.height / 2 + 10}
+                    cy={getYForComponent(comp) - connectorHeight / 2}
                     r={componentSize.height / 6}
                     fill="black"
                   />
                 </g>
               ) : (
-                /* Default rectangle for other components */
                 comp.shape === "rectangle" && (
                   <g
                     onClick={(e) => {
@@ -700,13 +738,16 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                       if (!popupClosedManually) {
                         setPopupComponent(comp);
                         setPopupPosition({
-                          x: getXForComponent(comp) + getWidthForComponent(comp) + 900,
-                          y: getYForComponent(comp) + componentSize.height + 100,
+                          x:
+                            getXForComponent(comp) +
+                            getWidthForComponent(comp) +
+                            900,
+                          y:
+                            getYForComponent(comp) + componentSize.height + 100,
                         });
                       }
                     }}
                   >
-                    {/* Base blue component */}
                     <rect
                       x={getXForComponent(comp)}
                       y={getYForComponent(comp)}
@@ -719,7 +760,6 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                         console.log("Rectangle clicked!", comp.id);
                       }}
                     />
-                    {/* Highlight overlay */}
                     {selectedComponentIds.includes(comp.id) && (
                       <rect
                         x={getXForComponent(comp)}
@@ -738,10 +778,10 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
 
                     {comp.category?.toLowerCase() === "sensor" && (
                       <Sensor
-                        x={getXForComponent(comp) + 20}                  // left of rectangle
-                        y={getYForComponent(comp) + 15}                  // top of rectangle
-                        width={getWidthForComponent(comp) / 20}          // match rectangle width
-                        height={componentSize.height / 2}               // match rectangle height
+                        x={getXForComponent(comp) + 20} // left of rectangle
+                        y={getYForComponent(comp) + 15} // top of rectangle
+                        width={getWidthForComponent(comp) / 20} // match rectangle width
+                        height={componentSize.height / 2} // match rectangle height
                         stroke="black"
                         strokeWidth={1}
                       />
@@ -757,55 +797,34 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                       />
                     )}
 
-
                     {comp.category?.toLowerCase() === "transistor" && (
                       <Transistor
-                        x={getXForComponent(comp) + getWidthForComponent(comp) / 12} // horizontal centering
-                        y={getYForComponent(comp) + componentSize.height / 2}      // vertical centering
-                        sizeMultiplier={0.3}  // make smaller so it fits neatly inside
+                        x={
+                          getXForComponent(comp) +
+                          getWidthForComponent(comp) / 12
+                        } // horizontal centering
+                        y={getYForComponent(comp) + componentSize.height / 2} // vertical centering
+                        sizeMultiplier={0.3} // make smaller so it fits neatly inside
                         stroke="black"
                         strokeWidth={5}
                       />
                     )}
                     {comp.category?.toLowerCase() === "transformer" && (
                       <Transformer
-                        x={getXForComponent(comp) + getWidthForComponent(comp) / 16} // horizontal centering
-                        y={getYForComponent(comp) + componentSize.height / 6}        // vertical centering
-                        sizeMultiplier={0.2}                                         // scale it down to fit
+                        x={
+                          getXForComponent(comp) +
+                          getWidthForComponent(comp) / 16
+                        } // horizontal centering
+                        y={getYForComponent(comp) + componentSize.height / 6} // vertical centering
+                        sizeMultiplier={0.2} // scale it down to fit
                         stroke="black"
                         strokeWidth={1}
                         fill="black"
                       />
                     )}
-
                   </g>
                 )
               )}
-
-              {/* change */}
-              {/* {symbolLibrary[comp.category] && (
-                <g>
-                  {(() => {
-                    const SymbolComponent = symbolLibrary[comp.category];
-                    if (!SymbolComponent) return null;
-
-                    // Calculate  position inside the rectangle
-                    const centerX = getXForComponent(comp) + getWidthForComponent(comp) / 10;
-                    const centerY = getYForComponent(comp) + componentSize.height / 4;
-
-                    return (
-                      <SymbolComponent
-                        x={centerX}    // adjust horizontal offset
-                        y={centerY}    // adjust vertical offset
-                        width={10}          // adjust size to fit rectangle
-                        height={30}
-                        stroke="black"
-                        strokeWidth={1}
-                      />
-                    );
-                  })()}
-                </g>
-              )} */}
               <text
                 vectorEffect="non-scaling-stroke"
                 ref={(el) => {
@@ -815,9 +834,10 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 // y={getYForComponent(comp) + componentSize.height / 2}
                 y={
                   getYForComponent(comp) +
-                  (getYForComponent(comp) + componentSize.height / 2 < viewBox.y + viewBox.h / 2
+                  (getYForComponent(comp) + componentSize.height / 2 <
+                  viewBox.y + viewBox.h / 2
                     ? -componentSize.height / 2 //+(-0.10)  // above component
-                    : componentSize.height + 30)       // below component
+                    : componentSize.height + 30) // below component
                 }
                 textAnchor="middle"
                 fontSize="20"
@@ -833,29 +853,17 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                       x={getXForConnector(conn, comp)}
                       y={getYForConnector(conn, comp)}
                       width={getWidthForConnector(conn)}
-                      height={20}
+                      height={connectorHeight}
                       fill="lightgreen"
                       stroke="black"
                       strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
                     />
                   )}
-                  {/* load center fuse symbol */}
-                  {/* {comp.label.toLowerCase() === "load center" && (
-                    <FuseSymbol
-                      cx={getXForConnector(conn, comp) + getWidthForConnector(conn) / 2}
-                      cy={getYForConnector(conn, comp) + 50} // adjust vertical offset
-                      size={16}
-                      stroke="black"
-                    />
-                  )} */}
                   <text
                     ref={(el) => {
                       connectorNameRefs.current[conn.id] = el;
                     }}
-                    x={
-                      getXForConnector(conn, comp)
-                      // + getWidthForConnector(conn) / 2
-                    }
+                    x={getXForConnector(conn, comp)}
                     y={getYForConnector(conn, comp) + 13}
                     textAnchor="end" //change to move text at the left
                     dominantBaseline="middle" //change to take text left at middle
@@ -908,7 +916,7 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                  (connIndex + 1);
+                    (connIndex + 1);
 
               fromX = fromConnectorX + fromConnectorOffset;
             }
@@ -950,71 +958,28 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 : getYForConnector(to, toComponent!);
             }
 
-
-
             connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
-            // Handle multiple wires connected to splice
-            if (fromComponent?.category.toLowerCase() === "splice") {
-              const spliceConnections = getConnectionsForComponent(fromComponent);
-              const spliceIndex = spliceConnections.findIndex(c => c === wire);
-              const totalWires = spliceConnections.length;
-              const spacing = 10; // space between wires
-
-              const centerX = getXForComponent(fromComponent) + getWidthForComponent(fromComponent) / 2;
-              const centerY = getYForComponent(fromComponent) + componentSize.height / 2;
-
-              // spread wires in a small fan/grid pattern
-              const horizontalOffset = (spliceIndex - (totalWires - 1) / 2) * spacing;
-              const verticalOffset = (spliceIndex % 2 === 0 ? 1 : -1) * spacing * Math.ceil(spliceIndex / 2);
-
-              fromX = centerX + horizontalOffset;
-              fromY = centerY + verticalOffset;
-            }
-
-            if (toComponent?.category.toLowerCase() === "splice") {
-              const spliceConnections = getConnectionsForComponent(toComponent);
-              const spliceIndex = spliceConnections.findIndex(c => c === wire);
-              const totalWires = spliceConnections.length;
-              const spacing = 10;
-
-              const centerX = getXForComponent(toComponent) + getWidthForComponent(toComponent) / 2;
-              const centerY = getYForComponent(toComponent) + componentSize.height / 2;
-
-              const horizontalOffset = (spliceIndex - (totalWires - 1) / 2) * spacing;
-              const verticalOffset = (spliceIndex % 2 === 0 ? 1 : -1) * spacing * Math.ceil(spliceIndex / 2);
-
-              toX = centerX + horizontalOffset;
-              toY = centerY + verticalOffset;
-            }
-
-
-
-            // --- Adjust midY calculation ---
-            let midY;
-            if (
-              fromComponent?.category.toLowerCase() === "splice" ||
-              toComponent?.category.toLowerCase() === "splice"
-            ) {
-              // Use straight midpoint for splice connections
-              midY = fromY + (toY - fromY) / 2;
-            } else {
-              // Use offset for normal wires
-              const offset = getConnectionOffset(i, data.connections.length, fromY, toY, 10);
-              let min = Math.min(fromY, toY);
-              midY = min + offset;
-            }
+            let intermediateY;
+            const offset = getConnectionOffset(
+              i,
+              data.connections.length,
+              fromY,
+              toY,
+              20
+            );
+            let min = Math.min(fromY, toY);
+            intermediateY = min + offset;
 
             // Calculate the positions where the tridents should be
-            const fromTridentY = fromY < toY ? midY : fromY - 10; // lift if needed
-            const toTridentY = fromY < toY ? toY : midY + 10;
+            const fromTridentY = fromY < toY ? intermediateY : fromY - 10; // lift if needed
+            const toTridentY = fromY < toY ? toY : intermediateY + 10;
 
             let isFromTop = isFromMasterComponent;
             let isToTop = isToMasterComponent;
 
             let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
             let toLabelY = isToTop ? toY - 5 : toY + 15;
-
 
             let wireElement;
             wireElement = (
@@ -1043,8 +1008,9 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${fromX}, ${fromY + 15
-                          }) scale(1, -1)`}
+                        transform={`translate(${fromX}, ${
+                          fromY + 15
+                        }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -1079,18 +1045,23 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     });
 
                     // Set popup position
-                    setPopupWirePosition({ x: fromX + 900, y: midY + 100 });
+                    setPopupWirePosition({
+                      x: fromX + 900,
+                      y: intermediateY + 100,
+                    });
                   }}
                   style={{ cursor: "pointer" }}
                 >
-
                   <polyline
                     key={i}
-                    // points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset
-                    //   } ${toX},${toY}`}
-                    points={`${fromX},${fromY} ${fromX},${midY} ${toX},${midY} ${toX},${toY}`}
+                    // points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset} ${toX},${toY}`}
+                    points={`${fromX},${fromY} ${fromX},${intermediateY} ${toX},${intermediateY} ${toX},${toY}`}
                     fill="none"
-                    stroke={selectedWires.includes(i.toString()) ? "#3390FF" : wire.color}
+                    stroke={
+                      selectedWires.includes(i.toString())
+                        ? "#3390FF"
+                        : wire.color
+                    }
                     strokeWidth={selectedWires.includes(i.toString()) ? 6 : 3}
                     markerEnd="url(#arrowhead)"
                     pointerEvents="stroke" // important
@@ -1110,8 +1081,9 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${toX}, ${toY + 15
-                          }) scale(1, -1)`}
+                        transform={`translate(${toX}, ${
+                          toY + 15
+                        }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -1150,7 +1122,6 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             );
             return <g key={i}>{wireElement}</g>;
           })}
-
         </svg>
       </div>
       {popupComponent && (
@@ -1169,8 +1140,10 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
         >
           <h4>{popupComponent.label}</h4>
           <p>
-            Category: {popupComponent.category}<br />
-            Connectors: {popupComponent.connectors.map(c => c.label).join(", ")}
+            Category: {popupComponent.category}
+            <br />
+            Connectors:{" "}
+            {popupComponent.connectors.map((c) => c.label).join(", ")}
           </p>
           <button
             onClick={() => {
@@ -1181,7 +1154,6 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           >
             Close
           </button>
-
         </div>
       )}
       {/* {popupWire && (
@@ -1329,11 +1301,17 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           >
             <tbody>
               <tr>
-                <td style={{ fontWeight: "bold", padding: "6px", width: "45%" }}>Harness Name</td>
+                <td
+                  style={{ fontWeight: "bold", padding: "6px", width: "45%" }}
+                >
+                  Harness Name
+                </td>
                 {/* <td style={{ padding: "6px" }}>{popupWire.wire?.harnessName || "MAIN WIRING HARNESS (W1)"}</td> */}
               </tr>
               <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>Harness Part Number</td>
+                <td style={{ fontWeight: "bold", padding: "6px" }}>
+                  Harness Part Number
+                </td>
                 {/* <td style={{ padding: "6px" }}>{popupWire.wire?.harnessPartNumber || "AUC13458"}</td> */}
               </tr>
               <tr>
@@ -1349,7 +1327,9 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 {/* <td style={{ padding: "6px" }}>{popupWire.wire?.wireDetails?.wireLength || "960"}</td> */}
               </tr>
               <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>Signal Name</td>
+                <td style={{ fontWeight: "bold", padding: "6px" }}>
+                  Signal Name
+                </td>
                 {/* <td style={{ padding: "6px" }}>{popupWire.wire?.signalName || "COOLANT TEMPERATURE"}</td> */}
               </tr>
             </tbody>
@@ -1377,31 +1357,61 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
             <thead>
               <tr style={{ backgroundColor: "#f7f7f7" }}>
                 <th style={{ border: "1px solid #ccc", padding: "6px" }}></th>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>From</th>
+                <th style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  From
+                </th>
                 <th style={{ border: "1px solid #ccc", padding: "6px" }}>To</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px", fontWeight: "bold" }}>Component</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromComponent?.label || popupWire.wire?.from?.componentId}
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Component
                 </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toComponent?.label || popupWire.wire?.to?.componentId}
+                  {popupWire.fromComponent?.label ||
+                    popupWire.wire?.from?.componentId}
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.toComponent?.label ||
+                    popupWire.wire?.to?.componentId}
                 </td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px", fontWeight: "bold" }}>Connector</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromConnector?.label || popupWire.wire?.from?.connectorId}
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Connector
                 </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toConnector?.label || popupWire.wire?.to?.connectorId}
+                  {popupWire.fromConnector?.label ||
+                    popupWire.wire?.from?.connectorId}
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.toConnector?.label ||
+                    popupWire.wire?.to?.connectorId}
                 </td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px", fontWeight: "bold" }}>Gender</td>
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Gender
+                </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
                   {/* {popupWire.fromConnector?.gender || popupWire.wire?.from?.gender || "-"} */}
                 </td>
@@ -1410,7 +1420,15 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
                 </td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px", fontWeight: "bold" }}>Cavity</td>
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Cavity
+                </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
                   {popupWire.wire?.from?.cavity}
                 </td>
@@ -1443,10 +1461,6 @@ export default function Schematic({ data, scale = 1 }: { data: SchematicData; sc
           </div>
         </div>
       )}
-
-
-
-
     </div>
   );
-} 
+}

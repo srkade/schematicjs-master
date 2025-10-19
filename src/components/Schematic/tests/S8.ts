@@ -24,7 +24,7 @@ const S8 = {
     gender: "Female"
   },
   {
-    id: "SPL1",
+    id: "SPL_500",
     label: "Splice",
     category: "Splice",
     shape: "circle",
@@ -36,7 +36,7 @@ const S8 = {
     ],
   },
   {
-    id: "SPL2",
+    id: "SPL_767",
     label: "Splice",
     category: "Splice",
     shape: "circle",
@@ -70,7 +70,7 @@ const S8 = {
         gender: ""
       },
       to: {
-        componentId: "SPL1",
+        componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
         gender: ""
@@ -112,7 +112,7 @@ const S8 = {
         cavity: "1",
       },
       to: {
-        componentId: "SPL2",
+        componentId: "SPL_767",
         connectorId: "XSP_767",
         cavity: "L",
       },

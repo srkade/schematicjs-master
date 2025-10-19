@@ -15,7 +15,7 @@ const S4 = {
       
     },
     {
-      id: "SPL1",
+      id: "SPL_500",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -51,7 +51,7 @@ const S4 = {
          gender: ""
       },
       to: {
-        componentId: "SPL1",
+        componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
         gender: ""

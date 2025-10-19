@@ -15,7 +15,7 @@ const DTC_StarterCoolDown = {
       ],
     },
     {
-      id: "SPL1",
+      id: "SPL_500",
       label: "Splice",
       category: "Splice",
       shape: "circle",
@@ -64,7 +64,7 @@ const DTC_StarterCoolDown = {
         cavity: "6",
       },
       to: {
-        componentId: "SPL1",
+        componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
       },
@@ -78,7 +78,7 @@ const DTC_StarterCoolDown = {
         cavity: "A",
       },
       to: {
-        componentId: "SPL1",
+        componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
       },
