@@ -410,11 +410,11 @@ export default function Schematic({
         continue;
       const x3 =
         getXForConnector(f2Connector, f2Component) +
-        getWidthForConnector(f2Connector) / 2;
+        getWidthForConnector(f2Connector, f2Component) / 2;
       const y3 = getYForConnector(f2Connector, f2Component) + 20 / 2;
       const x4 =
         getXForConnector(t2Connector, t2Component) +
-        getWidthForConnector(t2Connector) / 2;
+        getWidthForConnector(t2Connector, t2Component) / 2;
       const y4 = getYForConnector(t2Connector, t2Component) + 20 / 2;
       // Check intersection
       const inter = getIntersection(x1, y1, x2, y2, x3, y3, x4, y4);
@@ -472,7 +472,7 @@ export default function Schematic({
       if (connectionCount > 1) {
         let width = connectorSpacing;
         component.connectors.forEach((conn) => {
-          width += getWidthForConnector(conn) + connectorSpacing;
+          width += getWidthForConnector(conn, component) + connectorSpacing;
         });
         return Math.max(width, defaultWidth);
       }
@@ -527,7 +527,7 @@ export default function Schematic({
         connWidth += connectorSpacing;
         for (var i = 0; i < index; i++) {
           let conn = component.connectors[i];
-          connWidth += getWidthForConnector(conn);
+          connWidth += getWidthForConnector(conn, component);
           connWidth += connectorSpacing;
         }
         return x + connWidth;
@@ -535,8 +535,8 @@ export default function Schematic({
     }
     return (
       x +
-      (getWidthForComponent(component) / 2) -
-      (getWidthForConnector(component.connectors[0]) / 2)
+      getWidthForComponent(component) / 2 -
+      getWidthForConnector(component.connectors[0], component) / 2
     );
   }
 
@@ -556,19 +556,21 @@ export default function Schematic({
     );
   }
 
-  function getWidthForConnector(conn: ConnectorType): number {
+  function getWidthForConnector(
+    conn: ConnectorType,
+    comp: ComponentType
+  ): number {
     let connections = getConnectionsForConnector(conn);
-    let interConnectionSpacing = 30;
-    let connectionsBasedWidth =
-      (connections.length + 1) * interConnectionSpacing;
-    return (
-      // Pin padding changeed
-      Math.max(
+    if (comp.shape === "rectangle") {
+      let interConnectionSpacing = 30;
+      let connectionsBasedWidth =
+        (connections.length + 1) * interConnectionSpacing;
+      return Math.max(
         connectionsBasedWidth,
         connectorNameWidths[conn.id] + connectorNamePadding,
         100
-      )
-    );
+      );
+    }
     return connectorNameWidths[conn.id] + connectorNamePadding;
   }
 
@@ -852,7 +854,7 @@ export default function Schematic({
                     <rect
                       x={getXForConnector(conn, comp)}
                       y={getYForConnector(conn, comp)}
-                      width={getWidthForConnector(conn)}
+                      width={getWidthForConnector(conn, comp)}
                       height={connectorHeight}
                       fill="lightgreen"
                       stroke="black"
@@ -907,7 +909,10 @@ export default function Schematic({
             var fromX = fromStoredConnectionPoint?.x;
             if (fromX == undefined) {
               const fromConnectorX = getXForConnector(from, fromComponent!);
-              const fromConnectorWidth = getWidthForConnector(from);
+              const fromConnectorWidth = getWidthForConnector(
+                from,
+                fromComponent!
+              );
               const fromConnectorCount = connectorConnectionCount[from.id] || 1;
               const connIndex = getConnectionsForConnector(from).findIndex(
                 (c) => c === wire
@@ -938,7 +943,7 @@ export default function Schematic({
             var toX = toStoredConnectionPoint?.x;
             if (toX == undefined) {
               const toConnectorX = getXForConnector(to, toComponent!);
-              const toConnectorWidth = getWidthForConnector(to);
+              const toConnectorWidth = getWidthForConnector(to, toComponent!);
               const toConnectorCount = connectorConnectionCount[to.id] || 1;
               const connIndexTo = getConnectionsForConnector(to).findIndex(
                 (c) => c === wire
@@ -947,9 +952,12 @@ export default function Schematic({
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                  (connIndexTo + 1);
+                    (connIndexTo + 1);
 
-              toX = toConnectorX + toConnectorOffset;
+              toX =
+                toComponent?.shape === "circle"
+                  ? toConnectorX + toConnectorWidth / 2
+                  : toConnectorX + toConnectorOffset;
             }
             var toY = toStoredConnectionPoint?.y;
             if (toY == undefined) {
