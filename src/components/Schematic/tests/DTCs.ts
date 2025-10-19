@@ -1,8 +1,7 @@
-
 const DTC_StarterCoolDown = {
   masterComponents: ["S12"],
   components: [
-     {
+    {
       id: "S12",
       label: "Horn switch",
       category: "dtc",
@@ -36,10 +35,9 @@ const DTC_StarterCoolDown = {
           id: "XJ1",
           label: "XJ1",
         },
-       
       ],
     },
-    
+
     {
       id: "H1",
       label: "Horn",
@@ -52,8 +50,6 @@ const DTC_StarterCoolDown = {
         },
       ],
     },
-   
-    
   ],
   connections: [
     {
@@ -98,9 +94,11 @@ const DTC_StarterCoolDown = {
       },
       label: "",
     },
-    
   ],
 };
 
 
-export {  DTC_StarterCoolDown };
+
+export {
+  DTC_StarterCoolDown,
+};
