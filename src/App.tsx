@@ -13,7 +13,7 @@ import {
   CrankingSystem,
   ChargingSystem
 } from "./components/Schematic/tests";
-import {  DTC_StarterCoolDown } from "./components/Schematic/tests/DTCs"
+import {  DTC_StarterCoolDown,DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
 import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
 
@@ -33,6 +33,9 @@ const allSchematics = {
   ChargingSystem: wrapSchematic(ChargingSystem),
   
   DTC_StarterCoolDown: wrapSchematic(DTC_StarterCoolDown),
+  DTC_StarterRelayPower: wrapSchematic(DTC_StarterRelayPower),
+  DTC_StarterRelayGround: wrapSchematic(DTC_StarterRelayGround),
+  DTC_ICC: wrapSchematic(DTC_ICC),
 };
 const SYSTEM_KEYS = ["CrankingSystem", "ChargingSystem"];
 

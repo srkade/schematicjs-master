@@ -1,5 +1,5 @@
 const ChargingSystem = {
-  masterComponents: ["X90","G2"],
+  masterComponents: ["X90","G2","G1"],
   components: [
     {
       id: "G1",
@@ -21,6 +21,28 @@ const ChargingSystem = {
       remove: true,
       manufacturer: "",
       connector_part_number: "",
+      gender: ""
+    },
+    {
+      id: "W1",
+      label: "Ground",
+      category: "Component",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "XW1",
+          label: "XW1"
+        }
+      ],
+      engineering_component_name: "Ground",
+      engineering_manufacturer: "",
+      primary_part_number: "57M11990",
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      component_type: "Component",
+      connector_type: "Direct",
+      remove: false,
+      manufacturer: "",
+      connector_part_number: "57M11990",
       gender: ""
     },
     {
@@ -287,28 +309,7 @@ const ChargingSystem = {
       connector_part_number: "",
       gender: ""
     },
-    {
-      id: "W1",
-      label: "Ground",
-      category: "Component",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XW1",
-          label: "XW1"
-        }
-      ],
-      engineering_component_name: "Ground",
-      engineering_manufacturer: "",
-      primary_part_number: "57M11990",
-      harness_name: "MAIN WIRING HARNESS (W1)",
-      component_type: "Component",
-      connector_type: "Direct",
-      remove: false,
-      manufacturer: "",
-      connector_part_number: "57M11990",
-      gender: ""
-    }
+    
   ],
   connections: [
     {

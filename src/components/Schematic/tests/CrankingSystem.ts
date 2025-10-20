@@ -1,5 +1,5 @@
 const CrankingSystem = {
-  masterComponents: ["X90","G2","S3"],
+  masterComponents: ["Y2","W1","X90","G2","S3"],
   components: [
     {
       id: "S3",
@@ -23,6 +23,7 @@ const CrankingSystem = {
       connector_part_number: "M133149",
       gender: "Female"
     },
+    
     {
       id: "S7",
       label: "Reverse switch",
@@ -45,6 +46,7 @@ const CrankingSystem = {
       connector_part_number: "57M14183",
       gender: "Female"
     },
+    
     {
       id: "S8",
       label: "Brake Switch",
@@ -65,6 +67,50 @@ const CrankingSystem = {
       remove: false,
       manufacturer: "",
       connector_part_number: "",
+      gender: ""
+    },
+     {
+      id: "Y2",
+      label: "Starter Motor Solenoid",
+      category: "Solenoid",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "XY1",
+          label: "XY1"
+        }
+      ],
+      engineering_component_name: "Starter Motor Solenoid",
+      engineering_manufacturer: "",
+      primary_part_number: "57M8820",
+      harness_name: "",
+      component_type: "Component",
+      connector_type: "Direct",
+      remove: false,
+      manufacturer: "",
+      connector_part_number: "57M8820",
+      gender: ""
+    },
+    {
+      id: "W1",
+      label: "Ground",
+      category: "Ground",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "XW1",
+          label: "XW1"
+        }
+      ],
+      engineering_component_name: "Ground",
+      engineering_manufacturer: "",
+      primary_part_number: "57M11990",
+      harness_name: "",
+      component_type: "Component",
+      connector_type: "Direct",
+      remove: false,
+      manufacturer: "",
+      connector_part_number: "57M11990",
       gender: ""
     },
     {
@@ -539,50 +585,7 @@ const CrankingSystem = {
         }
       ]
     },
-    {
-      id: "Y2",
-      label: "Starter Motor Solenoid",
-      category: "Solenoid",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XY1",
-          label: "XY1"
-        }
-      ],
-      engineering_component_name: "Starter Motor Solenoid",
-      engineering_manufacturer: "",
-      primary_part_number: "57M8820",
-      harness_name: "",
-      component_type: "Component",
-      connector_type: "Direct",
-      remove: false,
-      manufacturer: "",
-      connector_part_number: "57M8820",
-      gender: ""
-    },
-    {
-      id: "W1",
-      label: "Ground",
-      category: "Ground",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XW1",
-          label: "XW1"
-        }
-      ],
-      engineering_component_name: "Ground",
-      engineering_manufacturer: "",
-      primary_part_number: "57M11990",
-      harness_name: "",
-      component_type: "Component",
-      connector_type: "Direct",
-      remove: false,
-      manufacturer: "",
-      connector_part_number: "57M11990",
-      gender: ""
-    }
+   
   ],
   connections: [
     {
