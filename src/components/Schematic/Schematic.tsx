@@ -13,6 +13,7 @@ import Sensor from "../symbols/Sensor";
 import ElectricalSwitch from "../symbols/ElectricalSwitch";
 import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
+import MotorSymbol from "../symbols/MotorSymbol";
 type ComponentType = {
   id: string;
   x?: number;
@@ -866,6 +867,17 @@ export default function Schematic({
                         fill="black"
                       />
                     )}
+
+                    {comp.category?.toLowerCase() === "motor" && (
+                      <MotorSymbol
+                        cx={getXForComponent(comp) + getWidthForComponent(comp) /5} // center of rectangle
+                        cy={getYForComponent(comp) + componentSize.height /2}       // center of rectangle
+                        size={Math.min(getWidthForComponent(comp), componentSize.height) * 0.5} // scale to fit rectangle
+                        color="black"
+                        fill="#B0E0E6"
+                      />
+                    )}
+
                   </g>
                 )
               )}

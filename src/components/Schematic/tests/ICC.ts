@@ -44,7 +44,7 @@ const ICC = {
     {
       id: "ALT",
       label: "Alternator",
-      category: "Alternator",
+      category: "Motor",
       shape: "rectangle",
       connectors: [
         {
@@ -56,7 +56,7 @@ const ICC = {
     {
       id: "MCFMHC",
       label: "Main Chassis to FMI Monitor Harness Connector",
-      category: "Connector",
+      category: "Sensor",
       shape: "rectangle",
       connectors: [
         {
@@ -68,7 +68,7 @@ const ICC = {
     {
       id: "MCRLH",
       label: "Main Chassis to Rear Lighting Harness",
-      category: "Main Chassis to Rear Lighting Harness",
+      category: "",
       shape: "rectangle",
       connectors: [
         {
@@ -80,7 +80,7 @@ const ICC = {
     {
       id: "FLS",
       label: "Fuel level sensor",
-      category: "Fuel level sensor",
+      category: "Sensor",
       shape: "rectangle",
       connectors: [
         {
@@ -128,7 +128,7 @@ const ICC = {
     {
       id: "HS",
       label: "Hood Switch",
-      category: "Hood Switch",
+      category: "Switch",
       shape: "rectangle",
       connectors: [
         {
@@ -188,7 +188,7 @@ const ICC = {
     {
       id: "KS",
       label: "Key Switch",
-      category: "Key Switch",
+      category: "Switch",
       shape: "rectangle",
       connectors: [
         {
@@ -212,7 +212,7 @@ const ICC = {
     {
       id: "OPS",
       label: "Oil Pressure Switch",
-      category: "Connector",
+      category: "Switch",
       shape: "rectangle",
       connectors: [
         {
@@ -248,7 +248,7 @@ const ICC = {
     {
       id: "BS",
       label: "Break switch",
-      category: "Break switch",
+      category: "switch",
       shape: "rectangle",
       connectors: [
         {
@@ -260,7 +260,7 @@ const ICC = {
     {
       id: "RS",
       label: "Reverse switch",
-      category: "Reverse switch",
+      category: "Switch",
       shape: "rectangle",
       connectors: [
         {
@@ -272,7 +272,7 @@ const ICC = {
     {
       id: "SS",
       label: "Seat switch",
-      category: "Seat switch",
+      category: "switch",
       shape: "rectangle",
       connectors: [
         {
@@ -332,7 +332,7 @@ const ICC = {
     {
       id: "LC",
       label: "Load Center",
-      category: "Load Center",
+      category: "Transformer",
       shape: "rectangle",
       connectors: [
         {
