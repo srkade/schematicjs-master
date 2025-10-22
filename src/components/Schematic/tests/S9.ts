@@ -74,7 +74,7 @@ const S9 = {
         componentId: "S9",
         connectorId: "XS9",
         cavity: "B",
-        gender: ""
+        gender: "female"
       },
       to: {
         componentId: "SPL_450",
@@ -117,11 +117,13 @@ const S9 = {
         componentId: "LC",
         connectorId: "X90",
         cavity: "47",
+        gender:"female"
       },
       to: {
         componentId: "S9",
         connectorId: "XS9",
         cavity: "D",
+        gender:"female"
       },
       label: "",
       wireDetails: {
@@ -158,11 +160,13 @@ const S9 = {
         componentId: "ICC",
         connectorId: "XJ1",
         cavity: "12",
+        gender:"female"
       },
       to: {
         componentId: "S9",
         connectorId: "XS9",
         cavity: "C",
+        gender:"female"
       },
       label: ""
     },
@@ -172,11 +176,13 @@ const S9 = {
         componentId: "HR",
         connectorId: "XK3",
         cavity: "19",
+        gender:""
       },
       to: {
         componentId: "S9",
         connectorId: "XS9",
         cavity: "1",
+        gender:"female"
       },
       label: "",
       wireDetails: {

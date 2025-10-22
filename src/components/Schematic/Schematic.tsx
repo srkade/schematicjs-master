@@ -23,8 +23,19 @@ type ComponentType = {
   category: string;
   shape: string;
   connectors: ConnectorType[];
-
   cavity?: number;
+
+  // Add these optional fields ↓↓↓
+  engineering_component_name?: string;
+  engineering_manufacturer?: string;
+  primary_part_number?: string;
+  harness_name?: string;
+  component_type?: string;
+  connector_type?: string;
+  manufacturer?: string;
+  connector_part_number?: string;
+  remove?: boolean;
+  harnessPartNumber?: string;
 };
 type ConnectorType = {
   id: string;
@@ -36,12 +47,14 @@ type ConnectionPoint = {
   componentId: string;
   connectorId: string;
   cavity: string;
+  gender?: string;
 };
 type ConnectionType = {
   color: string;
   from: ConnectionPoint;
   to: ConnectionPoint;
   label: string;
+  wireDetails?: WireDetailsType; // Add this
 };
 type SchematicData = {
   masterComponents: string[];
@@ -55,6 +68,35 @@ type WirePopupType = {
   fromConnector: ConnectorType;
   toComponent: ComponentType;
   toConnector: ConnectorType;
+  connections?: ConnectionType[];
+};
+
+type WireDetailsType = {
+  circuitNumber: string;
+  wireSize: number;
+  wireColor: string;
+  wireLength: number;
+  wireType: string;
+  twistId: string;
+  shieldId: string;
+  wireOption: string;
+  mark: string;
+  from: {
+    connectorNumber: string;
+    devName: string;
+    connPartNumber: string;
+    termPartNo: string;
+    sealPartNo: string;
+    cavity: string;
+  };
+  to: {
+    connectorNumber: string;
+    devName: string;
+    connPartNumber: string;
+    termPartNo: string;
+    sealPartNo: string;
+    cavity: string;
+  };
 };
 
 // ...existing code...
@@ -499,10 +541,10 @@ export default function Schematic({
     const y = isMasterComponent
       ? padding
       : padding +
-        componentSize.height +
-        spaceForWires() +
-        componentSize.height +
-        padding;
+      componentSize.height +
+      spaceForWires() +
+      componentSize.height +
+      padding;
     return y;
   }
 
@@ -837,7 +879,7 @@ export default function Schematic({
                 y={
                   getYForComponent(comp) +
                   (getYForComponent(comp) + componentSize.height / 2 <
-                  viewBox.y + viewBox.h / 2
+                    viewBox.y + viewBox.h / 2
                     ? -componentSize.height / 2 //+(-0.10)  // above component
                     : componentSize.height + 30) // below component
                 }
@@ -921,7 +963,7 @@ export default function Schematic({
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX =
                 fromComponent?.shape === "circle"
@@ -955,7 +997,7 @@ export default function Schematic({
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX =
                 toComponent?.shape === "circle"
@@ -1019,9 +1061,8 @@ export default function Schematic({
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${fromX}, ${
-                          fromY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${fromX}, ${fromY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -1038,13 +1079,8 @@ export default function Schematic({
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent deselecting everything else
 
-                    setSelectedWires((prev) => {
-                      if (prev.includes(i.toString())) {
-                        return prev.filter((id) => id !== i.toString());
-                      } else {
-                        return [...prev, i.toString()];
-                      }
-                    });
+                    // Select only this wire
+                    setSelectedWires([i.toString()]);
 
                     // Set popupWire with all details
                     setPopupWire({
@@ -1092,9 +1128,8 @@ export default function Schematic({
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${toX}, ${
-                          toY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${toX}, ${toY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -1167,115 +1202,12 @@ export default function Schematic({
           </button>
         </div>
       )}
-      {/* {popupWire && (
-        <div
-          // style={{
-          //   position: "absolute",
-          //   left: popupWirePosition.x,
-          //   top: popupWirePosition.y,
-          //   transform: "translate(0%, -50%)",
-          //   background: "white",
-          //   border: "1px solid black",
-          //   padding: "8px",
-          //   borderRadius: "4px",
-          //   zIndex: 1000,
-          //   width: "250px",
-          // }}
-          style={{
-            position: "fixed",        // make it fixed to screen
-            top: "40%",               // vertically centered
-            right: "20px",            // fixed to right side
-            transform: "translateY(-50%)",
-            width: "350px",           // popup width
-            height:"500px",
-            background: "#fff",
-            borderRadius: "10px",
-            boxShadow: "0px 4px 20px rgba(0,0,0,0.2)",
-            padding: "16px",
-            zIndex: 1000,             // make sure it’s above SVG
-            overflowY: "auto",
-            // maxHeight: "80vh",
-          }}
-        >
-          <h5>{popupWire.wire.label || "Wire Details"}</h5>
-          <table
-            style={{
-              borderCollapse: "collapse",
-              width: "100%",
-              textAlign: "left",
-            }}
-          >
-            <thead>
-              <tr>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>Property</th>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>From</th>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>To</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Color</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }} colSpan={2}>
-                  {popupWire.wire.color}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Component</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromComponent.label} ({popupWire.fromComponent.id})
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toComponent.label} ({popupWire.toComponent.id})
-                </td>
-              </tr>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Connector</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromConnector.label}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toConnector.label}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Cavity</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.wire.from.cavity}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.wire.to.cavity}
-                </td>
-              </tr>
 
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Gender</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromConnector.gender}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toConnector.gender}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();  // Prevent the click from bubbling up
-              setSelectedWires([]);
-              setPopupWire(null);
-            }}
-          >
-            Close
-          </button>
-
-        </div>
-      )} */}
       {popupWire && (
         <div
           style={{
             position: "fixed",
-            top: "40%",
+            top: "51%",
             right: "20px",
             transform: "translateY(-50%)",
             width: "420px",
@@ -1312,40 +1244,49 @@ export default function Schematic({
           >
             <tbody>
               <tr>
-                <td
-                  style={{ fontWeight: "bold", padding: "6px", width: "45%" }}
-                >
+                <td style={{ fontWeight: "bold", padding: "6px", width: "45%" }}>
                   Harness Name
                 </td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.harnessName || "MAIN WIRING HARNESS (W1)"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.fromComponent?.harness_name || "N/A"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>
                   Harness Part Number
                 </td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.harnessPartNumber || "AUC13458"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.fromComponent?.harnessPartNumber || "N/A"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>Color</td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.color || popupWire.wire?.wireDetails?.wireColor || "-"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.connections?.[0]?.color ||
+                    popupWire.wire?.color ||
+                    "-"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>Size</td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.wireDetails?.wireSize || "0.8"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.wire?.wireDetails?.wireSize || "N/A"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>Length</td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.wireDetails?.wireLength || "960"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.wire?.wireDetails?.wireLength || "N/A"}
+                </td>
               </tr>
               <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>
-                  Signal Name
+                <td style={{ fontWeight: "bold", padding: "6px" }}>Signal Name</td>
+                <td style={{ padding: "6px" }}>
+                  {/* {popupWire.wire?.signalName || popupWire.wire?.wireDetails?.devName || "N/A"} */}
                 </td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.signalName || "COOLANT TEMPERATURE"}</td> */}
               </tr>
             </tbody>
           </table>
-
           {/* SECOND TABLE: CONNECTION DETAILS */}
           <h3
             style={{
@@ -1424,10 +1365,10 @@ export default function Schematic({
                   Gender
                 </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {/* {popupWire.fromConnector?.gender || popupWire.wire?.from?.gender || "-"} */}
+                  {popupWire.fromConnector?.gender || popupWire.wire?.from?.gender || "-"}
                 </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {/* {popupWire.toConnector?.gender || popupWire.wire?.to?.gender || "-"} */}
+                  {popupWire.toConnector?.gender || popupWire.wire?.to?.gender || "-"}
                 </td>
               </tr>
               <tr>

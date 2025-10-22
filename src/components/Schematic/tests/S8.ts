@@ -151,11 +151,13 @@ const S8 = {
         componentId: "ICC",
         connectorId: "XJ2",
         cavity: "3",
+        gender:"female"
       },
       to: {
         componentId: "S8",
         connectorId: "XS8",
         cavity: "1",
+        gender:""
       },
       label: "",
       wireDetails: {
