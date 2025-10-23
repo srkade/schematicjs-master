@@ -146,6 +146,42 @@ export default function Schematic({
   }>({ x: 0, y: 0 });
 
   // Reset view handler
+  // const resetView = () => {
+  //   if (!svgWrapperRef.current) return;
+
+  //   const svgWidth = svgWrapperRef.current.clientWidth;
+  //   const svgHeight = svgWrapperRef.current.clientHeight;
+
+  //   const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
+
+  //   let scaleFactor = 1;
+
+  //   if (data.components.length === 1) {
+  //     // Single component: apply default zoom factor
+  //     scaleFactor = scaleFactor * 0.6; // Zoomed out default
+  //   } else {
+  //     // Multiple components: scale to fit SVG
+  //     const margin = 0.05;
+  //     const scaleX = svgWidth / schematicW;
+  //     const scaleY = svgHeight / schematicH;
+  //     scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+  //   }
+
+  //   const newW = schematicW * scaleFactor;
+  //   const newH = schematicH * scaleFactor;
+
+  //   // Center schematic
+  //   const centerX = fitX + (schematicW - newW) / 2;
+  //   const centerY = fitY + (schematicH - newH) / 2;
+
+  //   setViewBox({
+  //     x: centerX,
+  //     y: centerY,
+  //     w: newW,
+  //     h: newH,
+  //   });
+  // };
+
   const resetView = () => {
     if (!svgWrapperRef.current) return;
 
@@ -154,25 +190,30 @@ export default function Schematic({
 
     const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
-    let scaleFactor = 1;
+    const margin = 0.05;
+    const scaleX = svgWidth / schematicW;
+    const scaleY = svgHeight / schematicH;
+    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
 
-    if (data.components.length === 1) {
-      // Single component: apply default zoom factor
-      scaleFactor = scaleFactor * 0.6; // Zoomed out default
+    let newW, newH, centerX, centerY;
+
+    if (schematicW < svgWidth && schematicH < svgHeight) {
+      // Small schematic — keep centered
+      scaleFactor = Math.min(scaleFactor, 1);
+      newW = schematicW * scaleFactor + 200;
+      newH = schematicH * scaleFactor + 200;
+
+      centerX = fitX - (newW - schematicW) / 2;
+      centerY = fitY - (newH - schematicH) / 2;
     } else {
-      // Multiple components: scale to fit SVG
-      const margin = 0.05;
-      const scaleX = svgWidth / schematicW;
-      const scaleY = svgHeight / schematicH;
-      scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+      // Large schematic — align to top and expand horizontally
+      const expandFactor = 1.3; // expand width to the right
+      newW = schematicW * expandFactor;
+      newH = schematicH * scaleFactor * 2; // keep proportional height
+
+      centerX = fitX;     // left aligned
+      centerY = fitY+300;     // top aligned
     }
-
-    const newW = schematicW * scaleFactor;
-    const newH = schematicH * scaleFactor;
-
-    // Center schematic
-    const centerX = fitX + (schematicW - newW) / 2;
-    const centerY = fitY + (schematicH - newH) / 2;
 
     setViewBox({
       x: centerX,
@@ -181,7 +222,6 @@ export default function Schematic({
       h: newH,
     });
   };
-
   // Mouse wheel handler for zoom
   const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
     e.preventDefault();
@@ -867,11 +907,10 @@ export default function Schematic({
                         fill="black"
                       />
                     )}
-
                     {comp.category?.toLowerCase() === "motor" && (
                       <MotorSymbol
-                        cx={getXForComponent(comp) + getWidthForComponent(comp) /5} // center of rectangle
-                        cy={getYForComponent(comp) + componentSize.height /2}       // center of rectangle
+                        cx={getXForComponent(comp) + getWidthForComponent(comp) / 5} // center of rectangle
+                        cy={getYForComponent(comp) + componentSize.height / 2}       // center of rectangle
                         size={Math.min(getWidthForComponent(comp), componentSize.height) * 0.5} // scale to fit rectangle
                         color="black"
                         fill="#B0E0E6"
