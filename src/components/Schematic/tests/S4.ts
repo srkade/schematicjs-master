@@ -74,13 +74,13 @@ const S4 = {
         componentId: "S4",
         connectorId: "XS4",
         cavity: "2",
-         gender: ""
+        gender: "female"
       },
       to: {
         componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
-        gender: ""
+        gender: " "
       },
       label: "",
       wireDetails: {
@@ -123,7 +123,7 @@ const S4 = {
         componentId: "S4",
         connectorId: "XS4",
         cavity: "4",
-        gender: ""
+        gender: "female"
       },
       label: "",
       wireDetails: {

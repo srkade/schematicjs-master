@@ -13,6 +13,7 @@ import Sensor from "../symbols/Sensor";
 import ElectricalSwitch from "../symbols/ElectricalSwitch";
 import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
+import MotorSymbol from "../symbols/MotorSymbol";
 type ComponentType = {
   id: string;
   x?: number;
@@ -23,8 +24,19 @@ type ComponentType = {
   category: string;
   shape: string;
   connectors: ConnectorType[];
-
   cavity?: number;
+
+  // Add these optional fields ↓↓↓
+  engineering_component_name?: string;
+  engineering_manufacturer?: string;
+  primary_part_number?: string;
+  harness_name?: string;
+  component_type?: string;
+  connector_type?: string;
+  manufacturer?: string;
+  connector_part_number?: string;
+  remove?: boolean;
+  harnessPartNumber?: string;
 };
 type ConnectorType = {
   id: string;
@@ -36,12 +48,14 @@ type ConnectionPoint = {
   componentId: string;
   connectorId: string;
   cavity: string;
+  gender?: string;
 };
 type ConnectionType = {
   color: string;
   from: ConnectionPoint;
   to: ConnectionPoint;
   label: string;
+  wireDetails?: WireDetailsType; // Add this
 };
 type SchematicData = {
   masterComponents: string[];
@@ -55,10 +69,47 @@ type WirePopupType = {
   fromConnector: ConnectorType;
   toComponent: ComponentType;
   toConnector: ConnectorType;
+  connections?: ConnectionType[];
 };
 
+type WireDetailsType = {
+  circuitNumber: string;
+  wireSize: number;
+  wireColor: string;
+  wireLength: number;
+  wireType: string;
+  twistId: string;
+  shieldId: string;
+  wireOption: string;
+  mark: string;
+  from: {
+    connectorNumber: string;
+    devName: string;
+    connPartNumber: string;
+    termPartNo: string;
+    sealPartNo: string;
+    cavity: string;
+  };
+  to: {
+    connectorNumber: string;
+    devName: string;
+    connPartNumber: string;
+    termPartNo: string;
+    sealPartNo: string;
+    cavity: string;
+  };
+};
+type PopupConnectorType = {
+  componentCode: string;
+  connectorCode: string;
+  harnessName?: string;
+  partNumber?: string;
+  gender?: string;
+  color?: string;
+  connectorType?: string;
+  cavityCount?: number;
+};
 // ...existing code...
-
 const colors = {
   OG: "orange",
 };
@@ -102,7 +153,71 @@ export default function Schematic({
     y: number;
   }>({ x: 0, y: 0 });
 
+  //state to manange the connector selection
+  const [selectedConnector, setSelectedConnector] = useState<ConnectorType | null>(null);
+  const [popupConnector, setPopupConnector] = useState<PopupConnectorType | null>(null);
+
+  const handleConnectorClick = (
+    e: React.MouseEvent<SVGRectElement, MouseEvent>,
+    connector: ConnectorType,
+    comp: ComponentType
+  ) => {
+    e.stopPropagation();
+    setSelectedConnector(connector);
+    const cavityCount = calculateCavityCountForConnector(connector);
+
+    setPopupConnector({
+      componentCode: comp.label || comp.id,
+      connectorCode: connector.label || connector.id,
+      harnessName: comp.harness_name,
+      partNumber: comp.connector_part_number,
+      gender: connector.gender,
+      color: connector.color,
+      connectorType: comp.connector_type,
+      cavityCount,
+    });
+    setPopupWire(null);
+  };
+
+
+
   // Reset view handler
+  // const resetView = () => {
+  //   if (!svgWrapperRef.current) return;
+
+  //   const svgWidth = svgWrapperRef.current.clientWidth;
+  //   const svgHeight = svgWrapperRef.current.clientHeight;
+
+  //   const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
+
+  //   let scaleFactor = 1;
+
+  //   if (data.components.length === 1) {
+  //     // Single component: apply default zoom factor
+  //     scaleFactor = scaleFactor * 0.6; // Zoomed out default
+  //   } else {
+  //     // Multiple components: scale to fit SVG
+  //     const margin = 0.05;
+  //     const scaleX = svgWidth / schematicW;
+  //     const scaleY = svgHeight / schematicH;
+  //     scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+  //   }
+
+  //   const newW = schematicW * scaleFactor;
+  //   const newH = schematicH * scaleFactor;
+
+  //   // Center schematic
+  //   const centerX = fitX + (schematicW - newW) / 2;
+  //   const centerY = fitY + (schematicH - newH) / 2;
+
+  //   setViewBox({
+  //     x: centerX,
+  //     y: centerY,
+  //     w: newW,
+  //     h: newH,
+  //   });
+  // };
+
   const resetView = () => {
     if (!svgWrapperRef.current) return;
 
@@ -111,25 +226,30 @@ export default function Schematic({
 
     const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
 
-    let scaleFactor = 1;
+    const margin = 0.05;
+    const scaleX = svgWidth / schematicW;
+    const scaleY = svgHeight / schematicH;
+    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
 
-    if (data.components.length === 1) {
-      // Single component: apply default zoom factor
-      scaleFactor = scaleFactor * 0.6; // Zoomed out default
+    let newW, newH, centerX, centerY;
+
+    if (schematicW < svgWidth && schematicH < svgHeight) {
+      // Small schematic — keep centered
+      scaleFactor = Math.min(scaleFactor, 1);
+      newW = schematicW * scaleFactor + 200;
+      newH = schematicH * scaleFactor + 200;
+
+      centerX = fitX - (newW - schematicW) / 2;
+      centerY = fitY - (newH - schematicH) / 2;
     } else {
-      // Multiple components: scale to fit SVG
-      const margin = 0.05;
-      const scaleX = svgWidth / schematicW;
-      const scaleY = svgHeight / schematicH;
-      scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
+      // Large schematic — align to top and expand horizontally
+      const expandFactor = 1.3; // expand width to the right
+      newW = schematicW * expandFactor;
+      newH = schematicH * scaleFactor * 2; // keep proportional height
+
+      centerX = fitX;     // left aligned
+      centerY = fitY + 100;     // top aligned
     }
-
-    const newW = schematicW * scaleFactor;
-    const newH = schematicH * scaleFactor;
-
-    // Center schematic
-    const centerX = fitX + (schematicW - newW) / 2;
-    const centerY = fitY + (schematicH - newH) / 2;
 
     setViewBox({
       x: centerX,
@@ -138,7 +258,6 @@ export default function Schematic({
       h: newH,
     });
   };
-
   // Mouse wheel handler for zoom
   const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
     e.preventDefault();
@@ -194,17 +313,42 @@ export default function Schematic({
   }, []);
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      // If click is outside both the SVG and popup
+      if (
+        !svgWrapperRef.current?.contains(e.target as Node) &&
+        !popupRef.current?.contains(e.target as Node)
+      ) {
+        setSelectedComponentIds([]);
+        setPopupComponent(null);
+        setSelectedConnector(null);
+        setPopupConnector(null);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (!svgWrapperRef.current?.contains(e.target as Node)) {
         setSelectedComponentIds([]);
         setPopupComponent(null);
-        setPopupClosedManually(false); // reset manual close
-        setSelectedWires([]);
-        setPopupWire(null);
+        setSelectedConnector(null);
+        setPopupConnector(null);
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
   }, []);
+
+
+  const handleClosePopup = (e: React.MouseEvent) => {
+    e.stopPropagation();        // prevent outside-click effect
+    setPopupConnector(null);    // close popup
+    setSelectedConnector(null); // clear highlight
+  };
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -230,6 +374,8 @@ export default function Schematic({
       h: viewBox.h,
     });
   };
+  const popupRef = useRef<HTMLDivElement | null>(null);
+
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
   // Track if popup was manually closed
@@ -480,6 +626,7 @@ export default function Schematic({
     return defaultWidth;
   }
 
+
   function getXForComponent(component: ComponentType): number {
     let index = data.components.findIndex((c) => c.id === component.id);
     if (index < 1) {
@@ -499,10 +646,10 @@ export default function Schematic({
     const y = isMasterComponent
       ? padding
       : padding +
-        componentSize.height +
-        spaceForWires() +
-        componentSize.height +
-        padding;
+      componentSize.height +
+      spaceForWires() +
+      componentSize.height +
+      padding;
     return y;
   }
 
@@ -603,6 +750,18 @@ export default function Schematic({
     const offsetY = (wireIndex - (totalWires - 1) / 2) * spacing;
     return { x: centerX, offsetY };
   }
+
+  function calculateCavityCountForConnector(conn: ConnectorType): number {
+    // Count all connections where this connector is involved
+    const count = data.connections.filter(
+      (connection) =>
+        connection.from.connectorId === conn.id ||
+        connection.to.connectorId === conn.id
+    ).length;
+
+    return count;
+  }
+
 
   const buttonStyle = {
     padding: "3px 7px",
@@ -824,6 +983,16 @@ export default function Schematic({
                         fill="black"
                       />
                     )}
+                    {comp.category?.toLowerCase() === "motor" && (
+                      <MotorSymbol
+                        cx={getXForComponent(comp) + getWidthForComponent(comp) / 5} // center of rectangle
+                        cy={getYForComponent(comp) + componentSize.height / 2}       // center of rectangle
+                        size={Math.min(getWidthForComponent(comp), componentSize.height) * 0.5} // scale to fit rectangle
+                        color="black"
+                        fill="#B0E0E6"
+                      />
+                    )}
+
                   </g>
                 )
               )}
@@ -837,7 +1006,7 @@ export default function Schematic({
                 y={
                   getYForComponent(comp) +
                   (getYForComponent(comp) + componentSize.height / 2 <
-                  viewBox.y + viewBox.h / 2
+                    viewBox.y + viewBox.h / 2
                     ? -componentSize.height / 2 //+(-0.10)  // above component
                     : componentSize.height + 30) // below component
                 }
@@ -856,11 +1025,13 @@ export default function Schematic({
                       y={getYForConnector(conn, comp)}
                       width={getWidthForConnector(conn, comp)}
                       height={connectorHeight}
-                      fill="lightgreen"
+                      fill={selectedConnector?.id === conn.id ? "#3390FF" : "lightgreen"} // highlight selected
                       stroke="black"
                       strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                      onClick={(e) => handleConnectorClick(e, conn, comp)} // <-- add this
                     />
                   )}
+
                   <text
                     ref={(el) => {
                       connectorNameRefs.current[conn.id] = el;
@@ -921,7 +1092,7 @@ export default function Schematic({
                 fromConnectorCount === 1
                   ? fromConnectorWidth / 2
                   : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                  (connIndex + 1);
 
               fromX =
                 fromComponent?.shape === "circle"
@@ -955,7 +1126,7 @@ export default function Schematic({
                 toConnectorCount === 1
                   ? toConnectorWidth / 2
                   : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                  (connIndexTo + 1);
 
               toX =
                 toComponent?.shape === "circle"
@@ -995,17 +1166,6 @@ export default function Schematic({
             let wireElement;
             wireElement = (
               <g>
-                {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
-
-                {/* {isFromTop ? (
-                  // top component → trident points UP
-                  <TridentShape cx={fromX} cy={fromY - 15} color={wire.color} size={10} />
-                ) : (
-                  // bottom component → trident points DOWN
-                  <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
-                    <TridentShape cx={0} cy={0} color={wire.color} size={10} />
-                  </g>
-                )} */}
                 {fromComponent?.category?.toLowerCase() !== "splice" && (
                   <>
                     {isFromTop ? (
@@ -1019,9 +1179,8 @@ export default function Schematic({
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${fromX}, ${
-                          fromY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${fromX}, ${fromY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -1038,13 +1197,8 @@ export default function Schematic({
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent deselecting everything else
 
-                    setSelectedWires((prev) => {
-                      if (prev.includes(i.toString())) {
-                        return prev.filter((id) => id !== i.toString());
-                      } else {
-                        return [...prev, i.toString()];
-                      }
-                    });
+                    // Select only this wire
+                    setSelectedWires([i.toString()]);
 
                     // Set popupWire with all details
                     setPopupWire({
@@ -1065,7 +1219,6 @@ export default function Schematic({
                 >
                   <polyline
                     key={i}
-                    // points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset} ${toX},${toY}`}
                     points={`${fromX},${fromY} ${fromX},${intermediateY} ${toX},${intermediateY} ${toX},${toY}`}
                     fill="none"
                     stroke={
@@ -1092,9 +1245,8 @@ export default function Schematic({
                     ) : (
                       // bottom component → trident points DOWN
                       <g
-                        transform={`translate(${toX}, ${
-                          toY + 15
-                        }) scale(1, -1)`}
+                        transform={`translate(${toX}, ${toY + 15
+                          }) scale(1, -1)`}
                       >
                         <TridentShape
                           cx={0}
@@ -1138,9 +1290,9 @@ export default function Schematic({
       {popupComponent && (
         <div
           style={{
-            position: "absolute",
-            left: popupPosition.x,
-            top: popupPosition.y,
+            position: "fixed",
+            top: "30%",
+            right: "20px",
             transform: "translate(0%, -30%)",
             background: "white",
             border: "1px solid black",
@@ -1167,115 +1319,12 @@ export default function Schematic({
           </button>
         </div>
       )}
-      {/* {popupWire && (
-        <div
-          // style={{
-          //   position: "absolute",
-          //   left: popupWirePosition.x,
-          //   top: popupWirePosition.y,
-          //   transform: "translate(0%, -50%)",
-          //   background: "white",
-          //   border: "1px solid black",
-          //   padding: "8px",
-          //   borderRadius: "4px",
-          //   zIndex: 1000,
-          //   width: "250px",
-          // }}
-          style={{
-            position: "fixed",        // make it fixed to screen
-            top: "40%",               // vertically centered
-            right: "20px",            // fixed to right side
-            transform: "translateY(-50%)",
-            width: "350px",           // popup width
-            height:"500px",
-            background: "#fff",
-            borderRadius: "10px",
-            boxShadow: "0px 4px 20px rgba(0,0,0,0.2)",
-            padding: "16px",
-            zIndex: 1000,             // make sure it’s above SVG
-            overflowY: "auto",
-            // maxHeight: "80vh",
-          }}
-        >
-          <h5>{popupWire.wire.label || "Wire Details"}</h5>
-          <table
-            style={{
-              borderCollapse: "collapse",
-              width: "100%",
-              textAlign: "left",
-            }}
-          >
-            <thead>
-              <tr>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>Property</th>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>From</th>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>To</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Color</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }} colSpan={2}>
-                  {popupWire.wire.color}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Component</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromComponent.label} ({popupWire.fromComponent.id})
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toComponent.label} ({popupWire.toComponent.id})
-                </td>
-              </tr>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Connector</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromConnector.label}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toConnector.label}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Cavity</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.wire.from.cavity}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.wire.to.cavity}
-                </td>
-              </tr>
 
-              <tr>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>Gender</td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromConnector.gender}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toConnector.gender}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();  // Prevent the click from bubbling up
-              setSelectedWires([]);
-              setPopupWire(null);
-            }}
-          >
-            Close
-          </button>
-
-        </div>
-      )} */}
       {popupWire && (
         <div
           style={{
             position: "fixed",
-            top: "40%",
+            top: "51%",
             right: "20px",
             transform: "translateY(-50%)",
             width: "420px",
@@ -1312,40 +1361,49 @@ export default function Schematic({
           >
             <tbody>
               <tr>
-                <td
-                  style={{ fontWeight: "bold", padding: "6px", width: "45%" }}
-                >
+                <td style={{ fontWeight: "bold", padding: "6px", width: "45%" }}>
                   Harness Name
                 </td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.harnessName || "MAIN WIRING HARNESS (W1)"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.fromComponent?.harness_name || "N/A"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>
                   Harness Part Number
                 </td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.harnessPartNumber || "AUC13458"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.fromComponent?.harnessPartNumber || "N/A"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>Color</td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.color || popupWire.wire?.wireDetails?.wireColor || "-"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.connections?.[0]?.color ||
+                    popupWire.wire?.color ||
+                    "-"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>Size</td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.wireDetails?.wireSize || "0.8"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.wire?.wireDetails?.wireSize || "N/A"}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: "bold", padding: "6px" }}>Length</td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.wireDetails?.wireLength || "960"}</td> */}
+                <td style={{ padding: "6px" }}>
+                  {popupWire.wire?.wireDetails?.wireLength || "N/A"}
+                </td>
               </tr>
               <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>
-                  Signal Name
+                <td style={{ fontWeight: "bold", padding: "6px" }}>Signal Name</td>
+                <td style={{ padding: "6px" }}>
+                  {/* {popupWire.wire?.signalName || popupWire.wire?.wireDetails?.devName || "N/A"} */}
                 </td>
-                {/* <td style={{ padding: "6px" }}>{popupWire.wire?.signalName || "COOLANT TEMPERATURE"}</td> */}
               </tr>
             </tbody>
           </table>
-
           {/* SECOND TABLE: CONNECTION DETAILS */}
           <h3
             style={{
@@ -1424,10 +1482,10 @@ export default function Schematic({
                   Gender
                 </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {/* {popupWire.fromConnector?.gender || popupWire.wire?.from?.gender || "-"} */}
+                  {popupWire.fromConnector?.gender || popupWire.wire?.from?.gender || "-"}
                 </td>
                 <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {/* {popupWire.toConnector?.gender || popupWire.wire?.to?.gender || "-"} */}
+                  {popupWire.toConnector?.gender || popupWire.wire?.to?.gender || "-"}
                 </td>
               </tr>
               <tr>
@@ -1472,6 +1530,101 @@ export default function Schematic({
           </div>
         </div>
       )}
+      {popupConnector && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            right: "20px",
+            transform: "translateY(-50%)",
+            width: "400px",
+            height: "auto",
+            maxHeight: "600px",
+            background: "#fff",
+            borderRadius: "12px",
+            boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
+            padding: "20px",
+            zIndex: 1000,
+            overflowY: "auto",
+            fontFamily: "Arial, sans-serif",
+            lineHeight: "1.6",
+          }}
+        >
+          {/* HEADER */}
+          <h3
+            style={{
+              fontSize: "18px",
+              fontWeight: "bold",
+              marginBottom: "16px",
+            }}
+          >
+            Connector Details
+          </h3>
+
+          {/* DETAILS TABLE */}
+          <table style={{ width: "100%", fontSize: "14px" }}>
+            <tbody>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px", width: "40%" }}>Component Code</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.componentCode || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Code</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.connectorCode || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Harness Name</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.harnessName || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Part Number</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.partNumber || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Gender</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.gender || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Cavity Count</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.cavityCount || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Color</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.color || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Type</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.connectorType || "-"}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* CLOSE BUTTON */}
+          <div
+            ref={popupRef}
+            style={{ textAlign: "center", marginTop: "20px" }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopupConnector(null);
+                setSelectedConnector(null);
+              }}
+              style={{
+                background: "#007bff",
+                color: "#fff",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+
