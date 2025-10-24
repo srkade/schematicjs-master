@@ -248,7 +248,7 @@ export default function Schematic({
       newH = schematicH * scaleFactor * 2; // keep proportional height
 
       centerX = fitX;     // left aligned
-      centerY = fitY + 300;     // top aligned
+      centerY = fitY + 100;     // top aligned
     }
 
     setViewBox({
