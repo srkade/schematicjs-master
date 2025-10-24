@@ -9,23 +9,35 @@ const S4 = {
       connectors: [
         {
           id: "XS4",
-          label: "XS4",
-        },
+          label: "XS4"
+        }
       ],
-      
+      engineering_component_name: "Seat switch",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M7535",
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      component_type: "Component",
+      connector_type: "Direct",
+      remove: false,
+      manufacturer: "Deutsch",
+      connector_part_number: "57M7535",
+      gender: "Female"
     },
     {
-      id: "SPL_500",
+      id: "SP_500",
       label: "Splice",
       category: "Splice",
       shape: "circle",
       connectors: [
         {
           id: "XSP_500",
-          label: "XSP_500",
-        },
+          label: "XSP_500"
+        }
       ],
-      
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      component_type: "Splice",
+      connector_type: "Direct",
+      remove: false
     },
     {
       id: "ICC",
@@ -34,13 +46,27 @@ const S4 = {
       shape: "rectangle",
       connectors: [
         {
-          id: "XJ2",
-          label: "XJ2",
+          id: "XJ1",
+          label: "XJ1"
         },
+        {
+          id: "XJ2",
+          label: "XJ2"
+        }
       ],
-      
-    },
+      engineering_component_name: "Instrument Cluster Controller",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M12666",
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      component_type: "Component",
+      connector_type: "Direct",
+      remove: false,
+      manufacturer: "Molex",
+      connector_part_number: "57M12666",
+      gender: "Female"
+    }
   ],
+
   connections: [
     {
       color: "yellow",

@@ -1,72 +1,111 @@
 const S9 = {
   masterComponents: ["S9"],
   components: [
-    {
-      id: "S9",
-      label: "Light switch",
-      category: "Switch",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XS9",
-          label: "XS9",
-        },
-      ],
-    
-    },
-    {
-      id: "SPL_450",
-      label: "Splice",
-      category: "Splice",
-      shape: "circle",
-      connectors: [
-        {
-          id: "XSP_450",
-          label: "XSP_450",
-        },
-      ],
-      
-    },
-    {
-      id: "ICC",
-      label: "Instrument Cluster Controller",
-      category: "Transistor",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XJ1",
-          label: "XJ1",
-        },
-      ],
-     
-    },
-    {
-      id: "LC",
-      label: "Load Center",
-      category: "Transformer",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "X90",
-          label: "X90",
-        },
-      ],
-      
-    },
-    {
-      id: "HR",
-      label: "Headlight relay",
-      category: "Instrument",
-      shape: "rectangle",
-      connectors: [
-        {
-          id: "XK3",
-          label: "XK3",
-        },
-      ],
-      
-    }
-  ],
+  {
+    id: "S9",
+    label: "Light switch",
+    category: "Switch",
+    shape: "rectangle",
+    connectors: [
+      {
+        id: "XS9",
+        label: "XS9"
+      }
+    ],
+    engineering_component_name: "Light switch",
+    engineering_manufacturer: "Bosch",
+    primary_part_number: "57M9361",
+    harness_name: "MAIN WIRING HARNESS (W1)",
+    component_type: "Component",
+    connector_type: "Direct",
+    remove: false,
+    manufacturer: "Delphi",
+    connector_part_number: "57M9361",
+    gender: "Female"
+  },
+  {
+    id: "SPL_450",
+    label: "Splice",
+    category: "Splice",
+    shape: "circle",
+    connectors: [
+      {
+        id: "XSP_450",
+        label: "XSP_450"
+      }
+    ],
+    harness_name: "MAIN WIRING HARNESS (W1)",
+    component_type: "Splice",
+    connector_type: "Direct",
+    remove: false
+  },
+  {
+    id: "ICC",
+    label: "Instrument Cluster Controller",
+    category: "Transistor",
+    shape: "rectangle",
+    connectors: [
+      {
+        id: "XJ1",
+        label: "XJ1"
+      },
+      {
+        id: "XJ2",
+        label: "XJ2"
+      }
+    ],
+    engineering_component_name: "Instrument Cluster Controller",
+    engineering_manufacturer: "Bosch",
+    primary_part_number: "57M12666",
+    harness_name: "MAIN WIRING HARNESS (W1)",
+    component_type: "Component",
+    connector_type: "Direct",
+    remove: false,
+    manufacturer: "Molex",
+    connector_part_number: "57M12666",
+    gender: "Female"
+  },
+  {
+    id: "LC",
+    label: "Load Center",
+    category: "Transformer",
+    shape: "rectangle",
+    connectors: [
+      {
+        id: "X90",
+        label: "X90"
+      }
+    ],
+    engineering_component_name: "Load center",
+    engineering_manufacturer: "Bosch",
+    primary_part_number: "57M13428",
+    harness_name: "MAIN WIRING HARNESS (W1)",
+    component_type: "Component",
+    connector_type: "Direct",
+    remove: false,
+    manufacturer: "GEP",
+    connector_part_number: "57M13428",
+    gender: "Female"
+  },
+  {
+    id: "HR",
+    label: "Headlight relay",
+    category: "Relay",
+    shape: "rectangle",
+    connectors: [
+      {
+        id: "XK3",
+        label: "XK3"
+      }
+    ],
+    engineering_component_name: "Headlight relay",
+    harness_name: "MAIN WIRING HARNESS (W1)",
+    component_type: "Component",
+    connector_type: "Direct",
+    remove: false
+  }
+]
+,
   connections: [
     {
       color: "yellow",
