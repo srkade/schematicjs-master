@@ -313,33 +313,42 @@ export default function Schematic({
   }, []);
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (!svgWrapperRef.current?.contains(e.target as Node)) {
+      // If click is outside both the SVG and popup
+      if (
+        !svgWrapperRef.current?.contains(e.target as Node) &&
+        !popupRef.current?.contains(e.target as Node)
+      ) {
         setSelectedComponentIds([]);
         setPopupComponent(null);
-        setPopupClosedManually(false); // reset manual close
-        setSelectedWires([]);
-        setPopupWire(null);
+        setSelectedConnector(null);
+        setPopupConnector(null);
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setPopupConnector(null);
-      setSelectedConnector(null);
-      setPopupConnector(null);
-    };
-    const handleClosePopup = () => {
-      setPopupConnector(null); // do not clear selectedConnector
-      setSelectedConnector(null);
-    };
-
 
     window.addEventListener("click", handleClickOutside);
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!svgWrapperRef.current?.contains(e.target as Node)) {
+        setSelectedComponentIds([]);
+        setPopupComponent(null);
+        setSelectedConnector(null);
+        setPopupConnector(null);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
+
+  const handleClosePopup = (e: React.MouseEvent) => {
+    e.stopPropagation();        // prevent outside-click effect
+    setPopupConnector(null);    // close popup
+    setSelectedConnector(null); // clear highlight
+  };
 
   // Mouse event handlers for pan/drag
   const handleMouseDown = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -365,6 +374,8 @@ export default function Schematic({
       h: viewBox.h,
     });
   };
+  const popupRef = useRef<HTMLDivElement | null>(null);
+
   const [viewBox, setViewBox] = useState({ x: 0, y: 0, w: 800, h: 600 });
   const [fitViewBox, setFitViewBox] = useState(viewBox);
   // Track if popup was manually closed
@@ -1155,17 +1166,6 @@ export default function Schematic({
             let wireElement;
             wireElement = (
               <g>
-                {/* <circle cx={fromX} cy={fromY} r={5} fill={wire.color}></circle> */}
-
-                {/* {isFromTop ? (
-                  // top component → trident points UP
-                  <TridentShape cx={fromX} cy={fromY - 15} color={wire.color} size={10} />
-                ) : (
-                  // bottom component → trident points DOWN
-                  <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
-                    <TridentShape cx={0} cy={0} color={wire.color} size={10} />
-                  </g>
-                )} */}
                 {fromComponent?.category?.toLowerCase() !== "splice" && (
                   <>
                     {isFromTop ? (
@@ -1219,7 +1219,6 @@ export default function Schematic({
                 >
                   <polyline
                     key={i}
-                    // points={`${fromX},${fromY} ${fromX},${min + offset} ${toX},${min + offset} ${toX},${toY}`}
                     points={`${fromX},${fromY} ${fromX},${intermediateY} ${toX},${intermediateY} ${toX},${toY}`}
                     fill="none"
                     stroke={
@@ -1291,9 +1290,9 @@ export default function Schematic({
       {popupComponent && (
         <div
           style={{
-            position: "absolute",
-            left: popupPosition.x,
-            top: popupPosition.y,
+            position: "fixed",
+            top: "30%",
+            right: "20px",
             transform: "translate(0%, -30%)",
             background: "white",
             border: "1px solid black",
@@ -1601,11 +1600,14 @@ export default function Schematic({
           </table>
 
           {/* CLOSE BUTTON */}
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <div
+            ref={popupRef}
+            style={{ textAlign: "center", marginTop: "20px" }}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setPopupConnector(null);
+                setSelectedConnector(null);
               }}
               style={{
                 background: "#007bff",
