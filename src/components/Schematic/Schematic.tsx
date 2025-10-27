@@ -779,11 +779,11 @@ export default function Schematic({
         display: "flex",
         flexDirection: "column",
         width: "100%",
-        height: isFullscreen ? "100vh" : 600,
+        height: isFullscreen ? "100vh" : "100%",
         background: "#fafafa",
         overflow: "hidden",
-        minHeight: isFullscreen ? undefined : 600, // ensure min height stays fixed
-        maxHeight: isFullscreen ? undefined : 600, // prevent growing heights
+        minHeight: isFullscreen ? undefined : "100%", // ensure min height stays fixed
+        maxHeight: isFullscreen ? undefined : "100%", // prevent growing heights
       }}
     >
       <div
