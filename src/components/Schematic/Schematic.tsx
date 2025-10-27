@@ -163,8 +163,13 @@ export default function Schematic({
     comp: ComponentType
   ) => {
     e.stopPropagation();
+    setSelectedComponentIds([]);  // deselect any selected component
+    setSelectedWires([]);
     setSelectedConnector(connector);
     const cavityCount = calculateCavityCountForConnector(connector);
+    setPopupComponent(null);
+    setPopupWire(null);
+
 
     setPopupConnector({
       componentCode: comp.label || comp.id,
@@ -652,6 +657,8 @@ export default function Schematic({
       padding;
     return y;
   }
+  
+
 
   function getXForComponentTitle(component: ComponentType): number {
     return (
@@ -891,9 +898,14 @@ export default function Schematic({
                   <g
                     onClick={(e) => {
                       e.stopPropagation();
+                      setSelectedWires([]);
+                      setSelectedConnector(null);
 
                       // Select this component
                       setSelectedComponentIds([comp.id]);
+                      setPopupWire(null);
+                      setPopupConnector(null);
+
 
                       // Show popup only if it wasn't manually closed
                       if (!popupClosedManually) {
@@ -1197,8 +1209,13 @@ export default function Schematic({
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent deselecting everything else
 
+                    setSelectedComponentIds([]);
+                    setSelectedConnector(null);
                     // Select only this wire
                     setSelectedWires([i.toString()]);
+                    setPopupComponent(null);
+                    setPopupConnector(null);
+
 
                     // Set popupWire with all details
                     setPopupWire({
