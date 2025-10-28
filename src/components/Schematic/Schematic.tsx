@@ -1,5 +1,4 @@
 // ...existing code...
-
 import React, {
   useState,
   useEffect,
@@ -17,6 +16,7 @@ import MotorSymbol from "../symbols/MotorSymbol";
 import PopupComponentDetails from "../popup/PopupComponentDetails";
 import PopupWireDetails from "../popup/PopupWireDetails";
 import PopupConnectorDetails from "../popup/PopupConnectorDetails";
+import { spaceForWires,connectionPointKey,getConnectionOffset,getIntersection,getConnectionsForComponent,getConnectionsForConnector ,getComponentConnectorTupleFromConnectionPoint,calculateCavityCountForConnector} from "./SchematicUtils";
 
 import { SchematicData, ComponentType, WirePopupType, ConnectorType, PopupConnectorType, ConnectionPoint, ConnectionType } from "./SchematicTypes";
 // ...existing code...
@@ -76,7 +76,7 @@ export default function Schematic({
     setSelectedComponentIds([]);  // deselect any selected component
     setSelectedWires([]);
     setSelectedConnector(connector);
-    const cavityCount = calculateCavityCountForConnector(connector);
+    const cavityCount = calculateCavityCountForConnector(connector,data);
     setPopupComponent(null);
     setPopupWire(null);
 
@@ -292,7 +292,7 @@ export default function Schematic({
   var maxY =
     padding +
     componentSize.height +
-    spaceForWires() +
+    spaceForWires(data) +
     componentSize.height +
     padding;
 
@@ -360,54 +360,6 @@ export default function Schematic({
     }
     setViewBox({ x, y, w: newW, h: newH });
   };
-
-  function spaceForWires() {
-    let connectionsCount = data.connections.length;
-    return connectionsCount * 20 + 40; // 20px per connection + padding
-  }
-
-  function connectionPointKey(point: ConnectionPoint): string {
-    return `${point.componentId}_${point.connectorId}_${point.cavity}`;
-  }
-
-  function getConnectionOffset(
-    index: number,
-    count: number,
-    y1: number,
-    y2: number,
-    offsetStep = 10
-  ) {
-    let max = Math.max(y1, y2);
-    let min = Math.min(y1, y2);
-    let reverseOffset = max - min - index * offsetStep - offsetStep;
-    return reverseOffset;
-  }
-
-  function getIntersection(
-    xa: number,
-    ya: number,
-    xb: number,
-    yb: number,
-    xc: number,
-    yc: number,
-    xd: number,
-    yd: number
-  ) {
-    // Returns intersection point if line AB and CD intersect
-    const denom = (xb - xa) * (yd - yc) - (yb - ya) * (xd - xc);
-    if (denom === 0) return null;
-    const r = ((ya - yc) * (xd - xc) - (xa - xc) * (yd - yc)) / denom;
-    const s = ((ya - yc) * (xb - xa) - (xa - xc) * (yb - ya)) / denom;
-    if (r > 0 && r < 1 && s > 0 && s < 1) {
-      // Intersection point
-      return {
-        x: xa + r * (xb - xa),
-        y: ya + r * (yb - ya),
-      };
-    }
-    return null;
-  }
-
   function checkAndReturnIntersection(
     i: number,
     x1: number,
@@ -420,11 +372,11 @@ export default function Schematic({
       if (i === j) continue;
       const w2 = data.connections[j];
       const f2 = w2.from;
-      const f2Tuple = getComponentConnectorTupleFromConnectionPoint(f2);
+      const f2Tuple = getComponentConnectorTupleFromConnectionPoint(f2,data);
       const f2Component = f2Tuple[0];
       const f2Connector = f2Tuple[1];
       const t2 = w2.to;
-      const t2Tuple = getComponentConnectorTupleFromConnectionPoint(t2);
+      const t2Tuple = getComponentConnectorTupleFromConnectionPoint(t2,data);
       const t2Component = t2Tuple[0];
       const t2Connector = t2Tuple[1];
 
@@ -479,18 +431,10 @@ export default function Schematic({
       );
     }
   }
-
-  function getConnectionsForComponent(component: ComponentType) {
-    return data.connections.filter(
-      (c) =>
-        c.from.componentId === component.id || c.to.componentId === component.id
-    );
-  }
-
   function getWidthForComponent(component: ComponentType): number {
     const defaultWidth = componentNameWidths[component.id] + padding;
     if (component.shape === "rectangle") {
-      let connectionCount = getConnectionsForComponent(component).length;
+      let connectionCount = getConnectionsForComponent(component,data).length;
       if (connectionCount > 1) {
         let width = connectorSpacing;
         component.connectors.forEach((conn) => {
@@ -501,7 +445,6 @@ export default function Schematic({
     }
     return defaultWidth;
   }
-
 
   function getXForComponent(component: ComponentType): number {
     let index = data.components.findIndex((c) => c.id === component.id);
@@ -523,13 +466,11 @@ export default function Schematic({
       ? padding
       : padding +
       componentSize.height +
-      spaceForWires() +
+      spaceForWires(data) +
       componentSize.height +
       padding;
     return y;
   }
-
-
 
   function getXForComponentTitle(component: ComponentType): number {
     return (
@@ -574,18 +515,11 @@ export default function Schematic({
       ? getYForComponent(component) + componentSize.height
       : getYForComponent(component) - 20;
   }
-
-  function getConnectionsForConnector(conn: ConnectorType): ConnectionType[] {
-    return data.connections.filter(
-      (c) => c.from.connectorId === conn.id || c.to.connectorId === conn.id
-    );
-  }
-
   function getWidthForConnector(
     conn: ConnectorType,
     comp: ComponentType
   ): number {
-    let connections = getConnectionsForConnector(conn);
+    let connections = getConnectionsForConnector(conn,data);
     if (comp.shape === "rectangle") {
       let interConnectionSpacing = 30;
       let connectionsBasedWidth =
@@ -597,23 +531,6 @@ export default function Schematic({
       );
     }
     return connectorNameWidths[conn.id] + connectorNamePadding;
-  }
-
-  function getComponentConnectorTupleFromConnectionPoint(
-    point: ConnectionPoint
-  ): [ComponentType?, ConnectorType?] {
-    const fromComponent = data.components.find(
-      (comp) => point.componentId === comp.id
-    );
-    if (fromComponent) {
-      const connector = fromComponent.connectors.find(
-        (conn) => conn.id === point.connectorId
-      );
-      if (connector) {
-        return [fromComponent, connector];
-      }
-    }
-    return [undefined, undefined];
   }
   function getXForWireToSplice(
     component: ComponentType,
@@ -628,19 +545,6 @@ export default function Schematic({
     const offsetY = (wireIndex - (totalWires - 1) / 2) * spacing;
     return { x: centerX, offsetY };
   }
-
-  function calculateCavityCountForConnector(conn: ConnectorType): number {
-    // Count all connections where this connector is involved
-    const count = data.connections.filter(
-      (connection) =>
-        connection.from.connectorId === conn.id ||
-        connection.to.connectorId === conn.id
-    ).length;
-
-    return count;
-  }
-
-
   const buttonStyle = {
     padding: "3px 7px",
     borderRadius: "6px",
@@ -939,12 +843,12 @@ export default function Schematic({
             const toConn = wire.to;
 
             const fromData =
-              getComponentConnectorTupleFromConnectionPoint(fromConn);
+              getComponentConnectorTupleFromConnectionPoint(fromConn,data);
             const fromComponent = fromData[0];
             const from = fromData[1];
 
             const toData =
-              getComponentConnectorTupleFromConnectionPoint(toConn);
+              getComponentConnectorTupleFromConnectionPoint(toConn,data);
             const toComponent = toData[0];
             const to = toData[1];
 
@@ -968,7 +872,7 @@ export default function Schematic({
                 fromComponent!
               );
               const fromConnectorCount = connectorConnectionCount[from.id] || 1;
-              const connIndex = getConnectionsForConnector(from).findIndex(
+              const connIndex = getConnectionsForConnector(from,data).findIndex(
                 (c) => c === wire
               );
               const fromConnectorOffset =
@@ -1002,7 +906,7 @@ export default function Schematic({
               const toConnectorX = getXForConnector(to, toComponent!);
               const toConnectorWidth = getWidthForConnector(to, toComponent!);
               const toConnectorCount = connectorConnectionCount[to.id] || 1;
-              const connIndexTo = getConnectionsForConnector(to).findIndex(
+              const connIndexTo = getConnectionsForConnector(to,data).findIndex(
                 (c) => c === wire
               );
               const toConnectorOffset =
@@ -1079,15 +983,12 @@ export default function Schematic({
                   key={i}
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent deselecting everything else
-
                     setSelectedComponentIds([]);
                     setSelectedConnector(null);
                     // Select only this wire
                     setSelectedWires([i.toString()]);
                     setPopupComponent(null);
                     setPopupConnector(null);
-
-
                     // Set popupWire with all details
                     setPopupWire({
                       wire,
@@ -1146,7 +1047,6 @@ export default function Schematic({
                     )}
                   </>
                 )}
-
                 <text
                   x={fromX + 10}
                   y={fromLabelY}
@@ -1199,7 +1099,6 @@ export default function Schematic({
           setSelectedConnector(null);
         }}
       />
-
     </div>
   );
 }
