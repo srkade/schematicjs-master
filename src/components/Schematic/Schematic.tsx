@@ -14,30 +14,25 @@ import ElectricalSwitch from "../symbols/ElectricalSwitch";
 import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
 import MotorSymbol from "../symbols/MotorSymbol";
-type ComponentType = {
+
+
+interface ComponentType {
   id: string;
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
   label: string;
   category: string;
   shape: string;
-  connectors: ConnectorType[];
-  cavity?: number;
-
-  // Add these optional fields ↓↓↓
+  connectors: Array<{ id: string; label: string }>;
   engineering_component_name?: string;
   engineering_manufacturer?: string;
   primary_part_number?: string;
   harness_name?: string;
   component_type?: string;
   connector_type?: string;
+  remove?: boolean;
   manufacturer?: string;
   connector_part_number?: string;
-  remove?: boolean;
-  harnessPartNumber?: string;
-};
+  gender?: string;
+}
 type ConnectorType = {
   id: string;
   label: string;
@@ -51,11 +46,12 @@ type ConnectionPoint = {
   gender?: string;
 };
 type ConnectionType = {
-  color: string;
+  color?: string;
   from: ConnectionPoint;
   to: ConnectionPoint;
   label: string;
   wireDetails?: WireDetailsType; // Add this
+  
 };
 type SchematicData = {
   masterComponents: string[];
@@ -63,14 +59,61 @@ type SchematicData = {
   connections: ConnectionType[];
 };
 
-type WirePopupType = {
-  wire: ConnectionType;
-  fromComponent: ComponentType;
-  fromConnector: ConnectorType;
-  toComponent: ComponentType;
-  toConnector: ConnectorType;
-  connections?: ConnectionType[];
-};
+interface WirePopupType {
+  color?: string;
+  fromComponent?: ComponentType;
+  toComponent?: ComponentType;
+  fromConnector?: {
+    label?: string;
+    gender?: string;
+  };
+  toConnector?: {
+    label?: string;
+    gender?: string;
+  };
+  wire?: {
+    color?: string;
+    from?: {
+      componentId?: string;
+      connectorId?: string;
+      cavity?: string;
+      gender?: string;
+    };
+    to?: {
+      componentId?: string;
+      connectorId?: string;
+      cavity?: string;
+      gender?: string;
+    };
+    wireDetails?: {
+      circuitNumber?: string;
+      wireSize?: number;
+      wireColor?: string;
+      wireLength?: number;
+      wireType?: string;
+      twistId?: string;
+      shieldId?: string;
+      wireOption?: string;
+      mark?: string;
+      from?: {
+        connectorNumber?: string;
+        devName?: string;
+        connPartNumber?: string;
+        termPartNo?: string;
+        sealPartNo?: string;
+        cavity?: string;
+      };
+      to?: {
+        connectorNumber?: string;
+        devName?: string;
+        connPartNumber?: string;
+        termPartNo?: string;
+        sealPartNo?: string;
+        cavity?: string;
+      };
+    };
+  };
+}
 
 type WireDetailsType = {
   circuitNumber: string;
@@ -99,16 +142,25 @@ type WireDetailsType = {
     cavity: string;
   };
 };
-type PopupConnectorType = {
-  componentCode: string;
-  connectorCode: string;
+interface PopupConnectorType {
+  componentCode?: string;
+  connectorCode?: string;
+  label?: string;
   harnessName?: string;
   partNumber?: string;
   gender?: string;
+  cavityCount?: number;
   color?: string;
   connectorType?: string;
-  cavityCount?: number;
-};
+  manufacturer?: string;
+  termPartNo?: string;
+  sealPartNo?: string;
+}
+
+
+
+
+
 // ...existing code...
 const colors = {
   OG: "orange",
@@ -874,15 +926,15 @@ export default function Schematic({
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
                     cy={getYForComponent(comp) - connectorHeight / 2}
-                    r={componentSize.height / 4} // adjust radius as needed
+                    r={componentSize.height / 8} // adjust radius as needed
                     fill="white"
                     stroke="black"
-                    strokeWidth={2}
+                    strokeWidth={1}
                   />
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
                     cy={getYForComponent(comp) - connectorHeight / 2}
-                    r={componentSize.height / 6}
+                    r={componentSize.height / 10}
                     fill="black"
                   />
                 </g>
@@ -1287,342 +1339,1116 @@ export default function Schematic({
           })}
         </svg>
       </div>
-      {popupComponent && (
-        <div
-          style={{
-            position: "fixed",
-            top: "30%",
-            right: "20px",
-            transform: "translate(0%, -30%)",
-            background: "white",
-            border: "1px solid black",
-            padding: "8px",
-            borderRadius: "6px",
-            zIndex: 1000,
-          }}
-        >
-          <h4>{popupComponent.label}</h4>
-          <p>
-            Category: {popupComponent.category}
-            <br />
-            Connectors:{" "}
-            {popupComponent.connectors.map((c) => c.label).join(", ")}
-          </p>
-          <button
-            onClick={() => {
-              setSelectedComponentIds([]);
-              setPopupComponent(null);
-              setPopupClosedManually(false); // now clicking a component again can show popup
-            }}
-          >
-            Close
-          </button>
-        </div>
-      )}
+     {/* ==================== COMPONENT POPUP ==================== */}
+{popupComponent && (
+  <div
+    style={{
+      position: "fixed",
+      top: "30%",
+      right: "20px",
+      transform: "translate(0%, -30%)",
+      width: "480px",
+      maxHeight: "700px",
+      background: "#ffffff",
+      border: "1px solid #ddd",
+      padding: "20px",
+      borderRadius: "12px",
+      boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
+      zIndex: 1000,
+      overflowY: "auto",
+      fontFamily: "'Segoe UI', Arial, sans-serif",
+    }}
+  >
+    {/* HEADER */}
+    <h3
+      style={{
+        textAlign: "center",
+        color: "#333",
+        borderBottom: "3px solid #007bff",
+        paddingBottom: "10px",
+        marginBottom: "16px",
+        fontSize: "20px",
+      }}
+    >
+      Component Details
+    </h3>
 
-      {popupWire && (
-        <div
-          style={{
-            position: "fixed",
-            top: "51%",
-            right: "20px",
-            transform: "translateY(-50%)",
-            width: "420px",
-            height: "600px",
-            background: "#fff",
-            borderRadius: "12px",
-            boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
-            padding: "20px",
-            zIndex: 1000,
-            overflowY: "auto",
-            fontFamily: "Arial, sans-serif",
-            lineHeight: "1.6",
-          }}
-        >
-          {/* HEADER */}
-          <h3
-            style={{
-              borderBottom: "2px solid #ccc",
-              paddingBottom: "8px",
-              marginBottom: "12px",
-            }}
-          >
-            Wire Details
-          </h3>
-
-          {/* FIRST TABLE: WIRE DETAILS */}
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              marginBottom: "20px",
-              fontSize: "14px",
-            }}
-          >
-            <tbody>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px", width: "45%" }}>
-                  Harness Name
-                </td>
-                <td style={{ padding: "6px" }}>
-                  {popupWire.fromComponent?.harness_name || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>
-                  Harness Part Number
-                </td>
-                <td style={{ padding: "6px" }}>
-                  {popupWire.fromComponent?.harnessPartNumber || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>Color</td>
-                <td style={{ padding: "6px" }}>
-                  {popupWire.connections?.[0]?.color ||
-                    popupWire.wire?.color ||
-                    "-"}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>Size</td>
-                <td style={{ padding: "6px" }}>
-                  {popupWire.wire?.wireDetails?.wireSize || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>Length</td>
-                <td style={{ padding: "6px" }}>
-                  {popupWire.wire?.wireDetails?.wireLength || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px" }}>Signal Name</td>
-                <td style={{ padding: "6px" }}>
-                  {/* {popupWire.wire?.signalName || popupWire.wire?.wireDetails?.devName || "N/A"} */}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          {/* SECOND TABLE: CONNECTION DETAILS */}
-          <h3
-            style={{
-              borderBottom: "2px solid #ccc",
-              paddingBottom: "8px",
-              marginBottom: "10px",
-            }}
-          >
-            Connects To
-          </h3>
-
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "14px",
-              textAlign: "center",
-            }}
-          >
-            <thead>
-              <tr style={{ backgroundColor: "#f7f7f7" }}>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}></th>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  From
-                </th>
-                <th style={{ border: "1px solid #ccc", padding: "6px" }}>To</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "6px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Component
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromComponent?.label ||
-                    popupWire.wire?.from?.componentId}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toComponent?.label ||
-                    popupWire.wire?.to?.componentId}
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "6px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Connector
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromConnector?.label ||
-                    popupWire.wire?.from?.connectorId}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toConnector?.label ||
-                    popupWire.wire?.to?.connectorId}
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "6px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Gender
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.fromConnector?.gender || popupWire.wire?.from?.gender || "-"}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.toConnector?.gender || popupWire.wire?.to?.gender || "-"}
-                </td>
-              </tr>
-              <tr>
-                <td
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "6px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Cavity
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.wire?.from?.cavity}
-                </td>
-                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
-                  {popupWire.wire?.to?.cavity}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          {/* CLOSE BUTTON */}
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedWires([]);
-                setPopupWire(null);
-              }}
+    {/* COMPONENT DETAILS TABLE */}
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        fontSize: "14px",
+        marginBottom: "10px",
+      }}
+    >
+      <tbody>
+        {/* ID */}
+        {popupComponent.id && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
               style={{
-                background: "#007bff",
-                color: "white",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "6px",
-                cursor: "pointer",
+                fontWeight: "600",
+                padding: "10px 8px",
+                width: "45%",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
               }}
             >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-      {popupConnector && (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            right: "20px",
-            transform: "translateY(-50%)",
-            width: "400px",
-            height: "auto",
-            maxHeight: "600px",
-            background: "#fff",
-            borderRadius: "12px",
-            boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
-            padding: "20px",
-            zIndex: 1000,
-            overflowY: "auto",
-            fontFamily: "Arial, sans-serif",
-            lineHeight: "1.6",
-          }}
-        >
-          {/* HEADER */}
-          <h3
-            style={{
-              fontSize: "18px",
-              fontWeight: "bold",
-              marginBottom: "16px",
-            }}
-          >
-            Connector Details
-          </h3>
+              ID
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.id}
+            </td>
+          </tr>
+        )}
 
-          {/* DETAILS TABLE */}
-          <table style={{ width: "100%", fontSize: "14px" }}>
-            <tbody>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px", width: "40%" }}>Component Code</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.componentCode || "-"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Code</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.connectorCode || "-"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Harness Name</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.harnessName || "-"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Part Number</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.partNumber || "-"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Gender</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.gender || "-"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Cavity Count</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.cavityCount || "-"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Color</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.color || "-"}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Type</td>
-                <td style={{ padding: "6px 8px" }}>{popupConnector.connectorType || "-"}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          {/* CLOSE BUTTON */}
-          <div
-            ref={popupRef}
-            style={{ textAlign: "center", marginTop: "20px" }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setPopupConnector(null);
-                setSelectedConnector(null);
-              }}
+        {/* Engineering Component Name */}
+        {popupComponent.engineering_component_name && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
               style={{
-                background: "#007bff",
-                color: "#fff",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "6px",
-                cursor: "pointer",
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
               }}
             >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+              Engineering Component Name
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.engineering_component_name}
+            </td>
+          </tr>
+        )}
+
+
+        {/* Category */}
+        {popupComponent.category && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Category
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.category}
+            </td>
+          </tr>
+        )}
+
+        {/* Shape */}
+        {popupComponent.shape && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Shape
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333", textTransform: "capitalize" }}>
+              {popupComponent.shape}
+            </td>
+          </tr>
+        )}
+
+       
+        {/* Engineering Manufacturer */}
+        {popupComponent.engineering_manufacturer && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Engineering Manufacturer
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.engineering_manufacturer}
+            </td>
+          </tr>
+        )}
+
+        {/* Manufacturer */}
+        {popupComponent.manufacturer && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Manufacturer
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.manufacturer}
+            </td>
+          </tr>
+        )}
+
+        {/* Primary Part Number */}
+        {popupComponent.primary_part_number && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Primary Part Number
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.primary_part_number}
+            </td>
+          </tr>
+        )}
+
+        {/* Connector Part Number */}
+        {popupComponent.connector_part_number && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Connector Part Number
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.connector_part_number}
+            </td>
+          </tr>
+        )}
+
+        {/* Harness Name */}
+        {popupComponent.harness_name && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Harness Name
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.harness_name}
+            </td>
+          </tr>
+        )}
+
+        {/* Component Type */}
+        {popupComponent.component_type && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Component Type
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.component_type}
+            </td>
+          </tr>
+        )}
+
+        {/* Connector Type */}
+        {popupComponent.connector_type && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Connector Type
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.connector_type}
+            </td>
+          </tr>
+        )}
+
+        {/* Gender */}
+        {popupComponent.gender && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Gender
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.gender}
+            </td>
+          </tr>
+        )}
+
+        {/* Remove Status */}
+        {popupComponent.remove !== undefined && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Remove Status
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.remove ? "Yes" : "No"}
+            </td>
+          </tr>
+        )}
+
+        {/* Connectors */}
+        {popupComponent.connectors && popupComponent.connectors.length > 0 && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Connectors
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupComponent.connectors.map((c) => c.label).join(", ")}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+
+    {/* CLOSE BUTTON */}
+    <div style={{ textAlign: "center", marginTop: "20px" }}>
+      <button
+        onClick={() => {
+          setSelectedComponentIds([]);
+          setPopupComponent(null);
+          setPopupClosedManually(false);
+        }}
+        style={{
+          background: "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
+          color: "white",
+          border: "none",
+          padding: "10px 24px",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: "600",
+          boxShadow: "0px 3px 8px rgba(0,123,255,0.3)",
+          transition: "all 0.3s ease",
+        }}
+        onMouseOver={(e) => ((e.currentTarget).style.transform = "scale(1.05)")}
+        onMouseOut={(e) => ((e.currentTarget).style.transform = "scale(1)")}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+      {/* ==================== WIRE POPUP ==================== */}
+{popupWire && (
+  <div
+    style={{
+      position: "fixed",
+      top: "50%",
+      right: "20px",
+      transform: "translateY(-50%)",
+      width: "500px",
+      maxHeight: "750px",
+      background: "#ffffff",
+      borderRadius: "12px",
+      boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
+      padding: "24px",
+      zIndex: 1000,
+      overflowY: "auto",
+      fontFamily: "'Segoe UI', Arial, sans-serif",
+      lineHeight: "1.6",
+    }}
+  >
+    {/* HEADER */}
+    <h3
+      style={{
+        borderBottom: "3px solid #007bff",
+        paddingBottom: "10px",
+        marginBottom: "20px",
+        color: "#333",
+        fontSize: "20px",
+        textAlign: "center",
+      }}
+    >
+      Wire Details
+    </h3>
+
+    {/* WIRE DETAILS TABLE */}
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        marginBottom: "24px",
+        fontSize: "14px",
+      }}
+    >
+      <tbody>
+        {/* Color */}
+        <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+          <td
+            style={{
+              fontWeight: "600",
+              padding: "10px 8px",
+              width: "45%",
+              backgroundColor: "#f8f9fa",
+              color: "#555",
+            }}
+          >
+            Wire Color
+          </td>
+          <td style={{ padding: "10px 8px", color: "#333" }}>
+            {popupWire.color || popupWire.wire?.wireDetails?.wireColor || "N/A"}
+          </td>
+        </tr>
+
+        {/* Circuit Number */}
+        {popupWire.wire?.wireDetails?.circuitNumber && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Circuit Number
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.circuitNumber}
+            </td>
+          </tr>
+        )}
+
+        {/* Wire Size */}
+        {popupWire.wire?.wireDetails?.wireSize && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Wire Size
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.wireSize} mm
+            </td>
+          </tr>
+        )}
+
+        {/* Wire Length */}
+        {popupWire.wire?.wireDetails?.wireLength && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Wire Length
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.wireLength} mm
+            </td>
+          </tr>
+        )}
+
+        {/* Wire Type */}
+        {popupWire.wire?.wireDetails?.wireType && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Wire Type
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.wireType}
+            </td>
+          </tr>
+        )}
+
+        {/* Twist ID */}
+        {popupWire.wire?.wireDetails?.twistId && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Twist ID
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.twistId}
+            </td>
+          </tr>
+        )}
+
+        {/* Shield ID */}
+        {popupWire.wire?.wireDetails?.shieldId && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Shield ID
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.shieldId}
+            </td>
+          </tr>
+        )}
+
+        {/* Wire Option */}
+        {popupWire.wire?.wireDetails?.wireOption && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Wire Option
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.wireOption}
+            </td>
+          </tr>
+        )}
+
+        {/* Mark */}
+        {popupWire.wire?.wireDetails?.mark && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Mark
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.wire.wireDetails.mark}
+            </td>
+          </tr>
+        )}
+
+        {/* Harness Name */}
+        {popupWire.fromComponent?.harness_name && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Harness Name
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupWire.fromComponent.harness_name}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+
+    {/* CONNECTION DETAILS SECTION */}
+    <h3
+      style={{
+        borderBottom: "3px solid #007bff",
+        paddingBottom: "8px",
+        marginBottom: "16px",
+        color: "#333",
+        fontSize: "18px",
+      }}
+    >
+      Connection Details
+    </h3>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        fontSize: "14px",
+        textAlign: "center",
+        border: "1px solid #ddd",
+      }}
+    >
+      <thead>
+        <tr style={{ backgroundColor: "#007bff", color: "white" }}>
+          <th style={{ border: "1px solid #ddd", padding: "10px", fontWeight: "600" }}>
+            Property
+          </th>
+          <th style={{ border: "1px solid #ddd", padding: "10px", fontWeight: "600" }}>
+            From
+          </th>
+          <th style={{ border: "1px solid #ddd", padding: "10px", fontWeight: "600" }}>
+            To
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {/* Component */}
+        <tr>
+          <td
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            Component
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.fromComponent?.label ||
+              popupWire.wire?.wireDetails?.from?.devName ||
+              popupWire.wire?.from?.componentId ||
+              "N/A"}
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.toComponent?.label ||
+              popupWire.wire?.wireDetails?.to?.devName ||
+              popupWire.wire?.to?.componentId ||
+              "N/A"}
+          </td>
+        </tr>
+
+        {/* Connector */}
+        <tr>
+          <td
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            Connector
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.fromConnector?.label ||
+              popupWire.wire?.wireDetails?.from?.connectorNumber ||
+              popupWire.wire?.from?.connectorId ||
+              "N/A"}
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.toConnector?.label ||
+              popupWire.wire?.wireDetails?.to?.connectorNumber ||
+              popupWire.wire?.to?.connectorId ||
+              "N/A"}
+          </td>
+        </tr>
+
+        {/* Connector Part Number */}
+        <tr>
+          <td
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            Connector Part Number
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.from?.connPartNumber || "N/A"}
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.to?.connPartNumber || "N/A"}
+          </td>
+        </tr>
+
+        {/* Terminal Part Number */}
+        <tr>
+          <td
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            Terminal Part Number
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.from?.termPartNo || "N/A"}
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.to?.termPartNo || "N/A"}
+          </td>
+        </tr>
+
+        {/* Seal Part Number */}
+        <tr>
+          <td
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            Seal Part Number
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.from?.sealPartNo || "N/A"}
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.to?.sealPartNo || "N/A"}
+          </td>
+        </tr>
+
+        {/* Gender */}
+        <tr>
+          <td
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            Gender
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.fromConnector?.gender ||
+              popupWire.wire?.from?.gender ||
+              "N/A"}
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.toConnector?.gender ||
+              popupWire.wire?.to?.gender ||
+              "N/A"}
+          </td>
+        </tr>
+
+        {/* Cavity */}
+        <tr>
+          <td
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              fontWeight: "600",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            Cavity
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.from?.cavity ||
+              popupWire.wire?.from?.cavity ||
+              "N/A"}
+          </td>
+          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
+            {popupWire.wire?.wireDetails?.to?.cavity ||
+              popupWire.wire?.to?.cavity ||
+              "N/A"}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    {/* CLOSE BUTTON */}
+    <div style={{ textAlign: "center", marginTop: "24px" }}>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedWires([]);
+          setPopupWire(null);
+        }}
+        style={{
+          background: "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
+          color: "white",
+          border: "none",
+          padding: "10px 24px",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: "600",
+          boxShadow: "0px 3px 8px rgba(0,123,255,0.3)",
+          transition: "all 0.3s ease",
+        }}
+        onMouseOver={(e) => ((e.currentTarget).style.transform = "scale(1.05)")}
+        onMouseOut={(e) => ((e.currentTarget).style.transform = "scale(1)")}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+      
+{/* ==================== CONNECTOR POPUP ==================== */}
+{popupConnector && (
+  <div
+    style={{
+      position: "fixed",
+      top: "50%",
+      right: "20px",
+      transform: "translateY(-50%)",
+      width: "480px",
+      maxHeight: "700px",
+      background: "#ffffff",
+      borderRadius: "12px",
+      boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
+      padding: "24px",
+      zIndex: 1000,
+      overflowY: "auto",
+      fontFamily: "'Segoe UI', Arial, sans-serif",
+      lineHeight: "1.6",
+    }}
+  >
+    {/* HEADER */}
+    <h3
+      style={{
+        fontSize: "20px",
+        fontWeight: "bold",
+        marginBottom: "20px",
+        color: "#333",
+        textAlign: "center",
+        borderBottom: "3px solid #007bff",
+        paddingBottom: "10px",
+      }}
+    >
+      Connector Details
+    </h3>
+
+    {/* CONNECTOR DETAILS TABLE */}
+    <table
+      style={{
+        width: "100%",
+        fontSize: "14px",
+        borderCollapse: "collapse",
+      }}
+    >
+      <tbody>
+        {/* Component Code */}
+        {popupConnector.componentCode && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                width: "45%",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Component Code
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.componentCode}
+            </td>
+          </tr>
+        )}
+
+        {/* Connector Code */}
+        {popupConnector.connectorCode && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Connector Code
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.connectorCode}
+            </td>
+          </tr>
+        )}
+
+        {/* Label */}
+        {popupConnector.label && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Label
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.label}
+            </td>
+          </tr>
+        )}
+
+        {/* Harness Name */}
+        {popupConnector.harnessName && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Harness Name
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.harnessName}
+            </td>
+          </tr>
+        )}
+
+        {/* Connector Part Number */}
+        {popupConnector.partNumber && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Connector Part Number
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.partNumber}
+            </td>
+          </tr>
+        )}
+
+        {/* Gender */}
+        {popupConnector.gender && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Gender
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.gender}
+            </td>
+          </tr>
+        )}
+
+        {/* Cavity Count */}
+        {popupConnector.cavityCount && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Cavity Count
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.cavityCount}
+            </td>
+          </tr>
+        )}
+
+        {/* Color */}
+        {popupConnector.color && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Color
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.color}
+            </td>
+          </tr>
+        )}
+
+        {/* Connector Type */}
+        {popupConnector.connectorType && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Connector Type
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.connectorType}
+            </td>
+          </tr>
+        )}
+
+        {/* Manufacturer */}
+        {popupConnector.manufacturer && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Manufacturer
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.manufacturer}
+            </td>
+          </tr>
+        )}
+
+        {/* Terminal Part Number */}
+        {popupConnector.termPartNo && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Terminal Part Number
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.termPartNo}
+            </td>
+          </tr>
+        )}
+
+        {/* Seal Part Number */}
+        {popupConnector.sealPartNo && (
+          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                padding: "10px 8px",
+                backgroundColor: "#f8f9fa",
+                color: "#555",
+              }}
+            >
+              Seal Part Number
+            </td>
+            <td style={{ padding: "10px 8px", color: "#333" }}>
+              {popupConnector.sealPartNo}
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+
+    {/* CLOSE BUTTON */}
+    <div ref={popupRef} style={{ textAlign: "center", marginTop: "24px" }}>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setPopupConnector(null);
+          setSelectedConnector(null);
+        }}
+        style={{
+          background: "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
+          color: "#fff",
+          border: "none",
+          padding: "10px 24px",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: "600",
+          boxShadow: "0px 3px 8px rgba(0,123,255,0.3)",
+          transition: "all 0.3s ease",
+        }}
+        onMouseOver={(e) => ((e.currentTarget).style.transform = "scale(1.05)")}
+        onMouseOut={(e) => ((e.currentTarget).style.transform = "scale(1)")}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }
