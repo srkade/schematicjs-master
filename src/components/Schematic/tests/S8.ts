@@ -48,17 +48,30 @@ const S8 = {
     ],
   },
   {
-    id: "ICC",
-    label: "Instrument Cluster Controller",
-    category: "Transistor",
-    shape: "rectangle",
-    connectors: [
-      {
-        id: "XJ2",
-        label: "XJ2",
-      },
-    ],
-  },
+      id: "ICC",
+      label: "Instrument Cluster Controller",
+      category: "Transistor",
+      shape: "rectangle",
+      connectors: [
+        {
+          id: "XJ2",
+          label: "XJ2"
+        },
+      ],
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      engineering_connector_code: "XJ2",
+      engineering_component_name: "Instrument Cluster Controller",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M12666",
+      component_code: "ICC",
+      component_type: "Component",
+      connector_type: "Direct",
+      component_category: "Transistor",
+      remove: false,
+      manufacturer: "Molex",
+      connector_part_number: "57M12666",
+      gender: "Female"
+    },
 ],
   connections: [
     {

@@ -31,9 +31,22 @@ const B3 = {
       connectors: [
         {
           id: "XJ1",
-          label: "XJ1"
-        }
-      ]
+          label: "XJ1",
+        },
+      ],
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      engineering_connector_code: "XJ1",
+      engineering_component_name: "Instrument Cluster Controller",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M12666",
+      component_code: "ICC",
+      component_type: "Component",
+      connector_type: "Direct",
+      component_category: "Transistor",
+      remove: false,
+      manufacturer: "Molex",
+      connector_part_number: "57M12666",
+      gender: "Female"
     }
   ],
   connections: [

@@ -13,13 +13,8 @@ import ElectricalSwitch from "../symbols/ElectricalSwitch";
 import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
 import MotorSymbol from "../symbols/MotorSymbol";
-import PopupComponentDetails from "../popup/PopupComponentDetails";
-import PopupWireDetails from "../popup/PopupWireDetails";
-import PopupConnectorDetails from "../popup/PopupConnectorDetails";
-import { spaceForWires,connectionPointKey,getConnectionOffset,getIntersection,getConnectionsForComponent,getConnectionsForConnector ,getComponentConnectorTupleFromConnectionPoint,calculateCavityCountForConnector} from "./SchematicUtils";
-import { resetView,handleWheel ,zoom,enterFullscreen,exitFullscreen} from "./SchematicViews";
+import { ComponentType } from "react";
 
-import { SchematicData, ComponentType, WirePopupType, ConnectorType, PopupConnectorType, ConnectionPoint, ConnectionType } from "./SchematicTypes";
 // ...existing code...
 const colors = {
   OG: "orange",
@@ -556,15 +551,15 @@ export default function Schematic({
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
                     cy={getYForComponent(comp) - connectorHeight / 2}
-                    r={componentSize.height / 4} // adjust radius as needed
+                    r={componentSize.height / 8} // adjust radius as needed
                     fill="white"
                     stroke="black"
-                    strokeWidth={2}
+                    strokeWidth={1}
                   />
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
                     cy={getYForComponent(comp) - connectorHeight / 2}
-                    r={componentSize.height / 6}
+                    r={componentSize.height / 10}
                     fill="black"
                   />
                 </g>
@@ -975,30 +970,342 @@ export default function Schematic({
           })}
         </svg>
       </div>
-      <PopupComponentDetails
-        popupComponent={popupComponent}
-        onClose={() => {
-          setSelectedComponentIds([]);
-          setPopupComponent(null);
-          setPopupClosedManually(false);
-        }}
-      />
-      <PopupWireDetails
-        popupWire={popupWire}
-        onClose={(e) => {
-          e.stopPropagation();
-          setSelectedWires([]);
-          setPopupWire(null);
-        }}
-      />
-      <PopupConnectorDetails
-        popupConnector={popupConnector}
-        onClose={(e) => {
-          e.stopPropagation();
-          setPopupConnector(null);
-          setSelectedConnector(null);
-        }}
-      />
+      {popupComponent && (
+        <div
+          style={{
+            position: "fixed",
+            top: "30%",
+            right: "20px",
+            transform: "translate(0%, -30%)",
+            background: "white",
+            border: "1px solid black",
+            padding: "8px",
+            borderRadius: "6px",
+            zIndex: 1000,
+          }}
+        >
+          <h4>{popupComponent.label}</h4>
+          <p>
+            Category: {popupComponent.category}
+            <br />
+            Connectors:{" "}
+            {popupComponent.connectors.map((c) => c.label).join(", ")}
+          </p>
+          <button
+            onClick={() => {
+              setSelectedComponentIds([]);
+              setPopupComponent(null);
+              setPopupClosedManually(false); // now clicking a component again can show popup
+            }}
+          >
+            Close
+          </button>
+        </div>
+      )}
+
+      {popupWire && (
+        <div
+          style={{
+            position: "fixed",
+            top: "51%",
+            right: "20px",
+            transform: "translateY(-50%)",
+            width: "420px",
+            height: "600px",
+            background: "#fff",
+            borderRadius: "12px",
+            boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
+            padding: "20px",
+            zIndex: 1000,
+            overflowY: "auto",
+            fontFamily: "Arial, sans-serif",
+            lineHeight: "1.6",
+          }}
+        >
+          {/* HEADER */}
+          <h3
+            style={{
+              borderBottom: "2px solid #ccc",
+              paddingBottom: "8px",
+              marginBottom: "12px",
+            }}
+          >
+            Wire Details
+          </h3>
+
+          {/* FIRST TABLE: WIRE DETAILS */}
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              marginBottom: "20px",
+              fontSize: "14px",
+            }}
+          >
+            <tbody>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px", width: "45%" }}>
+                  Harness Name
+                </td>
+                <td style={{ padding: "6px" }}>
+                  {popupWire.fromComponent?.harness_name || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px" }}>
+                  Harness Part Number
+                </td>
+                <td style={{ padding: "6px" }}>
+                  {popupWire.fromComponent?.harnessPartNumber || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px" }}>Color</td>
+                <td style={{ padding: "6px" }}>
+                  {popupWire.connections?.[0]?.color ||
+                    popupWire.wire?.color ||
+                    "-"}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px" }}>Size</td>
+                <td style={{ padding: "6px" }}>
+                  {popupWire.wire?.wireDetails?.wireSize || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px" }}>Length</td>
+                <td style={{ padding: "6px" }}>
+                  {popupWire.wire?.wireDetails?.wireLength || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px" }}>Signal Name</td>
+                <td style={{ padding: "6px" }}>
+                  {/* {popupWire.wire?.signalName || popupWire.wire?.wireDetails?.devName || "N/A"} */}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          {/* SECOND TABLE: CONNECTION DETAILS */}
+          <h3
+            style={{
+              borderBottom: "2px solid #ccc",
+              paddingBottom: "8px",
+              marginBottom: "10px",
+            }}
+          >
+            Connects To
+          </h3>
+
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: "14px",
+              textAlign: "center",
+            }}
+          >
+            <thead>
+              <tr style={{ backgroundColor: "#f7f7f7" }}>
+                <th style={{ border: "1px solid #ccc", padding: "6px" }}></th>
+                <th style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  From
+                </th>
+                <th style={{ border: "1px solid #ccc", padding: "6px" }}>To</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Component
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.fromComponent?.label ||
+                    popupWire.wire?.from?.componentId}
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.toComponent?.label ||
+                    popupWire.wire?.to?.componentId}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Connector
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.fromConnector?.label ||
+                    popupWire.wire?.from?.connectorId}
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.toConnector?.label ||
+                    popupWire.wire?.to?.connectorId}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Gender
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.fromConnector?.gender || popupWire.wire?.from?.gender || "-"}
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.toConnector?.gender || popupWire.wire?.to?.gender || "-"}
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Cavity
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.wire?.from?.cavity}
+                </td>
+                <td style={{ border: "1px solid #ccc", padding: "6px" }}>
+                  {popupWire.wire?.to?.cavity}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* CLOSE BUTTON */}
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedWires([]);
+                setPopupWire(null);
+              }}
+              style={{
+                background: "#007bff",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+      {popupConnector && (
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            right: "20px",
+            transform: "translateY(-50%)",
+            width: "400px",
+            height: "auto",
+            maxHeight: "600px",
+            background: "#fff",
+            borderRadius: "12px",
+            boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
+            padding: "20px",
+            zIndex: 1000,
+            overflowY: "auto",
+            fontFamily: "Arial, sans-serif",
+            lineHeight: "1.6",
+          }}
+        >
+          {/* HEADER */}
+          <h3
+            style={{
+              fontSize: "18px",
+              fontWeight: "bold",
+              marginBottom: "16px",
+            }}
+          >
+            Connector Details
+          </h3>
+
+          {/* DETAILS TABLE */}
+          <table style={{ width: "100%", fontSize: "14px" }}>
+            <tbody>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px", width: "40%" }}>Component Code</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.componentCode || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Code</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.connectorCode || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Harness Name</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.harnessName || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Part Number</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.partNumber || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Gender</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.gender || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Cavity Count</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.cavityCount || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Color</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.color || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ fontWeight: "bold", padding: "6px 8px" }}>Connector Type</td>
+                <td style={{ padding: "6px 8px" }}>{popupConnector.connectorType || "-"}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* CLOSE BUTTON */}
+          <div
+            ref={popupRef}
+            style={{ textAlign: "center", marginTop: "20px" }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopupConnector(null);
+                setSelectedConnector(null);
+              }}
+              style={{
+                background: "#007bff",
+                color: "#fff",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                cursor: "pointer",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

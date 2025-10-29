@@ -3,16 +3,28 @@ const S4 = {
   components: [
     {
       id: "S4",
-      label: "Seat Switch",
+      label: "Seat switch",
       category: "Switch",
       shape: "rectangle",
       connectors: [
         {
           id: "XS4",
-          label: "XS4",
+          label: "XS4"
         },
       ],
-      
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      engineering_connector_code: "XS4",
+      engineering_component_name: "Seat switch",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M7535",
+      component_code: "S4",
+      component_type: "Component",
+      connector_type: "Direct",
+      component_category: "Switch",
+      remove: false,
+      manufacturer: "Deutsch",
+      connector_part_number: "57M7535",
+      gender: "Female"
     },
     {
       id: "SPL_500",
@@ -22,10 +34,17 @@ const S4 = {
       connectors: [
         {
           id: "XSP_500",
-          label: "XSP_500",
+          label: "XSP_500"
         },
       ],
-      
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      engineering_connector_code: "XSP_500",
+      engineering_component_name: "Splice",
+      primary_part_number: "",
+      component_code: "SPL_500",
+      component_type: "Splice",
+      connector_type: "Direct",
+      remove: false
     },
     {
       id: "ICC",
@@ -35,11 +54,23 @@ const S4 = {
       connectors: [
         {
           id: "XJ2",
-          label: "XJ2",
+          label: "XJ2"
         },
       ],
-      
-    },
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      engineering_connector_code: "XJ2",
+      engineering_component_name: "Instrument Cluster Controller",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M12666",
+      component_code: "ICC",
+      component_type: "Component",
+      connector_type: "Direct",
+      component_category: "Transistor",
+      remove: false,
+      manufacturer: "Molex",
+      connector_part_number: "57M12666",
+      gender: "Female"
+    }
   ],
   connections: [
     {
@@ -54,7 +85,7 @@ const S4 = {
         componentId: "SPL_500",
         connectorId: "XSP_500",
         cavity: "L",
-        gender: " "
+        gender: ""
       },
       label: "",
       wireDetails: {
@@ -113,7 +144,7 @@ const S4 = {
         from: {
           connectorNumber: "XJ2",
           devName: "Instrument Cluster Controller",
-          connPartNumber: "57M12920",
+          connPartNumber: "57M12666",
           termPartNo: "57M11448",
           sealPartNo: "",
           cavity: "3",
