@@ -17,6 +17,7 @@ import PopupComponentDetails from "../popup/PopupComponentDetails";
 import PopupWireDetails from "../popup/PopupWireDetails";
 import PopupConnectorDetails from "../popup/PopupConnectorDetails";
 import { spaceForWires,connectionPointKey,getConnectionOffset,getIntersection,getConnectionsForComponent,getConnectionsForConnector ,getComponentConnectorTupleFromConnectionPoint,calculateCavityCountForConnector} from "./SchematicUtils";
+import { resetView,handleWheel ,zoom,enterFullscreen,exitFullscreen} from "./SchematicViews";
 
 import { SchematicData, ComponentType, WirePopupType, ConnectorType, PopupConnectorType, ConnectionPoint, ConnectionType } from "./SchematicTypes";
 // ...existing code...
@@ -92,90 +93,6 @@ export default function Schematic({
       cavityCount,
     });
     setPopupWire(null);
-  };
-
-  const resetView = () => {
-    if (!svgWrapperRef.current) return;
-
-    const svgWidth = svgWrapperRef.current.clientWidth;
-    const svgHeight = svgWrapperRef.current.clientHeight;
-
-    const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
-
-    const margin = 0.05;
-    const scaleX = svgWidth / schematicW;
-    const scaleY = svgHeight / schematicH;
-    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
-
-    let newW, newH, centerX, centerY;
-
-    if (schematicW < svgWidth && schematicH < svgHeight) {
-      // Small schematic — keep centered
-      scaleFactor = Math.min(scaleFactor, 1);
-      newW = schematicW * scaleFactor + 200;
-      newH = schematicH * scaleFactor + 200;
-
-      centerX = fitX - (newW - schematicW) / 2;
-      centerY = fitY - (newH - schematicH) / 2;
-    } else {
-      // Large schematic — align to top and expand horizontally
-      const expandFactor = 1.3; // expand width to the right
-      newW = schematicW * expandFactor;
-      newH = schematicH * scaleFactor * 2; // keep proportional height
-
-      centerX = fitX;     // left aligned
-      centerY = fitY + 100;     // top aligned
-    }
-
-    setViewBox({
-      x: centerX,
-      y: centerY,
-      w: newW,
-      h: newH,
-    });
-  };
-  // Mouse wheel handler for zoom
-  const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
-    e.preventDefault();
-    const scaleFactor = 1.1;
-    const mouseX = e.nativeEvent.offsetX;
-    const mouseY = e.nativeEvent.offsetY;
-    let { x, y, w, h } = viewBox;
-
-    // Calculate zoom direction
-    const zoomIn = e.deltaY < 0;
-    // Mouse coordinates in SVG space
-    const svg = e.currentTarget;
-    const bounds = svg.getBoundingClientRect();
-    const svgX = (mouseX / svg.width.baseVal.value) * w + x;
-    const svgY = (mouseY / svg.height.baseVal.value) * h + y;
-
-    let newW = zoomIn ? w / scaleFactor : w * scaleFactor;
-    let newH = zoomIn ? h / scaleFactor : h * scaleFactor;
-
-    // Keep mouse position centered after zoom
-    const newX = svgX - (mouseX / svg.width.baseVal.value) * newW;
-    const newY = svgY - (mouseY / svg.height.baseVal.value) * newH;
-
-    setViewBox({
-      x: newX,
-      y: newY,
-      w: newW,
-      h: newH,
-    });
-  };
-
-  //  Full screen handlers
-  const enterFullscreen = () => {
-    if (svgWrapperRef.current) {
-      svgWrapperRef.current.requestFullscreen();
-    }
-  };
-
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
   };
 
   useEffect(() => {
@@ -260,7 +177,7 @@ export default function Schematic({
   //change deafault view box on data change
   useEffect(() => {
     if (fitViewBox) {
-      resetView();
+      resetView(svgWrapperRef,fitViewBox,setViewBox);
     }
   }, [fitViewBox]);
 
@@ -343,23 +260,6 @@ export default function Schematic({
     setFitViewBox(newBox);
   }, [data]);
 
-  // Remove wheel gesture
-
-  // Zoom in/out buttons
-  const zoom = (inOrOut: "in" | "out") => {
-    const scaleFactor = 1.1;
-    const { x, y, w, h } = viewBox;
-    let newW = w,
-      newH = h;
-    if (inOrOut === "in") {
-      newW = w / scaleFactor;
-      newH = h / scaleFactor;
-    } else {
-      newW = w * scaleFactor;
-      newH = h * scaleFactor;
-    }
-    setViewBox({ x, y, w: newW, h: newH });
-  };
   function checkAndReturnIntersection(
     i: number,
     x1: number,
@@ -579,17 +479,17 @@ export default function Schematic({
           flexShrink: 0, // prevent shrinking if flex adjustments occur
         }}
       >
-        <button onClick={resetView} style={buttonStyle}>
+        <button onClick={()=>resetView(svgWrapperRef,fitViewBox,setViewBox)} style={buttonStyle}>
           Reset View
         </button>
-        <button onClick={() => zoom("in")} style={buttonStyle}>
+        <button onClick={() => zoom("in",viewBox,setViewBox)} style={buttonStyle}>
           Zoom In
         </button>
-        <button onClick={() => zoom("out")} style={buttonStyle}>
+        <button onClick={() => zoom("out",viewBox,setViewBox)} style={buttonStyle}>
           Zoom Out
         </button>
         <button
-          onClick={isFullscreen ? exitFullscreen : enterFullscreen}
+          onClick={()=>isFullscreen ? exitFullscreen() : enterFullscreen(svgWrapperRef)}
           style={buttonStyle}
         >
           {isFullscreen ? "Default Screen" : "Full Screen"}
@@ -611,7 +511,7 @@ export default function Schematic({
               setPopupClosedManually(false);
             }
           }}
-          onWheel={handleWheel}
+          onWheel={(e)=>handleWheel(e,viewBox,setViewBox)}
           style={{
             border: "1px solid #ccc",
             width: "100%",
