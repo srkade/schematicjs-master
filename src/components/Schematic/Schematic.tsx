@@ -557,7 +557,7 @@ export default function Schematic({
                 <g>
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) - connectorHeight / 2}
+                    cy={getYForComponent(comp) - connectorHeight / 2-2}
                     r={componentSize.height / 8} // adjust radius as needed
                     fill="white"
                     stroke="black"
@@ -565,7 +565,7 @@ export default function Schematic({
                   />
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) - connectorHeight / 2}
+                    cy={getYForComponent(comp) - connectorHeight / 2-2}
                     r={componentSize.height / 10}
                     fill="black"
                   />
@@ -582,7 +582,6 @@ export default function Schematic({
                       setSelectedComponentIds([comp.id]);
                       setPopupWire(null);
                       setPopupConnector(null);
-
 
                       // Show popup only if it wasn't manually closed
                       if (!popupClosedManually) {
