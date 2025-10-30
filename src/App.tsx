@@ -124,7 +124,7 @@ export default function App() {
         return ["Transistor", "Instrument"].includes(item.type);
       case "systems":
         return ["System"].includes(item.type);
-      case "dtcs":
+      case "DTC":
         return ["dtc"].includes(item.type);
       default:
         return false;

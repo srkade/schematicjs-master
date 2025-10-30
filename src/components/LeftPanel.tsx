@@ -73,7 +73,7 @@ export default function LeftPanel({
   };
 
   //  CHANGE: decide if checkboxes should be shown for this tab
-  const showCheckbox = activeTab === "components" || activeTab === "dtcs";
+  const showCheckbox = activeTab === "components" || activeTab === "DTC";
 
   return (
     <div

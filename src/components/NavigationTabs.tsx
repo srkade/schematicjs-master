@@ -11,7 +11,7 @@ const tabs = [
   { id: "controllers", label: "Controllers", icon: "⚙️" },
   { id: "systems", label: "Systems", icon: "🔗" },
   { id: "voltage", label: "Voltage Supply", icon: "⚡" },
-  { id: "dtcs", label: "DTC", icon: "⚠️" },
+  { id: "DTC", label: "DTC", icon: "⚠️" },
   { id: "signals", label: "Signals", icon: "📶" },
   { id: "harnesses", label: "Harnesses", icon: "🔌" },
 ];
