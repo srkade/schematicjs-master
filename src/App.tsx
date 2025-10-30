@@ -16,7 +16,7 @@ import {
 import {  DTC_StarterCoolDown,DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
 import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
-
+import logo from "./assets/Images/logo.jpg";
 
 const wrapSchematic = (schematic: any): any => ({
   masterComponents: [], // add this line
@@ -145,7 +145,7 @@ export default function App() {
       }}
     >
       {/* Header */}
-      <div
+      {/* <div
         style={{
           background: "white",
           borderBottom: "1px solid #e9ecef",
@@ -155,18 +155,14 @@ export default function App() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <h1
+          <img
             style={{
-              margin: 0,
-              color: "#212529",
-              fontSize: "28px",
-              fontWeight: "700",
+              width:"50px",
+              height:"50px"
             }}
-          >
-            ASDM
-          </h1>
+           src={logo}></img>
         </div>
-      </div>
+      </div> */}
 
       {/* Navigation Tabs */}
       <NavigationTabs

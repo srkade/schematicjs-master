@@ -22,8 +22,8 @@ export const resetView = (
 
     if (schematicW < svgWidth && schematicH < svgHeight) {
         scaleFactor = Math.min(scaleFactor, 1);
-        newW = schematicW * scaleFactor + 200;
-        newH = schematicH * scaleFactor + 200;
+        newW = schematicW * scaleFactor + 500;
+        newH = schematicH * scaleFactor + 500;
         centerX = fitX - (newW - schematicW) / 2;
         centerY = fitY - (newH - schematicH) / 2;
     } else {
