@@ -1,4 +1,4 @@
-import { SchematicData } from "../types/SchematicTypes";
+import { SchematicData } from "../components/Schematic/SchematicTypes";
 
 interface Connector {
   id: string;

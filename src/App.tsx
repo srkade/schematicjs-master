@@ -2,8 +2,8 @@ import React, { Component, useState, useEffect } from "react";
 import NavigationTabs from "./components/NavigationTabs";
 import LeftPanel from "./components/LeftPanel";
 import MainPanel from "./components/MainPanel";
-import { SchematicData } from "./types/SchematicTypes";
 import Schematic from "./components/Schematic/Schematic";
+import { SchematicData } from "./components/Schematic/SchematicTypes";
 import {
   ICC,
   S4,
