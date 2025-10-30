@@ -1,4 +1,6 @@
 const S4 = {
+  code: "S4",
+  name: "Seat Switch",
   masterComponents: ["S4"],
   components: [
     {

@@ -1,4 +1,6 @@
 const S9 = {
+  code: "S9",
+  name: "Light Switch",
   masterComponents: ["S9"],
   components: [
     {

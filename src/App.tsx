@@ -42,11 +42,14 @@ const SYSTEM_KEYS = ["CrankingSystem", "ChargingSystem"];
 // Create dashboardItems mapping (DO NOT place any hook or selection logic here)
 const dashboardItems = Object.entries(allSchematics).map(([key, schematic]) => {
   const isSystem = SYSTEM_KEYS.includes(key);
+  // NEW: Read code and name from schematic if they exist
+  const dtcCode = schematic.code || key;
+  const dtcName = schematic.name || schematic.components[0]?.label || (isSystem ? key : "Unknown Component");
   const label =
     schematic.components[0]?.label || (isSystem ? key : "Unknown Component");
   return {
-    code: key,
-    name: label,
+    code: dtcCode,  // Changed: now uses schematic.code
+    name: dtcName,  // Changed: now uses schematic.name
     type: isSystem ? "System" : schematic.components[0]?.category || "Unknown",
     status: "Active" as const,
     voltage: isSystem
