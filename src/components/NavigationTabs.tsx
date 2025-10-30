@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../Styles/NavigationTabs.css"
+import logo from "../assets/Images/logo.jpg"
 interface NavigationTabsProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -11,7 +12,7 @@ const tabs = [
   { id: "controllers", label: "Controllers", icon: "⚙️" },
   { id: "systems", label: "Systems", icon: "🔗" },
   { id: "voltage", label: "Voltage Supply", icon: "⚡" },
-  { id: "dtcs", label: "DTC", icon: "⚠️" },
+  { id: "DTC", label: "DTC", icon: "⚠️" },
   { id: "signals", label: "Signals", icon: "📶" },
   { id: "harnesses", label: "Harnesses", icon: "🔌" },
 ];
@@ -35,6 +36,19 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout }: Nav
           display: "flex",
           gap: "2px"
         }}>
+        <img
+          style={{
+            width: "70px",
+            height: "70px",
+          }}
+          src={logo}></img>
+        <h1
+          style={{
+            marginRight: "50px"
+          }}
+        >
+          ASDM
+        </h1>
 
         {tabs.map((tab) => (
           <button
@@ -76,23 +90,36 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout }: Nav
             <span>{tab.label}</span>
           </button>
         ))}
-        <button
-          onClick={onLogout}
-          style={{
-            background: "#bd5560ff",
-            color: "white",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: "14px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            marginLeft: "auto",
-          }}
-        >
-          Logout
-        </button>
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginLeft:"auto"
+        }}>
+          <button
+            onClick={onLogout}
+            style={{
+              background: "#bd5560ff",
+              color: "white",
+              border: "none",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "14px",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              width: "80px",
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              
+            }}
+          >
+            Logout
+          </button>
+        </div>
+
       </nav>
     </div>
   );

@@ -1,5 +1,4 @@
 // ...existing code...
-
 import React, {
   useState,
   useEffect,
@@ -14,152 +13,14 @@ import ElectricalSwitch from "../symbols/ElectricalSwitch";
 import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
 import MotorSymbol from "../symbols/MotorSymbol";
+import { ComponentType, ConnectionType, ConnectorType, ConnectionPoint, SchematicData, WireDetailsType, WirePopupType, PopupConnectorType } from "./SchematicTypes";
+import { spaceForWires, connectionPointKey, getConnectionOffset, getIntersection, getConnectionsForComponent, getConnectionsForConnector, getComponentConnectorTupleFromConnectionPoint, calculateCavityCountForConnector } from "./SchematicUtils";
+import PopupComponentDetails from "../popup/PopupComponentDetails";
+import PopupWireDetails from "../popup/PopupWireDetails";
+import PopupConnectorDetails from "../popup/PopupConnectorDetails";
 
 
-interface ComponentType {
-  id: string;
-  label: string;
-  category: string;
-  shape: string;
-  connectors: Array<{ id: string; label: string }>;
-  engineering_component_name?: string;
-  engineering_manufacturer?: string;
-  primary_part_number?: string;
-  harness_name?: string;
-  component_type?: string;
-  connector_type?: string;
-  remove?: boolean;
-  manufacturer?: string;
-  connector_part_number?: string;
-  gender?: string;
-}
-type ConnectorType = {
-  id: string;
-  label: string;
-  color?: string;
-  gender?: string;
-};
-type ConnectionPoint = {
-  componentId: string;
-  connectorId: string;
-  cavity: string;
-  gender?: string;
-};
-type ConnectionType = {
-  color?: string;
-  from: ConnectionPoint;
-  to: ConnectionPoint;
-  label: string;
-  wireDetails?: WireDetailsType; // Add this
-  
-};
-type SchematicData = {
-  masterComponents: string[];
-  components: ComponentType[];
-  connections: ConnectionType[];
-};
-
-interface WirePopupType {
-  color?: string;
-  fromComponent?: ComponentType;
-  toComponent?: ComponentType;
-  fromConnector?: {
-    label?: string;
-    gender?: string;
-  };
-  toConnector?: {
-    label?: string;
-    gender?: string;
-  };
-  wire?: {
-    color?: string;
-    from?: {
-      componentId?: string;
-      connectorId?: string;
-      cavity?: string;
-      gender?: string;
-    };
-    to?: {
-      componentId?: string;
-      connectorId?: string;
-      cavity?: string;
-      gender?: string;
-    };
-    wireDetails?: {
-      circuitNumber?: string;
-      wireSize?: number;
-      wireColor?: string;
-      wireLength?: number;
-      wireType?: string;
-      twistId?: string;
-      shieldId?: string;
-      wireOption?: string;
-      mark?: string;
-      from?: {
-        connectorNumber?: string;
-        devName?: string;
-        connPartNumber?: string;
-        termPartNo?: string;
-        sealPartNo?: string;
-        cavity?: string;
-      };
-      to?: {
-        connectorNumber?: string;
-        devName?: string;
-        connPartNumber?: string;
-        termPartNo?: string;
-        sealPartNo?: string;
-        cavity?: string;
-      };
-    };
-  };
-}
-
-type WireDetailsType = {
-  circuitNumber: string;
-  wireSize: number;
-  wireColor: string;
-  wireLength: number;
-  wireType: string;
-  twistId: string;
-  shieldId: string;
-  wireOption: string;
-  mark: string;
-  from: {
-    connectorNumber: string;
-    devName: string;
-    connPartNumber: string;
-    termPartNo: string;
-    sealPartNo: string;
-    cavity: string;
-  };
-  to: {
-    connectorNumber: string;
-    devName: string;
-    connPartNumber: string;
-    termPartNo: string;
-    sealPartNo: string;
-    cavity: string;
-  };
-};
-interface PopupConnectorType {
-  componentCode?: string;
-  connectorCode?: string;
-  label?: string;
-  harnessName?: string;
-  partNumber?: string;
-  gender?: string;
-  cavityCount?: number;
-  color?: string;
-  connectorType?: string;
-  manufacturer?: string;
-  termPartNo?: string;
-  sealPartNo?: string;
-}
-
-
-
-
+import { resetView, handleWheel, zoom, enterFullscreen, exitFullscreen } from "./SchematicViews";
 
 // ...existing code...
 const colors = {
@@ -218,7 +79,7 @@ export default function Schematic({
     setSelectedComponentIds([]);  // deselect any selected component
     setSelectedWires([]);
     setSelectedConnector(connector);
-    const cavityCount = calculateCavityCountForConnector(connector);
+    const cavityCount = calculateCavityCountForConnector(connector, data);
     setPopupComponent(null);
     setPopupWire(null);
 
@@ -234,129 +95,6 @@ export default function Schematic({
       cavityCount,
     });
     setPopupWire(null);
-  };
-
-
-
-  // Reset view handler
-  // const resetView = () => {
-  //   if (!svgWrapperRef.current) return;
-
-  //   const svgWidth = svgWrapperRef.current.clientWidth;
-  //   const svgHeight = svgWrapperRef.current.clientHeight;
-
-  //   const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
-
-  //   let scaleFactor = 1;
-
-  //   if (data.components.length === 1) {
-  //     // Single component: apply default zoom factor
-  //     scaleFactor = scaleFactor * 0.6; // Zoomed out default
-  //   } else {
-  //     // Multiple components: scale to fit SVG
-  //     const margin = 0.05;
-  //     const scaleX = svgWidth / schematicW;
-  //     const scaleY = svgHeight / schematicH;
-  //     scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
-  //   }
-
-  //   const newW = schematicW * scaleFactor;
-  //   const newH = schematicH * scaleFactor;
-
-  //   // Center schematic
-  //   const centerX = fitX + (schematicW - newW) / 2;
-  //   const centerY = fitY + (schematicH - newH) / 2;
-
-  //   setViewBox({
-  //     x: centerX,
-  //     y: centerY,
-  //     w: newW,
-  //     h: newH,
-  //   });
-  // };
-
-  const resetView = () => {
-    if (!svgWrapperRef.current) return;
-
-    const svgWidth = svgWrapperRef.current.clientWidth;
-    const svgHeight = svgWrapperRef.current.clientHeight;
-
-    const { w: schematicW, h: schematicH, x: fitX, y: fitY } = fitViewBox;
-
-    const margin = 0.05;
-    const scaleX = svgWidth / schematicW;
-    const scaleY = svgHeight / schematicH;
-    let scaleFactor = Math.min(scaleX, scaleY) * (1 - margin);
-
-    let newW, newH, centerX, centerY;
-
-    if (schematicW < svgWidth && schematicH < svgHeight) {
-      // Small schematic — keep centered
-      scaleFactor = Math.min(scaleFactor, 1);
-      newW = schematicW * scaleFactor + 200;
-      newH = schematicH * scaleFactor + 200;
-
-      centerX = fitX - (newW - schematicW) / 2;
-      centerY = fitY - (newH - schematicH) / 2;
-    } else {
-      // Large schematic — align to top and expand horizontally
-      const expandFactor = 1.3; // expand width to the right
-      newW = schematicW * expandFactor;
-      newH = schematicH * scaleFactor * 2; // keep proportional height
-
-      centerX = fitX;     // left aligned
-      centerY = fitY + 100;     // top aligned
-    }
-
-    setViewBox({
-      x: centerX,
-      y: centerY,
-      w: newW,
-      h: newH,
-    });
-  };
-  // Mouse wheel handler for zoom
-  const handleWheel = (e: React.WheelEvent<SVGSVGElement>) => {
-    e.preventDefault();
-    const scaleFactor = 1.1;
-    const mouseX = e.nativeEvent.offsetX;
-    const mouseY = e.nativeEvent.offsetY;
-    let { x, y, w, h } = viewBox;
-
-    // Calculate zoom direction
-    const zoomIn = e.deltaY < 0;
-    // Mouse coordinates in SVG space
-    const svg = e.currentTarget;
-    const bounds = svg.getBoundingClientRect();
-    const svgX = (mouseX / svg.width.baseVal.value) * w + x;
-    const svgY = (mouseY / svg.height.baseVal.value) * h + y;
-
-    let newW = zoomIn ? w / scaleFactor : w * scaleFactor;
-    let newH = zoomIn ? h / scaleFactor : h * scaleFactor;
-
-    // Keep mouse position centered after zoom
-    const newX = svgX - (mouseX / svg.width.baseVal.value) * newW;
-    const newY = svgY - (mouseY / svg.height.baseVal.value) * newH;
-
-    setViewBox({
-      x: newX,
-      y: newY,
-      w: newW,
-      h: newH,
-    });
-  };
-
-  //  Full screen handlers
-  const enterFullscreen = () => {
-    if (svgWrapperRef.current) {
-      svgWrapperRef.current.requestFullscreen();
-    }
-  };
-
-  const exitFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
   };
 
   useEffect(() => {
@@ -441,7 +179,7 @@ export default function Schematic({
   //change deafault view box on data change
   useEffect(() => {
     if (fitViewBox) {
-      resetView();
+      resetView(svgWrapperRef, fitViewBox, setViewBox);
     }
   }, [fitViewBox]);
 
@@ -473,7 +211,7 @@ export default function Schematic({
   var maxY =
     padding +
     componentSize.height +
-    spaceForWires() +
+    spaceForWires(data) +
     componentSize.height +
     padding;
 
@@ -524,71 +262,6 @@ export default function Schematic({
     setFitViewBox(newBox);
   }, [data]);
 
-  // Remove wheel gesture
-
-  // Zoom in/out buttons
-  const zoom = (inOrOut: "in" | "out") => {
-    const scaleFactor = 1.1;
-    const { x, y, w, h } = viewBox;
-    let newW = w,
-      newH = h;
-    if (inOrOut === "in") {
-      newW = w / scaleFactor;
-      newH = h / scaleFactor;
-    } else {
-      newW = w * scaleFactor;
-      newH = h * scaleFactor;
-    }
-    setViewBox({ x, y, w: newW, h: newH });
-  };
-
-  function spaceForWires() {
-    let connectionsCount = data.connections.length;
-    return connectionsCount * 20 + 40; // 20px per connection + padding
-  }
-
-  function connectionPointKey(point: ConnectionPoint): string {
-    return `${point.componentId}_${point.connectorId}_${point.cavity}`;
-  }
-
-  function getConnectionOffset(
-    index: number,
-    count: number,
-    y1: number,
-    y2: number,
-    offsetStep = 10
-  ) {
-    let max = Math.max(y1, y2);
-    let min = Math.min(y1, y2);
-    let reverseOffset = max - min - index * offsetStep - offsetStep;
-    return reverseOffset;
-  }
-
-  function getIntersection(
-    xa: number,
-    ya: number,
-    xb: number,
-    yb: number,
-    xc: number,
-    yc: number,
-    xd: number,
-    yd: number
-  ) {
-    // Returns intersection point if line AB and CD intersect
-    const denom = (xb - xa) * (yd - yc) - (yb - ya) * (xd - xc);
-    if (denom === 0) return null;
-    const r = ((ya - yc) * (xd - xc) - (xa - xc) * (yd - yc)) / denom;
-    const s = ((ya - yc) * (xb - xa) - (xa - xc) * (yb - ya)) / denom;
-    if (r > 0 && r < 1 && s > 0 && s < 1) {
-      // Intersection point
-      return {
-        x: xa + r * (xb - xa),
-        y: ya + r * (yb - ya),
-      };
-    }
-    return null;
-  }
-
   function checkAndReturnIntersection(
     i: number,
     x1: number,
@@ -601,11 +274,11 @@ export default function Schematic({
       if (i === j) continue;
       const w2 = data.connections[j];
       const f2 = w2.from;
-      const f2Tuple = getComponentConnectorTupleFromConnectionPoint(f2);
+      const f2Tuple = getComponentConnectorTupleFromConnectionPoint(f2, data);
       const f2Component = f2Tuple[0];
       const f2Connector = f2Tuple[1];
       const t2 = w2.to;
-      const t2Tuple = getComponentConnectorTupleFromConnectionPoint(t2);
+      const t2Tuple = getComponentConnectorTupleFromConnectionPoint(t2, data);
       const t2Component = t2Tuple[0];
       const t2Connector = t2Tuple[1];
 
@@ -660,18 +333,10 @@ export default function Schematic({
       );
     }
   }
-
-  function getConnectionsForComponent(component: ComponentType) {
-    return data.connections.filter(
-      (c) =>
-        c.from.componentId === component.id || c.to.componentId === component.id
-    );
-  }
-
   function getWidthForComponent(component: ComponentType): number {
     const defaultWidth = componentNameWidths[component.id] + padding;
     if (component.shape === "rectangle") {
-      let connectionCount = getConnectionsForComponent(component).length;
+      let connectionCount = getConnectionsForComponent(component, data).length;
       if (connectionCount > 1) {
         let width = connectorSpacing;
         component.connectors.forEach((conn) => {
@@ -682,7 +347,6 @@ export default function Schematic({
     }
     return defaultWidth;
   }
-
 
   function getXForComponent(component: ComponentType): number {
     let index = data.components.findIndex((c) => c.id === component.id);
@@ -704,13 +368,11 @@ export default function Schematic({
       ? padding
       : padding +
       componentSize.height +
-      spaceForWires() +
+      spaceForWires(data) +
       componentSize.height +
       padding;
     return y;
   }
-  
-
 
   function getXForComponentTitle(component: ComponentType): number {
     return (
@@ -755,18 +417,11 @@ export default function Schematic({
       ? getYForComponent(component) + componentSize.height
       : getYForComponent(component) - 20;
   }
-
-  function getConnectionsForConnector(conn: ConnectorType): ConnectionType[] {
-    return data.connections.filter(
-      (c) => c.from.connectorId === conn.id || c.to.connectorId === conn.id
-    );
-  }
-
   function getWidthForConnector(
     conn: ConnectorType,
     comp: ComponentType
   ): number {
-    let connections = getConnectionsForConnector(conn);
+    let connections = getConnectionsForConnector(conn, data);
     if (comp.shape === "rectangle") {
       let interConnectionSpacing = 30;
       let connectionsBasedWidth =
@@ -778,23 +433,6 @@ export default function Schematic({
       );
     }
     return connectorNameWidths[conn.id] + connectorNamePadding;
-  }
-
-  function getComponentConnectorTupleFromConnectionPoint(
-    point: ConnectionPoint
-  ): [ComponentType?, ConnectorType?] {
-    const fromComponent = data.components.find(
-      (comp) => point.componentId === comp.id
-    );
-    if (fromComponent) {
-      const connector = fromComponent.connectors.find(
-        (conn) => conn.id === point.connectorId
-      );
-      if (connector) {
-        return [fromComponent, connector];
-      }
-    }
-    return [undefined, undefined];
   }
   function getXForWireToSplice(
     component: ComponentType,
@@ -809,19 +447,6 @@ export default function Schematic({
     const offsetY = (wireIndex - (totalWires - 1) / 2) * spacing;
     return { x: centerX, offsetY };
   }
-
-  function calculateCavityCountForConnector(conn: ConnectorType): number {
-    // Count all connections where this connector is involved
-    const count = data.connections.filter(
-      (connection) =>
-        connection.from.connectorId === conn.id ||
-        connection.to.connectorId === conn.id
-    ).length;
-
-    return count;
-  }
-
-
   const buttonStyle = {
     padding: "3px 7px",
     borderRadius: "6px",
@@ -856,17 +481,17 @@ export default function Schematic({
           flexShrink: 0, // prevent shrinking if flex adjustments occur
         }}
       >
-        <button onClick={resetView} style={buttonStyle}>
+        <button onClick={() => resetView(svgWrapperRef, fitViewBox, setViewBox)} style={buttonStyle}>
           Reset View
         </button>
-        <button onClick={() => zoom("in")} style={buttonStyle}>
+        <button onClick={() => zoom("in", viewBox, setViewBox)} style={buttonStyle}>
           Zoom In
         </button>
-        <button onClick={() => zoom("out")} style={buttonStyle}>
+        <button onClick={() => zoom("out", viewBox, setViewBox)} style={buttonStyle}>
           Zoom Out
         </button>
         <button
-          onClick={isFullscreen ? exitFullscreen : enterFullscreen}
+          onClick={() => isFullscreen ? exitFullscreen() : enterFullscreen(svgWrapperRef)}
           style={buttonStyle}
         >
           {isFullscreen ? "Default Screen" : "Full Screen"}
@@ -888,7 +513,7 @@ export default function Schematic({
               setPopupClosedManually(false);
             }
           }}
-          onWheel={handleWheel}
+          onWheel={(e) => handleWheel(e, viewBox, setViewBox)}
           style={{
             border: "1px solid #ccc",
             width: "100%",
@@ -932,7 +557,7 @@ export default function Schematic({
                 <g>
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) - connectorHeight / 2}
+                    cy={getYForComponent(comp) - connectorHeight / 2-2}
                     r={componentSize.height / 8} // adjust radius as needed
                     fill="white"
                     stroke="black"
@@ -940,7 +565,7 @@ export default function Schematic({
                   />
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) - connectorHeight / 2}
+                    cy={getYForComponent(comp) - connectorHeight / 2-2}
                     r={componentSize.height / 10}
                     fill="black"
                   />
@@ -957,7 +582,6 @@ export default function Schematic({
                       setSelectedComponentIds([comp.id]);
                       setPopupWire(null);
                       setPopupConnector(null);
-
 
                       // Show popup only if it wasn't manually closed
                       if (!popupClosedManually) {
@@ -1120,12 +744,12 @@ export default function Schematic({
             const toConn = wire.to;
 
             const fromData =
-              getComponentConnectorTupleFromConnectionPoint(fromConn);
+              getComponentConnectorTupleFromConnectionPoint(fromConn, data);
             const fromComponent = fromData[0];
             const from = fromData[1];
 
             const toData =
-              getComponentConnectorTupleFromConnectionPoint(toConn);
+              getComponentConnectorTupleFromConnectionPoint(toConn, data);
             const toComponent = toData[0];
             const to = toData[1];
 
@@ -1149,7 +773,7 @@ export default function Schematic({
                 fromComponent!
               );
               const fromConnectorCount = connectorConnectionCount[from.id] || 1;
-              const connIndex = getConnectionsForConnector(from).findIndex(
+              const connIndex = getConnectionsForConnector(from, data).findIndex(
                 (c) => c === wire
               );
               const fromConnectorOffset =
@@ -1183,7 +807,7 @@ export default function Schematic({
               const toConnectorX = getXForConnector(to, toComponent!);
               const toConnectorWidth = getWidthForConnector(to, toComponent!);
               const toConnectorCount = connectorConnectionCount[to.id] || 1;
-              const connIndexTo = getConnectionsForConnector(to).findIndex(
+              const connIndexTo = getConnectionsForConnector(to, data).findIndex(
                 (c) => c === wire
               );
               const toConnectorOffset =
@@ -1260,15 +884,12 @@ export default function Schematic({
                   key={i}
                   onClick={(e) => {
                     e.stopPropagation(); // Prevent deselecting everything else
-
                     setSelectedComponentIds([]);
                     setSelectedConnector(null);
                     // Select only this wire
                     setSelectedWires([i.toString()]);
                     setPopupComponent(null);
                     setPopupConnector(null);
-
-
                     // Set popupWire with all details
                     setPopupWire({
                       wire,
@@ -1327,7 +948,6 @@ export default function Schematic({
                     )}
                   </>
                 )}
-
                 <text
                   x={fromX + 10}
                   y={fromLabelY}
@@ -1356,1116 +976,26 @@ export default function Schematic({
           })}
         </svg>
       </div>
-     {/* ==================== COMPONENT POPUP ==================== */}
-{popupComponent && (
-  <div
-    style={{
-      position: "fixed",
-      top: "30%",
-      right: "20px",
-      transform: "translate(0%, -30%)",
-      width: "480px",
-      maxHeight: "700px",
-      background: "#ffffff",
-      border: "1px solid #ddd",
-      padding: "20px",
-      borderRadius: "12px",
-      boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
-      zIndex: 1000,
-      overflowY: "auto",
-      fontFamily: "'Segoe UI', Arial, sans-serif",
-    }}
-  >
-    {/* HEADER */}
-    <h3
-      style={{
-        textAlign: "center",
-        color: "#333",
-        borderBottom: "3px solid #007bff",
-        paddingBottom: "10px",
-        marginBottom: "16px",
-        fontSize: "20px",
-      }}
-    >
-      Component Details
-    </h3>
-
-    {/* COMPONENT DETAILS TABLE */}
-    <table
-      style={{
-        width: "100%",
-        borderCollapse: "collapse",
-        fontSize: "14px",
-        marginBottom: "10px",
-      }}
-    >
-      <tbody>
-        {/* ID */}
-        {popupComponent.id && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                width: "45%",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              ID
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.id}
-            </td>
-          </tr>
-        )}
-
-        {/* Engineering Component Name */}
-        {popupComponent.engineering_component_name && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Engineering Component Name
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.engineering_component_name}
-            </td>
-          </tr>
-        )}
-
-
-        {/* Category */}
-        {popupComponent.category && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Category
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.category}
-            </td>
-          </tr>
-        )}
-
-        {/* Shape */}
-        {popupComponent.shape && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Shape
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333", textTransform: "capitalize" }}>
-              {popupComponent.shape}
-            </td>
-          </tr>
-        )}
-
-       
-        {/* Engineering Manufacturer */}
-        {popupComponent.engineering_manufacturer && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Engineering Manufacturer
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.engineering_manufacturer}
-            </td>
-          </tr>
-        )}
-
-        {/* Manufacturer */}
-        {popupComponent.manufacturer && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Manufacturer
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.manufacturer}
-            </td>
-          </tr>
-        )}
-
-        {/* Primary Part Number */}
-        {popupComponent.primary_part_number && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Primary Part Number
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.primary_part_number}
-            </td>
-          </tr>
-        )}
-
-        {/* Connector Part Number */}
-        {popupComponent.connector_part_number && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Connector Part Number
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.connector_part_number}
-            </td>
-          </tr>
-        )}
-
-        {/* Harness Name */}
-        {popupComponent.harness_name && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Harness Name
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.harness_name}
-            </td>
-          </tr>
-        )}
-
-        {/* Component Type */}
-        {popupComponent.component_type && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Component Type
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.component_type}
-            </td>
-          </tr>
-        )}
-
-        {/* Connector Type */}
-        {popupComponent.connector_type && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Connector Type
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.connector_type}
-            </td>
-          </tr>
-        )}
-
-        {/* Gender */}
-        {popupComponent.gender && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Gender
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.gender}
-            </td>
-          </tr>
-        )}
-
-        {/* Remove Status */}
-        {popupComponent.remove !== undefined && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Remove Status
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.remove ? "Yes" : "No"}
-            </td>
-          </tr>
-        )}
-
-        {/* Connectors */}
-        {popupComponent.connectors && popupComponent.connectors.length > 0 && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Connectors
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupComponent.connectors.map((c) => c.label).join(", ")}
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-
-    {/* CLOSE BUTTON */}
-    <div style={{ textAlign: "center", marginTop: "20px" }}>
-      <button
-        onClick={() => {
-          setSelectedComponentIds([]);
-          setPopupComponent(null);
-          setPopupClosedManually(false);
-        }}
-        style={{
-          background: "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
-          color: "white",
-          border: "none",
-          padding: "10px 24px",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: "600",
-          boxShadow: "0px 3px 8px rgba(0,123,255,0.3)",
-          transition: "all 0.3s ease",
-        }}
-        onMouseOver={(e) => ((e.currentTarget).style.transform = "scale(1.05)")}
-        onMouseOut={(e) => ((e.currentTarget).style.transform = "scale(1)")}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
-
-      {/* ==================== WIRE POPUP ==================== */}
-{popupWire && (
-  <div
-    style={{
-      position: "fixed",
-      top: "50%",
-      right: "20px",
-      transform: "translateY(-50%)",
-      width: "500px",
-      maxHeight: "750px",
-      background: "#ffffff",
-      borderRadius: "12px",
-      boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
-      padding: "24px",
-      zIndex: 1000,
-      overflowY: "auto",
-      fontFamily: "'Segoe UI', Arial, sans-serif",
-      lineHeight: "1.6",
-    }}
-  >
-    {/* HEADER */}
-    <h3
-      style={{
-        borderBottom: "3px solid #007bff",
-        paddingBottom: "10px",
-        marginBottom: "20px",
-        color: "#333",
-        fontSize: "20px",
-        textAlign: "center",
-      }}
-    >
-      Wire Details
-    </h3>
-
-    {/* WIRE DETAILS TABLE */}
-    <table
-      style={{
-        width: "100%",
-        borderCollapse: "collapse",
-        marginBottom: "24px",
-        fontSize: "14px",
-      }}
-    >
-      <tbody>
-        {/* Color */}
-        <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-          <td
-            style={{
-              fontWeight: "600",
-              padding: "10px 8px",
-              width: "45%",
-              backgroundColor: "#f8f9fa",
-              color: "#555",
-            }}
-          >
-            Wire Color
-          </td>
-          <td style={{ padding: "10px 8px", color: "#333" }}>
-            {popupWire.color || popupWire.wire?.wireDetails?.wireColor || "N/A"}
-          </td>
-        </tr>
-
-        {/* Circuit Number */}
-        {popupWire.wire?.wireDetails?.circuitNumber && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Circuit Number
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.circuitNumber}
-            </td>
-          </tr>
-        )}
-
-        {/* Wire Size */}
-        {popupWire.wire?.wireDetails?.wireSize && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Wire Size
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.wireSize} mm
-            </td>
-          </tr>
-        )}
-
-        {/* Wire Length */}
-        {popupWire.wire?.wireDetails?.wireLength && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Wire Length
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.wireLength} mm
-            </td>
-          </tr>
-        )}
-
-        {/* Wire Type */}
-        {popupWire.wire?.wireDetails?.wireType && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Wire Type
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.wireType}
-            </td>
-          </tr>
-        )}
-
-        {/* Twist ID */}
-        {popupWire.wire?.wireDetails?.twistId && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Twist ID
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.twistId}
-            </td>
-          </tr>
-        )}
-
-        {/* Shield ID */}
-        {popupWire.wire?.wireDetails?.shieldId && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Shield ID
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.shieldId}
-            </td>
-          </tr>
-        )}
-
-        {/* Wire Option */}
-        {popupWire.wire?.wireDetails?.wireOption && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Wire Option
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.wireOption}
-            </td>
-          </tr>
-        )}
-
-        {/* Mark */}
-        {popupWire.wire?.wireDetails?.mark && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Mark
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.wire.wireDetails.mark}
-            </td>
-          </tr>
-        )}
-
-        {/* Harness Name */}
-        {popupWire.fromComponent?.harness_name && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Harness Name
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupWire.fromComponent.harness_name}
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-
-    {/* CONNECTION DETAILS SECTION */}
-    <h3
-      style={{
-        borderBottom: "3px solid #007bff",
-        paddingBottom: "8px",
-        marginBottom: "16px",
-        color: "#333",
-        fontSize: "18px",
-      }}
-    >
-      Connection Details
-    </h3>
-
-    <table
-      style={{
-        width: "100%",
-        borderCollapse: "collapse",
-        fontSize: "14px",
-        textAlign: "center",
-        border: "1px solid #ddd",
-      }}
-    >
-      <thead>
-        <tr style={{ backgroundColor: "#007bff", color: "white" }}>
-          <th style={{ border: "1px solid #ddd", padding: "10px", fontWeight: "600" }}>
-            Property
-          </th>
-          <th style={{ border: "1px solid #ddd", padding: "10px", fontWeight: "600" }}>
-            From
-          </th>
-          <th style={{ border: "1px solid #ddd", padding: "10px", fontWeight: "600" }}>
-            To
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {/* Component */}
-        <tr>
-          <td
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              fontWeight: "600",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            Component
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.fromComponent?.label ||
-              popupWire.wire?.wireDetails?.from?.devName ||
-              popupWire.wire?.from?.componentId ||
-              "N/A"}
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.toComponent?.label ||
-              popupWire.wire?.wireDetails?.to?.devName ||
-              popupWire.wire?.to?.componentId ||
-              "N/A"}
-          </td>
-        </tr>
-
-        {/* Connector */}
-        <tr>
-          <td
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              fontWeight: "600",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            Connector
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.fromConnector?.label ||
-              popupWire.wire?.wireDetails?.from?.connectorNumber ||
-              popupWire.wire?.from?.connectorId ||
-              "N/A"}
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.toConnector?.label ||
-              popupWire.wire?.wireDetails?.to?.connectorNumber ||
-              popupWire.wire?.to?.connectorId ||
-              "N/A"}
-          </td>
-        </tr>
-
-        {/* Connector Part Number */}
-        <tr>
-          <td
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              fontWeight: "600",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            Connector Part Number
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.from?.connPartNumber || "N/A"}
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.to?.connPartNumber || "N/A"}
-          </td>
-        </tr>
-
-        {/* Terminal Part Number */}
-        <tr>
-          <td
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              fontWeight: "600",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            Terminal Part Number
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.from?.termPartNo || "N/A"}
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.to?.termPartNo || "N/A"}
-          </td>
-        </tr>
-
-        {/* Seal Part Number */}
-        <tr>
-          <td
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              fontWeight: "600",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            Seal Part Number
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.from?.sealPartNo || "N/A"}
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.to?.sealPartNo || "N/A"}
-          </td>
-        </tr>
-
-        {/* Gender */}
-        <tr>
-          <td
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              fontWeight: "600",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            Gender
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.fromConnector?.gender ||
-              popupWire.wire?.from?.gender ||
-              "N/A"}
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.toConnector?.gender ||
-              popupWire.wire?.to?.gender ||
-              "N/A"}
-          </td>
-        </tr>
-
-        {/* Cavity */}
-        <tr>
-          <td
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              fontWeight: "600",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            Cavity
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.from?.cavity ||
-              popupWire.wire?.from?.cavity ||
-              "N/A"}
-          </td>
-          <td style={{ border: "1px solid #ddd", padding: "10px" }}>
-            {popupWire.wire?.wireDetails?.to?.cavity ||
-              popupWire.wire?.to?.cavity ||
-              "N/A"}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    {/* CLOSE BUTTON */}
-    <div style={{ textAlign: "center", marginTop: "24px" }}>
-      <button
-        onClick={(e) => {
+      <PopupComponentDetails
+        popupComponent={popupComponent}
+        onClose={() => setPopupComponent(null)}
+      />
+      <PopupWireDetails
+        popupWire={popupWire}
+        onClose={(e) => {
           e.stopPropagation();
           setSelectedWires([]);
           setPopupWire(null);
         }}
-        style={{
-          background: "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
-          color: "white",
-          border: "none",
-          padding: "10px 24px",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: "600",
-          boxShadow: "0px 3px 8px rgba(0,123,255,0.3)",
-          transition: "all 0.3s ease",
-        }}
-        onMouseOver={(e) => ((e.currentTarget).style.transform = "scale(1.05)")}
-        onMouseOut={(e) => ((e.currentTarget).style.transform = "scale(1)")}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
-
-      
-{/* ==================== CONNECTOR POPUP ==================== */}
-{popupConnector && (
-  <div
-    style={{
-      position: "fixed",
-      top: "50%",
-      right: "20px",
-      transform: "translateY(-50%)",
-      width: "480px",
-      maxHeight: "700px",
-      background: "#ffffff",
-      borderRadius: "12px",
-      boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
-      padding: "24px",
-      zIndex: 1000,
-      overflowY: "auto",
-      fontFamily: "'Segoe UI', Arial, sans-serif",
-      lineHeight: "1.6",
-    }}
-  >
-    {/* HEADER */}
-    <h3
-      style={{
-        fontSize: "20px",
-        fontWeight: "bold",
-        marginBottom: "20px",
-        color: "#333",
-        textAlign: "center",
-        borderBottom: "3px solid #007bff",
-        paddingBottom: "10px",
-      }}
-    >
-      Connector Details
-    </h3>
-
-    {/* CONNECTOR DETAILS TABLE */}
-    <table
-      style={{
-        width: "100%",
-        fontSize: "14px",
-        borderCollapse: "collapse",
-      }}
-    >
-      <tbody>
-        {/* Component Code */}
-        {popupConnector.componentCode && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                width: "45%",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Component Code
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.componentCode}
-            </td>
-          </tr>
-        )}
-
-        {/* Connector Code */}
-        {popupConnector.connectorCode && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Connector Code
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.connectorCode}
-            </td>
-          </tr>
-        )}
-
-        {/* Label */}
-        {popupConnector.label && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Label
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.label}
-            </td>
-          </tr>
-        )}
-
-        {/* Harness Name */}
-        {popupConnector.harnessName && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Harness Name
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.harnessName}
-            </td>
-          </tr>
-        )}
-
-        {/* Connector Part Number */}
-        {popupConnector.partNumber && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Connector Part Number
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.partNumber}
-            </td>
-          </tr>
-        )}
-
-        {/* Gender */}
-        {popupConnector.gender && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Gender
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.gender}
-            </td>
-          </tr>
-        )}
-
-        {/* Cavity Count */}
-        {popupConnector.cavityCount && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Cavity Count
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.cavityCount}
-            </td>
-          </tr>
-        )}
-
-        {/* Color */}
-        {popupConnector.color && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Color
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.color}
-            </td>
-          </tr>
-        )}
-
-        {/* Connector Type */}
-        {popupConnector.connectorType && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Connector Type
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.connectorType}
-            </td>
-          </tr>
-        )}
-
-        {/* Manufacturer */}
-        {popupConnector.manufacturer && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Manufacturer
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.manufacturer}
-            </td>
-          </tr>
-        )}
-
-        {/* Terminal Part Number */}
-        {popupConnector.termPartNo && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Terminal Part Number
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.termPartNo}
-            </td>
-          </tr>
-        )}
-
-        {/* Seal Part Number */}
-        {popupConnector.sealPartNo && (
-          <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-            <td
-              style={{
-                fontWeight: "600",
-                padding: "10px 8px",
-                backgroundColor: "#f8f9fa",
-                color: "#555",
-              }}
-            >
-              Seal Part Number
-            </td>
-            <td style={{ padding: "10px 8px", color: "#333" }}>
-              {popupConnector.sealPartNo}
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-
-    {/* CLOSE BUTTON */}
-    <div ref={popupRef} style={{ textAlign: "center", marginTop: "24px" }}>
-      <button
-        onClick={(e) => {
+      />
+      <PopupConnectorDetails
+        popupConnector={popupConnector}
+        onClose={(e) => {
           e.stopPropagation();
           setPopupConnector(null);
           setSelectedConnector(null);
         }}
-        style={{
-          background: "linear-gradient(135deg, #007bff 0%, #0056b3 100%)",
-          color: "#fff",
-          border: "none",
-          padding: "10px 24px",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontSize: "14px",
-          fontWeight: "600",
-          boxShadow: "0px 3px 8px rgba(0,123,255,0.3)",
-          transition: "all 0.3s ease",
-        }}
-        onMouseOver={(e) => ((e.currentTarget).style.transform = "scale(1.05)")}
-        onMouseOut={(e) => ((e.currentTarget).style.transform = "scale(1)")}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
+      />
     </div>
   );
 }
