@@ -1,4 +1,7 @@
 const DTC_StarterCoolDown = {
+  code :"ICC 000677.31",
+  name: "(E1001) - Starter Cool Down in Process",
+  type: "dtcs",
   masterComponents: ["S12"],
   components: [
     {
@@ -98,6 +101,9 @@ const DTC_StarterCoolDown = {
 };
 
 const DTC_StarterRelayPower = {
+  code :"ICC 000677.03",
+  name: "(E1007) - Starter Relay Short to Power",
+  type: "dtcs",
   masterComponents: ["K3","K6"],
   components: [
     {
@@ -407,6 +413,9 @@ const DTC_StarterRelayPower = {
 
 
 const DTC_StarterRelayGround = {
+  code :"ICC 000677.04",
+  name: "(E1006) - Starter Relay Short to Ground",
+  type: "dtcs",
   masterComponents: [
    "G2",
   
@@ -703,6 +712,9 @@ const DTC_StarterRelayGround = {
 
 
 const DTC_ICC = {
+  code :"ICC 000677.05",
+  name: "(E1012) - Starter Relay Open Circuit",
+  type: "dtcs",
   masterComponents: ["ICC"],
   components: [
     {
@@ -2606,10 +2618,6 @@ const DTC_ICC = {
     }
   ]
 };
-
-
-
-
 
 
 export {

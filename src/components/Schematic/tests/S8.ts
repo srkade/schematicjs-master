@@ -1,4 +1,6 @@
 const S8 = {
+  code: "S8",
+  name: "Brake Switch",
   masterComponents: ["S8"],
   components: [
   {

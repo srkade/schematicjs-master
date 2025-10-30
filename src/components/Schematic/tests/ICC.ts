@@ -1,4 +1,6 @@
 const ICC = {
+  code: "ICC",
+  name: "Instrument Cluster Controller",
   masterComponents: ["ICC"],
   components: [
     {

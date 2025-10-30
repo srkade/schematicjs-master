@@ -1,4 +1,6 @@
 const B3 = {
+  code: "B3",
+  name: "Coolant Temperature Sensor",
   masterComponents: ["B3"],
   components: [
     {

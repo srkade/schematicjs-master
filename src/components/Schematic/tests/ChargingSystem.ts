@@ -1,4 +1,6 @@
 const ChargingSystem = {
+  code: "7",
+  name: "Charging System",
   masterComponents: ["X90","G2","G1"],
   components: [
     {
@@ -390,51 +392,51 @@ const ChargingSystem = {
           connPartNumber: "M90206",
           termPartNo: "U46662",
           sealPartNo: "",
-          cavity: "B"
+          cavity: "B" 
         }
       }
     },
-    {
-      color: "red",
-      from: {
-        componentId: "X90",
-        connectorId: "X90",
-        cavity: "27"
-      },
-      to: {
-        componentId: "X90",
-        connectorId: "X90",
-        cavity: "38"
-      },
-      label: "",
-      wireDetails: {
-        circuitNumber: "207A",
-        wireSize: 2.0,
-        wireColor: "RD",
-        wireLength: 100,
-        wireType: "Regular",
-        twistId: "",
-        shieldId: "",
-        wireOption: "",
-        mark: "",
-        from: {
-          connectorNumber: "X90",
-          devName: "Load center",
-          connPartNumber: "57M13428",
-          termPartNo: "57M7491",
-          sealPartNo: "57M9219",
-          cavity: "27"
-        },
-        to: {
-          connectorNumber: "X90",
-          devName: "Load center",
-          connPartNumber: "57M13428",
-          termPartNo: "57M7491",
-          sealPartNo: "57M9219",
-          cavity: "38"
-        }
-      }
-    },
+    // {
+    //   color: "red",
+    //   from: {
+    //     componentId: "X90",
+    //     connectorId: "X90",
+    //     cavity: "27"
+    //   },
+    //   to: {
+    //     componentId: "X90",
+    //     connectorId: "X90",
+    //     cavity: "38"
+    //   },
+    //   label: "",
+    //   wireDetails: {
+    //     circuitNumber: "207A",
+    //     wireSize: 2.0,
+    //     wireColor: "RD",
+    //     wireLength: 100,
+    //     wireType: "Regular",
+    //     twistId: "",
+    //     shieldId: "",
+    //     wireOption: "",
+    //     mark: "",
+    //     from: {
+    //       connectorNumber: "X90",
+    //       devName: "Load center",
+    //       connPartNumber: "57M13428",
+    //       termPartNo: "57M7491",
+    //       sealPartNo: "57M9219",
+    //       cavity: "27"
+    //     },
+    //     to: {
+    //       connectorNumber: "X90",
+    //       devName: "Load center",
+    //       connPartNumber: "57M13428",
+    //       termPartNo: "57M7491",
+    //       sealPartNo: "57M9219",
+    //       cavity: "38"
+    //     }
+    //   }
+    // },
     {
       color: "yellow",
       from: {
