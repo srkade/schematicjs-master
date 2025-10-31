@@ -16,22 +16,22 @@ export default function PopupComponentDetails({
   return (
     <div
       style={{
-        position: "fixed",
-        top: "30%",
-        right: "20px",
-        transform: "translate(0%, -30%)",
-        width: "480px",
-        maxHeight: "700px",
+        position: "absolute",     // changed from fixed → absolute
+        top: 0,                   // start exactly from top of the SVG container
+        right: 0,                 // align with the right edge
+        width: "350px",
+        height: "90%",         // make it scrollable within the container
+        overflowY: "auto",
         background: "#ffffff",
         border: "1px solid #ddd",
         padding: "20px",
         borderRadius: "12px",
         boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
-        zIndex: 1000,
-        overflowY: "auto",
+        zIndex: 10,               // stays above SVG shapes
         fontFamily: "'Segoe UI', Arial, sans-serif",
       }}
     >
+
       {/* HEADER */}
       <h3
         style={{

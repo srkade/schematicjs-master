@@ -258,7 +258,7 @@ export default function Schematic({
     };
     setFitViewBox(newBox);
   }, [data]);
-  
+
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent) => {
       // Check if click happened outside the SVG wrapper
@@ -521,6 +521,7 @@ export default function Schematic({
           flex: 1, // Dynamically takes all available vertical space
           overflow: "hidden",
           display: "flex",
+
         }}
       >
         <svg
@@ -548,6 +549,8 @@ export default function Schematic({
             WebkitUserSelect: dragging ? "none" : "auto", // For Safari
             MozUserSelect: dragging ? "none" : "auto", // For Firefox
             msUserSelect: dragging ? ("none" as any) : ("auto" as any),
+            position: "relative",
+            overflow: "auto",
           }}
           viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
           onMouseDown={handleMouseDown}
@@ -999,27 +1002,27 @@ export default function Schematic({
             return <g key={i}>{wireElement}</g>;
           })}
         </svg>
+        <PopupComponentDetails
+          popupComponent={popupComponent}
+          onClose={() => setPopupComponent(null)}
+        />
+        <PopupWireDetails
+          popupWire={popupWire}
+          onClose={(e) => {
+            e.stopPropagation();
+            setSelectedWires([]);
+            setPopupWire(null);
+          }}
+        />
+        <PopupConnectorDetails
+          popupConnector={popupConnector}
+          onClose={(e) => {
+            e.stopPropagation();
+            setPopupConnector(null);
+            setSelectedConnector(null);
+          }}
+        />
       </div>
-      <PopupComponentDetails
-        popupComponent={popupComponent}
-        onClose={() => setPopupComponent(null)}
-      />
-      <PopupWireDetails
-        popupWire={popupWire}
-        onClose={(e) => {
-          e.stopPropagation();
-          setSelectedWires([]);
-          setPopupWire(null);
-        }}
-      />
-      <PopupConnectorDetails
-        popupConnector={popupConnector}
-        onClose={(e) => {
-          e.stopPropagation();
-          setPopupConnector(null);
-          setSelectedConnector(null);
-        }}
-      />
     </div>
   );
 }

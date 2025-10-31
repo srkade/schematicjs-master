@@ -15,18 +15,17 @@ export default function PopupConnectorDetails({
 
   // ---------- Internal CSS Styles ----------
   const containerStyle: React.CSSProperties = {
-    position: "fixed",
-    top: "50%",
-    right: "20px",
-    transform: "translateY(-50%)",
-    width: "480px",
-    maxHeight: "700px",
+    position: "absolute",
+    top: 0, // starts from top of SVG
+    right: 0, // sticks to top-right
+    width: "350px",
+    height: "65%", // same height as SVG container
     background: "#ffffff",
-    borderRadius: "12px",
+    borderRadius: "12px 0 0 12px",
     boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
     padding: "24px",
     zIndex: 1000,
-    overflowY: "auto",
+    overflowY: "auto", // scrollable content
     fontFamily: "'Segoe UI', Arial, sans-serif",
     lineHeight: "1.6",
   };

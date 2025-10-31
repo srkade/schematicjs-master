@@ -14,18 +14,17 @@ export default function PopupWireDetails({
 
   // ---------- Internal CSS Styles ----------
   const containerStyle: React.CSSProperties = {
-    position: "fixed",
-    top: "50%",
-    right: "20px",
-    transform: "translateY(-50%)",
-    width: "500px",
-    maxHeight: "750px",
+    position: "absolute",
+    top: 0, // start from the top of SVG
+    right: 0, // stick to top-right corner
+    width: "350px",
+    height: "90%", // same height as SVG
     background: "#ffffff",
-    borderRadius: "12px",
+    borderRadius: "12px 0 0 12px",
     boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
     padding: "24px",
     zIndex: 1000,
-    overflowY: "auto",
+    overflowY: "auto", // scrollable if content too long
     fontFamily: "'Segoe UI', Arial, sans-serif",
     lineHeight: "1.6",
   };
