@@ -238,10 +238,8 @@ export default function Schematic({
         }
       });
     });
-
     setComponentNameWidths(newWidths);
     setConnectorNameWidths(connWidths);
-
     // Connections count
     const connCount: { [id: string]: number } = {};
     data.connections.forEach((conn) => {
@@ -251,7 +249,6 @@ export default function Schematic({
         (connCount[conn.to.connectorId] || 0) + 1;
     });
     setConnectorConnectionCount(connCount);
-
     // Set viewBox and fitViewBox AFTER layout measured
     const newBox = {
       x: 0,
@@ -261,6 +258,28 @@ export default function Schematic({
     };
     setFitViewBox(newBox);
   }, [data]);
+  
+  useEffect(() => {
+    const handleGlobalClick = (event: MouseEvent) => {
+      // Check if click happened outside the SVG wrapper
+      const svgWrapper = svgWrapperRef.current;
+      if (svgWrapper && !svgWrapper.contains(event.target as Node)) {
+        setSelectedComponentIds([]);
+        setSelectedWires([]);
+        setSelectedConnector(null);
+        setPopupComponent(null);
+        setPopupConnector(null);
+        setPopupWire(null);
+        setPopupClosedManually(false);
+      }
+    };
+
+    document.addEventListener("click", handleGlobalClick);
+    // Cleanup on unmount
+    return () => {
+      document.removeEventListener("click", handleGlobalClick);
+    };
+  }, []);
 
   function checkAndReturnIntersection(
     i: number,
@@ -509,7 +528,11 @@ export default function Schematic({
             // Only deselect if click is on the SVG itself, not on components
             if ((e.target as SVGElement).tagName === "svg") {
               setSelectedComponentIds([]);
+              setSelectedWires([]);
+              setSelectedConnector(null);
               setPopupComponent(null);
+              setPopupConnector(null);
+              setPopupWire(null);
               setPopupClosedManually(false);
             }
           }}
@@ -557,7 +580,7 @@ export default function Schematic({
                 <g>
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) - connectorHeight / 2-2}
+                    cy={getYForComponent(comp) - connectorHeight / 2 - 2}
                     r={componentSize.height / 8} // adjust radius as needed
                     fill="white"
                     stroke="black"
@@ -565,7 +588,7 @@ export default function Schematic({
                   />
                   <circle
                     cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
-                    cy={getYForComponent(comp) - connectorHeight / 2-2}
+                    cy={getYForComponent(comp) - connectorHeight / 2 - 2}
                     r={componentSize.height / 10}
                     fill="black"
                   />
@@ -890,6 +913,7 @@ export default function Schematic({
                     setSelectedWires([i.toString()]);
                     setPopupComponent(null);
                     setPopupConnector(null);
+                    setPopupWire(null);
                     // Set popupWire with all details
                     setPopupWire({
                       wire,

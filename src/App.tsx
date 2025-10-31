@@ -147,26 +147,6 @@ export default function App() {
         flexDirection: "column",
       }}
     >
-      {/* Header */}
-      {/* <div
-        style={{
-          background: "white",
-          borderBottom: "1px solid #e9ecef",
-          padding: "1x 2px",
-          paddingLeft: "24px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <img
-            style={{
-              width:"50px",
-              height:"50px"
-            }}
-           src={logo}></img>
-        </div>
-      </div> */}
-
       {/* Navigation Tabs */}
       <NavigationTabs
         activeTab={activeTab}
