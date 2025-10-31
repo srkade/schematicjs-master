@@ -694,7 +694,7 @@ export default function Schematic({
                 y={
                   getYForComponent(comp) +
                   (getYForComponent(comp) + componentSize.height / 2 <
-                    viewBox.y + viewBox.h / 2
+                    fitViewBox.y + fitViewBox.h / 2
                     ? -componentSize.height / 2 //+(-0.10)  // above component
                     : componentSize.height + 30) // below component
                 }
