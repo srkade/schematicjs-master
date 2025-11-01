@@ -18,6 +18,16 @@ const ICC = {
           label: "XJ2",
         },
       ],
+      engineering_component_name: "Instrument Cluster Controller",
+      engineering_manufacturer: "Bosch",
+      primary_part_number: "57M12666",
+      harness_name: "MAIN WIRING HARNESS (W1)",
+      component_type: "Controller",
+      connector_type: "Direct",
+      remove: false,
+      manufacturer: "Bosch",
+      connector_part_number: "57M12666",
+      gender: "Female"
     },
     {
       id: "SPL_757",

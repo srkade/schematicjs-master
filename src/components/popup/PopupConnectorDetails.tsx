@@ -165,6 +165,17 @@ export default function PopupConnectorDetails({
           )}
         </tbody>
       </table>
+      <div>
+    {/* ...Connector details table... */}
+    <div style={{ marginTop: '16px', textAlign: 'center' }}>
+      <img
+        src={`/images/connectors/${popupConnector.connectorCode}.png?.jpg?`}
+        alt={popupConnector.connectorCode}
+        style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
+        
+      />
+    </div>
+  </div>
 
       {/* CLOSE BUTTON */}
       <div style={{ textAlign: "center", marginTop: "24px" }}>

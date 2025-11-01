@@ -289,6 +289,14 @@ export default function PopupWireDetails({
           </tr>
         </tbody>
       </table>
+      <div>
+    <img
+      src={`/images/wires/${popupWire.wire?.wireDetails?.circuitNumber}.png?.jpg?`}
+      alt={popupWire.wire?.wireDetails?.circuitNumber}
+      style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
+      
+    />
+  </div>
 
       {/* CLOSE BUTTON */}
       <div style={{ textAlign: "center", marginTop: "24px" }}>

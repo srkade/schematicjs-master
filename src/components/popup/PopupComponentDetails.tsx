@@ -32,6 +32,7 @@ export default function PopupComponentDetails({
         fontFamily: "'Segoe UI', Arial, sans-serif",
       }}
     >
+      
       {/* HEADER */}
       <h3
         style={{
@@ -330,9 +331,17 @@ export default function PopupComponentDetails({
           )}
         </tbody>
       </table>
-
+      <div style={{ marginTop: '16px', textAlign: 'center' }}>
+        <img
+        src={`/images/components/${popupComponent.id}.png?.jpg?`}
+        alt={popupComponent.label}
+        style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
+        // onError={e => { e.currentTarget.src = '/images/components/default.jpg'; }}
+        />
+      </div>
       {/* CLOSE BUTTON */}
       <div style={{ textAlign: "center", marginTop: "20px" }}>
+        
         <button
           onClick={onClose}
           style={{
