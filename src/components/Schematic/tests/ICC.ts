@@ -118,7 +118,7 @@ const ICC = {
     {
       id: "FLSH",
       label: "Flasher",
-      category: "Flasher",
+      category: "Lamp",
       shape: "rectangle",
       connectors: [
         {

@@ -13,13 +13,12 @@ import ElectricalSwitch from "../symbols/ElectricalSwitch";
 import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
 import MotorSymbol from "../symbols/MotorSymbol";
+import LampSymbol from "../symbols/Lamp";
 import { ComponentType, ConnectionType, ConnectorType, ConnectionPoint, SchematicData, WireDetailsType, WirePopupType, PopupConnectorType } from "./SchematicTypes";
 import { spaceForWires, connectionPointKey, getConnectionOffset, getIntersection, getConnectionsForComponent, getConnectionsForConnector, getComponentConnectorTupleFromConnectionPoint, calculateCavityCountForConnector } from "./SchematicUtils";
 import PopupComponentDetails from "../popup/PopupComponentDetails";
 import PopupWireDetails from "../popup/PopupWireDetails";
 import PopupConnectorDetails from "../popup/PopupConnectorDetails";
-
-
 import { resetView, handleWheel, zoom, enterFullscreen, exitFullscreen } from "./SchematicViews";
 
 // ...existing code...
@@ -704,6 +703,14 @@ export default function Schematic({
                         size={Math.min(getWidthForComponent(comp), componentSize.height) * 0.5} // scale to fit rectangle
                         color="black"
                         fill="#B0E0E6"
+                      />
+                    )}
+                    {comp.category?.toLowerCase() === "lamp" && (
+                      <LampSymbol
+                        cx={getXForComponent(comp) + getWidthForComponent(comp) / 5}
+                        cy={getYForComponent(comp) + componentSize.height / 2}
+                        size={Math.min(getWidthForComponent(comp), componentSize.height) * 0.5}
+                        color="black"
                       />
                     )}
 
