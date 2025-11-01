@@ -728,8 +728,9 @@ export default function Schematic({
                   getYForComponent(comp) +
                   (getYForComponent(comp) + componentSize.height / 2 <
                     fitViewBox.y + fitViewBox.h / 2
-                    ? -componentSize.height / 2 //+(-0.10)  // above component
-                    : componentSize.height + 30) // below component
+                    ? -componentSize.height / 2 // above component
+                    : componentSize.height +
+                    (comp.category?.toLowerCase() === "splice" ? -30 : 30))
                 }
                 textAnchor="middle"
                 fontSize="20"
@@ -757,8 +758,10 @@ export default function Schematic({
                     ref={(el) => {
                       connectorNameRefs.current[conn.id] = el;
                     }}
-                    x={getXForConnector(conn, comp)}
-                    y={getYForConnector(conn, comp) + 13}
+                    x={
+                      getXForConnector(conn, comp) -
+                      (comp.category?.toLowerCase() === "splice" ? -10 : 1) // reduce gap if splice
+                    } y={getYForConnector(conn, comp) + 13}
                     textAnchor="end" //change to move text at the left
                     dominantBaseline="middle" //change to take text left at middle
                     fontSize="10"
