@@ -109,7 +109,7 @@ export default function LeftPanel({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
-              width: "100%",
+              width: "80%",
               padding: "10px 12px 10px 40px",
               border: "1px solid #ced4da",
               borderRadius: "8px",
