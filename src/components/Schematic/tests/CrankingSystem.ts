@@ -258,7 +258,7 @@ const CrankingSystem = {
     {
       id: "X90",
       label: "Load center",
-      category: "Transformator",
+      category: "Transformer",
       shape: "rectangle",
       connectors: [
         {

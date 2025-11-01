@@ -15,38 +15,63 @@ export default function PopupConnectorDetails({
 
   // ---------- Internal CSS Styles ----------
   const containerStyle: React.CSSProperties = {
-    position: "fixed",
-    top: "50%",
-    right: "20px",
-    transform: "translateY(-50%)",
-    width: "480px",
-    maxHeight: "700px",
+    position: "absolute",
+    top: 0, // starts from top of SVG
+    right: 0, // sticks to top-right
+    width: "350px",
+    height: "65%", // same height as SVG container
     background: "#ffffff",
-    borderRadius: "12px",
+    borderRadius: "12px 0 0 12px",
     boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
     padding: "24px",
     zIndex: 1000,
-    overflowY: "auto",
+    overflowY: "auto", // scrollable content
     fontFamily: "'Segoe UI', Arial, sans-serif",
     lineHeight: "1.6",
   };
 
-  const logoStyle: React.CSSProperties = {
-    display: "block",
-    width: "120px",
-    margin: "0 auto 16px",
+  const headerContainerStyle: React.CSSProperties = {
+    position: "sticky",
+    top: 0,
+    background: "#fff",
+    zIndex: 2,
+    padding: "16px 16px 10px 16px",
+    borderBottom: "3px solid #007bff", // Full-width blue line
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexShrink: 0,
   };
-
+  const headerTitleStyle: React.CSSProperties = {
+    fontSize: "20px",
+    fontWeight: "bold",
+    color: "#333",
+    margin: 0,
+  };
   const headerStyle: React.CSSProperties = {
     fontSize: "20px",
     fontWeight: "bold",
-    marginBottom: "20px",
     color: "#333",
-    textAlign: "center",
-    borderBottom: "3px solid #007bff",
-    paddingBottom: "10px",
+    margin: 0,
+    borderBottom: "3px solid #007bff", // Blue line only below text
+    paddingBottom: "6px",
+    flexGrow: 1,
   };
 
+  const closeIconStyle: React.CSSProperties = {
+    backgroundColor: "red",
+    color: "white",
+    border: "none",
+    width: "30px",
+    height: "30px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "18px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "transform 0.2s ease",
+  };
   const tableStyle: React.CSSProperties = {
     width: "100%",
     fontSize: "14px",
@@ -86,7 +111,24 @@ export default function PopupConnectorDetails({
     <div style={containerStyle}>
 
       {/* HEADER */}
-      <h3 style={headerStyle}>Connector Details</h3>
+      {/* HEADER SECTION */}
+      <div style={headerContainerStyle}>
+        <h3 style={headerTitleStyle}>Connector Details</h3>
+        <button
+          onClick={onClose}
+          style={closeIconStyle}
+          title="Close"
+          onMouseOver={(e) =>
+            ((e.currentTarget as HTMLButtonElement).style.transform = "scale(1.2)")
+          }
+          onMouseOut={(e) =>
+            ((e.currentTarget as HTMLButtonElement).style.transform = "scale(1)")
+          }
+        >
+          ×
+        </button>
+      </div>
+
 
       {/* DETAILS TABLE */}
       <table style={tableStyle}>
@@ -165,6 +207,7 @@ export default function PopupConnectorDetails({
           )}
         </tbody>
       </table>
+<<<<<<< HEAD
       <div>
     {/* ...Connector details table... */}
     <div style={{ marginTop: '16px', textAlign: 'center' }}>
@@ -192,6 +235,8 @@ export default function PopupConnectorDetails({
           Close
         </button>
       </div>
+=======
+>>>>>>> 33becda2382ebf25759a8fad4b0d00f8d7c68174
     </div>
   );
 }
