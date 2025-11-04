@@ -128,6 +128,15 @@ export default function PopupConnectorDetails({
           ×
         </button>
       </div>
+      {/* Popup Connector Image */}
+       <div style={{ marginTop: '16px', textAlign: 'center' }}>
+      <img
+        src={`/images/connectors/${popupConnector.connectorCode}.png?.jpg?`}
+        alt={popupConnector.connectorCode}
+        style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
+        
+      />
+    </div>
 
 
       {/* DETAILS TABLE */}
@@ -207,36 +216,7 @@ export default function PopupConnectorDetails({
           )}
         </tbody>
       </table>
-<<<<<<< HEAD
-      <div>
-    {/* ...Connector details table... */}
-    <div style={{ marginTop: '16px', textAlign: 'center' }}>
-      <img
-        src={`/images/connectors/${popupConnector.connectorCode}.png?.jpg?`}
-        alt={popupConnector.connectorCode}
-        style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
-        
-      />
-    </div>
-  </div>
-
-      {/* CLOSE BUTTON */}
-      <div style={{ textAlign: "center", marginTop: "24px" }}>
-        <button
-          onClick={onClose}
-          style={closeButtonStyle}
-          onMouseOver={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)")
-          }
-          onMouseOut={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.transform = "scale(1)")
-          }
-        >
-          Close
-        </button>
-      </div>
-=======
->>>>>>> 33becda2382ebf25759a8fad4b0d00f8d7c68174
+     
     </div>
   );
 }

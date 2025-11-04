@@ -30,14 +30,8 @@ export default function PopupComponentDetails({
         flexDirection: "column",
       }}
     >
-<<<<<<< HEAD
-      
-      {/* HEADER */}
-      <h3
-=======
     
       <div
->>>>>>> 33becda2382ebf25759a8fad4b0d00f8d7c68174
         style={{
           position: "sticky",
           top: 0,
@@ -62,306 +56,7 @@ export default function PopupComponentDetails({
           Component Details
         </h3>
 
-<<<<<<< HEAD
-      {/* COMPONENT DETAILS TABLE */}
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          fontSize: "14px",
-          marginBottom: "10px",
-        }}
-      >
-        <tbody>
-          {/* ID */}
-          {popupComponent.id && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  width: "45%",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                ID
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.id}
-              </td>
-            </tr>
-          )}
-
-          {/* Engineering Component Name */}
-          {popupComponent.engineering_component_name && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Engineering Component Name
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.engineering_component_name}
-              </td>
-            </tr>
-          )}
-
-          {/* Category */}
-          {popupComponent.category && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Category
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.category}
-              </td>
-            </tr>
-          )}
-
-          {/* Shape */}
-          {popupComponent.shape && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Shape
-              </td>
-              <td
-                style={{
-                  padding: "10px 8px",
-                  color: "#333",
-                  textTransform: "capitalize",
-                }}
-              >
-                {popupComponent.shape}
-              </td>
-            </tr>
-          )}
-
-          {/* Engineering Manufacturer */}
-          {popupComponent.engineering_manufacturer && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Engineering Manufacturer
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.engineering_manufacturer}
-              </td>
-            </tr>
-          )}
-
-          {/* Manufacturer */}
-          {popupComponent.manufacturer && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Manufacturer
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.manufacturer}
-              </td>
-            </tr>
-          )}
-
-          {/* Primary Part Number */}
-          {popupComponent.primary_part_number && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Primary Part Number
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.primary_part_number}
-              </td>
-            </tr>
-          )}
-
-          {/* Connector Part Number */}
-          {popupComponent.connector_part_number && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Connector Part Number
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.connector_part_number}
-              </td>
-            </tr>
-          )}
-
-          {/* Harness Name */}
-          {popupComponent.harness_name && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Harness Name
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.harness_name}
-              </td>
-            </tr>
-          )}
-
-          {/* Component Type */}
-          {popupComponent.component_type && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Component Type
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.component_type}
-              </td>
-            </tr>
-          )}
-
-          {/* Connector Type */}
-          {popupComponent.connector_type && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Connector Type
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.connector_type}
-              </td>
-            </tr>
-          )}
-
-          {/* Gender */}
-          {popupComponent.gender && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Gender
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.gender}
-              </td>
-            </tr>
-          )}
-
-          {/* Remove Status */}
-          {popupComponent.remove !== undefined && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Remove Status
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.remove ? "Yes" : "No"}
-              </td>
-            </tr>
-          )}
-
-          {/* Connectors */}
-          {popupComponent.connectors && popupComponent.connectors.length > 0 && (
-            <tr style={{ borderBottom: "1px solid #e0e0e0" }}>
-              <td
-                style={{
-                  fontWeight: "600",
-                  padding: "10px 8px",
-                  backgroundColor: "#f8f9fa",
-                  color: "#555",
-                }}
-              >
-                Connectors
-              </td>
-              <td style={{ padding: "10px 8px", color: "#333" }}>
-                {popupComponent.connectors.map((c) => c.label).join(", ")}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-      <div style={{ marginTop: '16px', textAlign: 'center' }}>
-        <img
-        src={`/images/components/${popupComponent.id}.png?.jpg?`}
-        alt={popupComponent.label}
-        style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
-        // onError={e => { e.currentTarget.src = '/images/components/default.jpg'; }}
-        />
-      </div>
-      {/* CLOSE BUTTON */}
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
-        
-        <button
-=======
         <span
->>>>>>> 33becda2382ebf25759a8fad4b0d00f8d7c68174
           onClick={onClose}
           style={{
             color: "white",
@@ -383,6 +78,7 @@ export default function PopupComponentDetails({
         </span>
       </div>
 
+
       <div
         style={{
           flexGrow: 1,
@@ -390,6 +86,14 @@ export default function PopupComponentDetails({
           padding: "20px",
         }}
       >
+         <div style={{ marginTop: '16px', textAlign: 'center' }}>
+        <img
+        src={`/images/components/${popupComponent.id}.png?.jpg?`}
+        alt={popupComponent.label}
+        style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
+        // onError={e => { e.currentTarget.src = '/images/components/default.jpg'; }}
+        />
+      </div>
         <table
           style={{
             width: "100%",
@@ -673,7 +377,9 @@ export default function PopupComponentDetails({
                 </tr>
               )}
           </tbody>
+          <img src="" alt="" />
         </table>
+        
       </div>
     </div>
   );

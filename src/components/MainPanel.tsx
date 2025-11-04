@@ -67,46 +67,8 @@ export default function MainPanel({ selectedItem, activeTab,isMobile }: MainPane
         flexDirection: "column",
         overflow: "hidden"
       }}>
-      {/* Header */}
-
-
-      {/* Schematic Viewer */}
-      <div style={{
-        flex: 1,
-        padding: "5px",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column"
-      }}>
-        <div style={{
-          background: "white",
-          borderRadius: "12px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          overflow: "hidden",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column"
-        }}>
-          <div style={{
-            background: "#f8f9fa",
-            borderBottom: "1px solid #e9ecef",
-            padding: "3px 5px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between"
-          }}>
-            <h3 style={{
-              margin: 0,
-              color: "#495057",
-              fontSize: "16px",
-              fontWeight: "600"
-            }}>
-              Schematic Viewer
-            </h3>
-          </div>
-
-          {/* Only show schematic on desktop */}
-          {!isMobile && (
+        
+        {!isMobile && (
             <div
               style={{
                 flex: 1,
@@ -119,8 +81,10 @@ export default function MainPanel({ selectedItem, activeTab,isMobile }: MainPane
               <Schematic data={selectedItem.schematicData} />
             </div>
           )}
-        </div>
-      </div>
+      {/* Header */}
+
+
+     
     </div>
   );
 }

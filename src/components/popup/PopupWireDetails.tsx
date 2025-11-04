@@ -357,62 +357,6 @@ export default function PopupWireDetails({
                 </td>
               </tr>
 
-<<<<<<< HEAD
-          <tr>
-            <td style={tdLabelStyle}>Gender</td>
-            <td style={tdValueStyle}>
-              {popupWire.fromConnector?.gender ||
-                popupWire.wire?.from?.gender ||
-                "N/A"}
-            </td>
-            <td style={tdValueStyle}>
-              {popupWire.toConnector?.gender ||
-                popupWire.wire?.to?.gender ||
-                "N/A"}
-            </td>
-          </tr>
-
-          <tr>
-            <td style={tdLabelStyle}>Cavity</td>
-            <td style={tdValueStyle}>
-              {popupWire.wire?.wireDetails?.from?.cavity ||
-                popupWire.wire?.from?.cavity ||
-                "N/A"}
-            </td>
-            <td style={tdValueStyle}>
-              {popupWire.wire?.wireDetails?.to?.cavity ||
-                popupWire.wire?.to?.cavity ||
-                "N/A"}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div>
-    <img
-      src={`/images/wires/${popupWire.wire?.wireDetails?.circuitNumber}.png?.jpg?`}
-      alt={popupWire.wire?.wireDetails?.circuitNumber}
-      style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
-      
-    />
-  </div>
-
-      {/* CLOSE BUTTON */}
-      <div style={{ textAlign: "center", marginTop: "24px" }}>
-        <button
-          onClick={onClose}
-          style={closeButtonStyle}
-          onMouseOver={(e) =>
-          ((e.currentTarget as HTMLButtonElement).style.transform =
-            "scale(1.05)")
-          }
-          onMouseOut={(e) =>
-          ((e.currentTarget as HTMLButtonElement).style.transform =
-            "scale(1)")
-          }
-        >
-          Close
-        </button>
-=======
               <tr>
                 <td style={tdLabelStyle}>Cavity</td>
                 <td style={tdValueStyle}>
@@ -428,9 +372,17 @@ export default function PopupWireDetails({
               </tr>
             </tbody>
           </table>
+          
         )}
->>>>>>> 33becda2382ebf25759a8fad4b0d00f8d7c68174
       </div>
+      <div>
+    <img
+      src={`/images/wires/${popupWire.wire?.wireDetails?.circuitNumber}.png?.jpg?`}
+      alt={popupWire.wire?.wireDetails?.circuitNumber}
+      style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
+      
+    />
+  </div>
     </div>
   );
 }
