@@ -16,7 +16,7 @@ import {
 import {  DTC_StarterCoolDown,DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
 import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
-import logo from "./assets/Images/logo.jpg";
+
 
 const wrapSchematic = (schematic: any): any => ({
   masterComponents: [], // add this line
