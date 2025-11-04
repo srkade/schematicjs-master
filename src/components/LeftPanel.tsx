@@ -5,6 +5,8 @@ import { DashboardItem } from "../App";
 import "../Styles/LeftPanel.css";
 
 import Schematic from "./Schematic/Schematic";
+import { Layers, CheckSquare } from "lucide-react";
+
 
 interface LeftPanelProps {
   activeTab: string;
@@ -132,31 +134,84 @@ export default function LeftPanel({
           </span>
         </div>
       </div>
-
-      {/* Clear Selection Button (only show when items are selected) */}
-      {selectedCodes.length > 0 && showCheckbox && (
+      {showCheckbox && (
         <div
           style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             padding: "8px 16px",
             borderBottom: "1px solid #e9ecef",
+            gap: "8px",
           }}
         >
           <button
-            onClick={() => setSelectedCodes([])}
-            style={{
-              width: "100%",
-              background: "#f1f3f5",
-              border: "1px solid #ced4da",
-              borderRadius: "6px",
-              padding: "8px 12px",
-              cursor: "pointer",
-              fontSize: "14px",
-              color: "#495057",
+            onClick={() => {
+              const allCodes = filteredData.map((item) => item.code);
+              setSelectedCodes(allCodes);
+              onViewSchematic(allCodes);
             }}
+            title="Select All"
+            style={{
+              width: "40px",
+              height: "40px",
+              background: "#e7f3ff",
+              border: "1px solid #007bff",
+              borderRadius: "50%",
+              cursor: "pointer",
+              fontSize: "18px",
+              color: "#007bff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "background 0.2s ease",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.background = "#d0e7ff")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.background = "#e7f3ff")
+            }
           >
-            Clear Selection
-            {/* ({selectedCodes.length}) */}
+            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <Layers
+                size={18}
+                strokeWidth={2}
+                color="yellow"
+                style={{ position: "absolute", opacity: 0.4, left: -4, top: -4 }}
+              />
+              <CheckSquare size={20} strokeWidth={2} color="#007bff" />
+            </div>
           </button>
+
+          {selectedCodes.length > 0 && (
+            <button
+              onClick={() => setSelectedCodes([])}
+              title="Clear Selection"
+              style={{
+                width: "40px",
+                height: "40px",
+                background: "#f1f3f5",
+                border: "1px solid #ced4da",
+                borderRadius: "50%",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "18px",
+                color: "#495057",
+                transition: "background 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = "#e9ecef")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLButtonElement).style.background = "#f1f3f5")
+              }
+            >
+              🧹
+            </button>
+          )}
         </div>
       )}
 

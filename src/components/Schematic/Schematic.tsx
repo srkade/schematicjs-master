@@ -505,7 +505,7 @@ export default function Schematic({
               left: 4,
               padding: 8,
               zIndex: 10,
-              background: "white",
+              //background: "white",
               display: "flex",
               gap: 8,
               borderRadius: 8,

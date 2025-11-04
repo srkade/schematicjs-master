@@ -51,19 +51,25 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout, userN
           display: "flex",
           gap: "2px"
         }}>
-        <img
-          style={{
-            width: "70px",
-            height: "70px",
-          }}
-          src={logo}></img>
-        <h1
-          style={{
-            marginRight: "50px"
-          }}
-        >
-          ASDM
-        </h1>
+        <div
+         style={{
+          width:"320px",
+          display:"flex"
+         }}>
+          <img
+            style={{
+              width: "70px",
+              height: "70px",
+            }}
+            src={logo}></img>
+          <h1
+            style={{
+              marginRight: "50px"
+            }}
+          >
+            ASDM
+          </h1>
+        </div>
 
         {tabs.map((tab) => (
           <button
@@ -88,8 +94,8 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout, userN
               fontWeight: "500",
               borderRadius: "8px 8px 0 0",
               transition: "all 0.2s ease",
-              height:"60px",
-              justifyContent:"center"
+              height: "60px",
+              justifyContent: "center"
             }}
             onMouseEnter={(e) => {
               if (activeTab !== tab.id) {
