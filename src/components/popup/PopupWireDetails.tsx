@@ -92,8 +92,8 @@ export default function PopupWireDetails({
   const closeButtonStyle: React.CSSProperties = {
     width: "28px",
     height: "28px",
-    backgroundColor: "red",
-    color: "white",
+    //backgroundColor: "red",
+    color: "black",
     fontWeight: "bold",
     fontSize: "20px",
     display: "flex",

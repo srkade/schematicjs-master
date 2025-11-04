@@ -59,8 +59,8 @@ export default function PopupConnectorDetails({
   };
 
   const closeIconStyle: React.CSSProperties = {
-    backgroundColor: "red",
-    color: "white",
+  //  backgroundColor: "red",
+    color: "black",
     border: "none",
     width: "30px",
     height: "30px",
