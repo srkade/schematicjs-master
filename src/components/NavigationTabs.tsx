@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../Styles/NavigationTabs.css"
 import logo from "../assets/Images/logo.jpg"
+
 interface NavigationTabsProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   onLogout: () => void;
+  userName: string;
 }
 
 const tabs = [
@@ -17,9 +19,22 @@ const tabs = [
   { id: "harnesses", label: "Harnesses", icon: "🔌" },
 ];
 
-export default function NavigationTabs({ activeTab, onTabChange, onLogout }: NavigationTabsProps) {
+export default function NavigationTabs({ activeTab, onTabChange, onLogout, userName }: NavigationTabsProps) {
   const [menuOpen, setMenuOpen] = useState(false);  //change to dispaly hamberger icon at the time of the mobile screen
-
+  const [userMenuOpen, setUserMenuOpen] = useState(false); //  new state for dropdown toggle
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  // close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   return (
 
     <div className="nav-tabs-wrapper" style={{ position: "relative" }}>
@@ -64,14 +79,17 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout }: Nav
               gap: "8px",
               padding: "12px 16px",
               border: "none",
-              background: activeTab === tab.id ? "#f8f9fa" : "transparent",
+              background: activeTab === tab.id ? "#a4cefcff" : "transparent",
               color: activeTab === tab.id ? "#495057" : "#6c757d",
               borderBottom: activeTab === tab.id ? "3px solid #007bff" : "3px solid transparent",
+              borderTop: activeTab === tab.id ? "3px solid #007bff" : "3px solid transparent",
               cursor: "pointer",
               fontSize: "14px",
               fontWeight: "500",
               borderRadius: "8px 8px 0 0",
-              transition: "all 0.2s ease"
+              transition: "all 0.2s ease",
+              height:"60px",
+              justifyContent:"center"
             }}
             onMouseEnter={(e) => {
               if (activeTab !== tab.id) {
@@ -90,36 +108,93 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout }: Nav
             <span>{tab.label}</span>
           </button>
         ))}
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginLeft:"auto"
-        }}>
-          <button
-            onClick={onLogout}
+        <div
+          ref={userMenuRef}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginLeft: "auto"
+          }}
+        >
+          {/*  User icon (visible always) */}
+          <div
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
             style={{
-              background: "#bd5560ff",
-              color: "white",
-              border: "none",
-              padding: "8px 16px",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "14px",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              width: "80px",
+              width: "40px",
               height: "40px",
+              borderRadius: "50%",
+              background: "#f1f3f5",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              
+              cursor: "pointer",
+              fontSize: "20px",
+              color: "#343a40",
+              transition: "background 0.3s ease",
             }}
+            title="User Menu"
+            onMouseEnter={(e) => ((e.currentTarget.style.background = "#e9ecef"))}
+            onMouseLeave={(e) => ((e.currentTarget.style.background = "#f1f3f5"))}
           >
-            Logout
-          </button>
-        </div>
+            👤
+          </div>
 
+          {/* Dropdown menu: User info + Logout */}
+          {userMenuOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "110%",
+                right: 0,
+                background: "white",
+                border: "1px solid #dee2e6",
+                borderRadius: "10px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                padding: "12px",
+                zIndex: 1000,
+                minWidth: "200px",
+              }}
+            >
+              <div
+                style={{
+                  textAlign: "center",
+                  marginBottom: "10px",
+                }}
+              >
+                <div style={{ fontWeight: "bold", color: "#212529" }}>{userName}</div>
+                {/* <div style={{ fontSize: "13px", color: "#6c757d" }}>
+                  user@example.com
+                </div> */}
+              </div>
+
+              <hr style={{ border: "none", borderTop: "1px solid #e9ecef" }} />
+
+              <button
+                onClick={onLogout}
+                style={{
+                  background: "#bd5560",
+                  color: "white",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  width: "100%",
+                  transition: "background 0.2s ease",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.target as HTMLButtonElement).style.background = "#a74550")
+                }
+                onMouseLeave={(e) =>
+                  ((e.target as HTMLButtonElement).style.background = "#bd5560")
+                }
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
       </nav>
     </div>
   );

@@ -109,7 +109,7 @@ export default function LeftPanel({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{
-              width: "100%",
+              width: "80%",
               padding: "10px 12px 10px 40px",
               border: "1px solid #ced4da",
               borderRadius: "8px",
@@ -154,7 +154,7 @@ export default function LeftPanel({
               color: "#495057",
             }}
           >
-            Clear Selection 
+            Clear Selection
             {/* ({selectedCodes.length}) */}
           </button>
         </div>
@@ -172,15 +172,13 @@ export default function LeftPanel({
                 style={{
                   padding: "16px",
                   marginBottom: "12px",
-                  border: `2px solid ${isSelected ? "#007bff" : isChecked ? "#28a745" : "#e9ecef"}`,
-                  borderRadius: "12px",
-                  background: isSelected ? "#f0f8ff" : isChecked ? "#f0fff4" : "white",
-                  cursor: "pointer",
+                  border: `2px solid ${isSelected ? "#007bff" : isChecked ? "#007bff" : "#e9ecef"}`, borderRadius: "12px",
+                  background: isSelected ? "#f0f8ff" : isChecked ? "#cce5ff" : "white", cursor: "pointer",
                   transition: "all 0.2s ease",
                   boxShadow: isSelected
-                    ? "0 4px 12px rgba(0,123,255,0.15)"
+                    ? "0 4px 12px rgba(0,123,255,0.25)"
                     : isChecked
-                      ? "0 4px 12px rgba(40,167,69,0.15)"
+                      ? "0 4px 12px rgba(0,123,255,0.25)"
                       : "0 2px 4px rgba(0,0,0,0.1)",
                   position: "relative",
                 }}

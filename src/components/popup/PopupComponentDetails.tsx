@@ -59,13 +59,13 @@ export default function PopupComponentDetails({
         <span
           onClick={onClose}
           style={{
-            color: "white",
+            color: "black",
             fontSize: "22px",
             fontWeight: "bold",
             cursor: "pointer",
             marginLeft: "12px",
             userSelect: "none",
-            backgroundColor: "red",
+           // backgroundColor: "red",
             width: "30px",
             height: "30px",
             display: "flex",

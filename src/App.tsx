@@ -152,6 +152,7 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onLogout={() => setLoggedIn(false)}
+        userName="admin"
       />
 
       {/* Main Content */}
