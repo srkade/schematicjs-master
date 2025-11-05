@@ -145,44 +145,7 @@ export default function LeftPanel({
             gap: "8px",
           }}
         >
-          <button
-            onClick={() => {
-              const allCodes = filteredData.map((item) => item.code);
-              setSelectedCodes(allCodes);
-              onViewSchematic(allCodes);
-            }}
-            title="Select All"
-            style={{
-              width: "40px",
-              height: "40px",
-              background: "#e7f3ff",
-              border: "1px solid #007bff",
-              borderRadius: "50%",
-              cursor: "pointer",
-              fontSize: "18px",
-              color: "#007bff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "background 0.2s ease",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background = "#d0e7ff")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.background = "#e7f3ff")
-            }
-          >
-            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-              <Layers
-                size={18}
-                strokeWidth={2}
-                color="yellow"
-                style={{ position: "absolute", opacity: 0.4, left: -4, top: -4 }}
-              />
-              <CheckSquare size={20} strokeWidth={2} color="#007bff" />
-            </div>
-          </button>
+         
 
           {selectedCodes.length > 0 && (
             <button

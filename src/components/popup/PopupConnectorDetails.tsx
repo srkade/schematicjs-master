@@ -1,16 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { PopupConnectorType } from "../Schematic/SchematicTypes";
 
 
 interface PopupConnectorDetailsProps {
   popupConnector: PopupConnectorType | null;
   onClose: (e: React.MouseEvent) => void;
+  selectedTab?: string;
 }
 
 export default function PopupConnectorDetails({
   popupConnector,
   onClose,
+  selectedTab
 }: PopupConnectorDetailsProps) {
+  const [activeTab, setActiveTab] = useState<"connection" | "dtc">("connection");
   if (!popupConnector) return null;
 
   // ---------- Internal CSS Styles ----------
@@ -59,7 +62,7 @@ export default function PopupConnectorDetails({
   };
 
   const closeIconStyle: React.CSSProperties = {
-  //  backgroundColor: "red",
+    //  backgroundColor: "red",
     color: "black",
     border: "none",
     width: "30px",
@@ -72,6 +75,24 @@ export default function PopupConnectorDetails({
     cursor: "pointer",
     transition: "transform 0.2s ease",
   };
+
+  const tabContainerStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "8px",
+    marginTop: "10px",
+  };
+
+  const tabButtonStyle = (active: boolean): React.CSSProperties => ({
+    padding: "6px 12px",
+    cursor: "pointer",
+    background: active ? "#007bff" : "#f0f0f0",
+    color: active ? "#fff" : "#333",
+    border: "none",
+    borderRadius: "6px",
+    fontWeight: 600,
+    transition: "all 0.3s ease",
+  });
   const tableStyle: React.CSSProperties = {
     width: "100%",
     fontSize: "14px",
@@ -109,11 +130,26 @@ export default function PopupConnectorDetails({
   // ---------- Component JSX ----------
   return (
     <div style={containerStyle}>
-
+      <div style={{ marginBottom: "10px" ,fontWeight:"bold",fontSize:"20px",textAlign:"center"}}>Connector Information</div>
       {/* HEADER */}
       {/* HEADER SECTION */}
       <div style={headerContainerStyle}>
-        <h3 style={headerTitleStyle}>Connector Details</h3>
+        <div style={tabContainerStyle}>
+          <button
+            style={tabButtonStyle(activeTab === "connection")}
+            onClick={() => setActiveTab("connection")}
+          >
+            Connection Details
+          </button>
+          {selectedTab === "DTC" && (
+            <button
+              style={tabButtonStyle(activeTab === "dtc")}
+              onClick={() => setActiveTab("dtc")}
+            >
+              DTC Steps
+            </button>
+          )}
+        </div>
         <button
           onClick={onClose}
           style={closeIconStyle}
@@ -129,94 +165,120 @@ export default function PopupConnectorDetails({
         </button>
       </div>
       {/* Popup Connector Image */}
-       <div style={{ marginTop: '16px', textAlign: 'center' }}>
-      <img
-        src={`/images/connectors/${popupConnector.connectorCode}.png?.jpg?`}
-        alt={popupConnector.connectorCode}
-        style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
-        
-      />
-    </div>
+      <div style={{ marginTop: '16px', textAlign: 'center' }}>
+        <img
+          src={`/images/connectors/${popupConnector.connectorCode}.png?.jpg?`}
+          alt={popupConnector.connectorCode}
+          style={{ maxWidth: '160px', width: '100%', borderRadius: '8px' }}
+
+        />
+      </div>
 
 
       {/* DETAILS TABLE */}
-      <table style={tableStyle}>
-        <tbody>
-          {popupConnector.componentCode && (
-            <tr>
-              <td style={labelCell}>Component Code</td>
-              <td style={valueCell}>{popupConnector.componentCode}</td>
-            </tr>
-          )}
-          {popupConnector.connectorCode && (
-            <tr>
-              <td style={labelCell}>Connector Code</td>
-              <td style={valueCell}>{popupConnector.connectorCode}</td>
-            </tr>
-          )}
-          {popupConnector.label && (
-            <tr>
-              <td style={labelCell}>Label</td>
-              <td style={valueCell}>{popupConnector.label}</td>
-            </tr>
-          )}
-          {popupConnector.harnessName && (
-            <tr>
-              <td style={labelCell}>Harness Name</td>
-              <td style={valueCell}>{popupConnector.harnessName}</td>
-            </tr>
-          )}
-          {popupConnector.partNumber && (
-            <tr>
-              <td style={labelCell}>Connector Part Number</td>
-              <td style={valueCell}>{popupConnector.partNumber}</td>
-            </tr>
-          )}
-          {popupConnector.gender && (
-            <tr>
-              <td style={labelCell}>Gender</td>
-              <td style={valueCell}>{popupConnector.gender}</td>
-            </tr>
-          )}
-          {popupConnector.cavityCount && (
-            <tr>
-              <td style={labelCell}>Cavity Count</td>
-              <td style={valueCell}>{popupConnector.cavityCount}</td>
-            </tr>
-          )}
-          {popupConnector.color && (
-            <tr>
-              <td style={labelCell}>Color</td>
-              <td style={valueCell}>{popupConnector.color}</td>
-            </tr>
-          )}
-          {popupConnector.connectorType && (
-            <tr>
-              <td style={labelCell}>Connector Type</td>
-              <td style={valueCell}>{popupConnector.connectorType}</td>
-            </tr>
-          )}
-          {popupConnector.manufacturer && (
-            <tr>
-              <td style={labelCell}>Manufacturer</td>
-              <td style={valueCell}>{popupConnector.manufacturer}</td>
-            </tr>
-          )}
-          {popupConnector.termPartNo && (
-            <tr>
-              <td style={labelCell}>Terminal Part Number</td>
-              <td style={valueCell}>{popupConnector.termPartNo}</td>
-            </tr>
-          )}
-          {popupConnector.sealPartNo && (
-            <tr>
-              <td style={labelCell}>Seal Part Number</td>
-              <td style={valueCell}>{popupConnector.sealPartNo}</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-     
+      {activeTab === "connection" && (
+        <table style={tableStyle}>
+          <tbody>
+            {popupConnector.componentCode && (
+              <tr>
+                <td style={labelCell}>Component Code</td>
+                <td style={valueCell}>{popupConnector.componentCode}</td>
+              </tr>
+            )}
+            {popupConnector.connectorCode && (
+              <tr>
+                <td style={labelCell}>Connector Code</td>
+                <td style={valueCell}>{popupConnector.connectorCode}</td>
+              </tr>
+            )}
+            {popupConnector.label && (
+              <tr>
+                <td style={labelCell}>Label</td>
+                <td style={valueCell}>{popupConnector.label}</td>
+              </tr>
+            )}
+            {popupConnector.harnessName && (
+              <tr>
+                <td style={labelCell}>Harness Name</td>
+                <td style={valueCell}>{popupConnector.harnessName}</td>
+              </tr>
+            )}
+            {popupConnector.partNumber && (
+              <tr>
+                <td style={labelCell}>Connector Part Number</td>
+                <td style={valueCell}>{popupConnector.partNumber}</td>
+              </tr>
+            )}
+            {popupConnector.gender && (
+              <tr>
+                <td style={labelCell}>Gender</td>
+                <td style={valueCell}>{popupConnector.gender}</td>
+              </tr>
+            )}
+            {popupConnector.cavityCount && (
+              <tr>
+                <td style={labelCell}>Cavity Count</td>
+                <td style={valueCell}>{popupConnector.cavityCount}</td>
+              </tr>
+            )}
+            {popupConnector.color && (
+              <tr>
+                <td style={labelCell}>Color</td>
+                <td style={valueCell}>{popupConnector.color}</td>
+              </tr>
+            )}
+            {popupConnector.connectorType && (
+              <tr>
+                <td style={labelCell}>Connector Type</td>
+                <td style={valueCell}>{popupConnector.connectorType}</td>
+              </tr>
+            )}
+            {popupConnector.manufacturer && (
+              <tr>
+                <td style={labelCell}>Manufacturer</td>
+                <td style={valueCell}>{popupConnector.manufacturer}</td>
+              </tr>
+            )}
+            {popupConnector.termPartNo && (
+              <tr>
+                <td style={labelCell}>Terminal Part Number</td>
+                <td style={valueCell}>{popupConnector.termPartNo}</td>
+              </tr>
+            )}
+            {popupConnector.sealPartNo && (
+              <tr>
+                <td style={labelCell}>Seal Part Number</td>
+                <td style={valueCell}>{popupConnector.sealPartNo}</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      )}
+
+      {activeTab === "dtc" && (
+        <div style={{
+          marginTop: "16px",
+          fontSize: "14px",
+          color: "#333"
+        }}>
+          <h4 style={{
+            marginBottom: "8px",
+            color: "#0d0d0eff",
+          }}>
+            DTC Steps
+          </h4>
+          <p><b>Step 1:</b> Scan for codes.</p>
+          <p><b>Step 2:</b> Perform a visual inspection.</p>
+          <p><b>Step 3:</b> Use a multimeter<br></br>
+            <ul>
+              <li> Set the Mutlimeter.</li>
+              <li>Measure resistance.</li>
+              <li>Check continuity.</li>
+            </ul>
+          </p>
+        </div>
+      )}
+
     </div>
   );
 }
