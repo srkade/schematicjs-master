@@ -29,9 +29,11 @@ const colors = {
 export default function Schematic({
   data,
   scale = 1,
+  activeTab
 }: {
   data: SchematicData;
   scale?: number;
+  activeTab?:string;
 }) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -1040,6 +1042,7 @@ export default function Schematic({
             setPopupConnector(null);
             setSelectedConnector(null);
           }}
+          selectedTab={activeTab}
         />
       </div>
     </div>

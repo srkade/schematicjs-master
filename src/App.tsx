@@ -172,7 +172,7 @@ export default function App() {
           isMobile={isMobile}
         />
         {!isMobile && selectedItem?.schematicData && (
-          <Schematic data={selectedItem.schematicData} />
+          <Schematic data={selectedItem.schematicData}  activeTab={activeTab}/>
         )}
 
         {/* Main Panel */}
