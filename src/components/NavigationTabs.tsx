@@ -11,11 +11,11 @@ interface NavigationTabsProps {
 
 const tabs = [
   { id: "components", label: "Components", icon: "🔧" },
-  { id: "controllers", label: "Controllers", icon: "⚙️" },
+  { id: "controllers", label: "Control Unit", icon: "⚙️" },
   { id: "systems", label: "Systems", icon: "🔗" },
-  { id: "voltage", label: "Voltage Supply", icon: "⚡" },
-  { id: "DTC", label: "DTC", icon: "⚠️" },
-  { id: "signals", label: "Signals", icon: "📶" },
+  { id: "voltage", label: "Supply", icon: "⚡" },
+  { id: "DTC", label: "Trouble Code", icon: "⚠️" },
+  { id: "signals", label: "Wires", icon: "📶" },
   { id: "harnesses", label: "Harnesses", icon: "🔌" },
 ];
 
@@ -52,10 +52,12 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout, userN
           gap: "2px"
         }}>
         <div
-         style={{
-          width:"320px",
-          display:"flex"
-         }}>
+          style={{
+            width: "320px",
+            display: "flex",
+            height: "80px",
+            alignItems: "center",
+          }}>
           <img
             style={{
               width: "70px",
@@ -64,10 +66,11 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout, userN
             src={logo}></img>
           <h1
             style={{
-              marginRight: "50px"
+              marginRight: "50px",
+              fontSize: "20px",
             }}
           >
-            ASDM
+            CRAZYBEES
           </h1>
         </div>
 
