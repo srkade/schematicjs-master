@@ -89,122 +89,125 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout, userN
               padding: "12px 16px",
               border: "none",
               background: activeTab === tab.id ? "#a4cefcff" : "transparent",
-              color: activeTab === tab.id ? "#495057" : "#6c757d",
+              //color: activeTab === tab.id ? "#495057" : "#6c757d",
+              color: activeTab === tab.id ? "black" : "black",
               borderBottom: activeTab === tab.id ? "3px solid #007bff" : "3px solid transparent",
               borderTop: activeTab === tab.id ? "3px solid #007bff" : "3px solid transparent",
               cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "500",
+              fontSize: "15px",
+              fontWeight: "bold",
               borderRadius: "8px 8px 0 0",
               transition: "all 0.2s ease",
               height: "60px",
-              justifyContent: "center"
+              justifyContent: "center",
+              outline: "none",
+              userSelect: "none",
             }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.id) {
-                (e.target as HTMLElement).style.background = "#f8f9fa";
-                (e.target as HTMLElement).style.color = "#495057";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.id) {
-                (e.target as HTMLElement).style.background = "transparent";
-                (e.target as HTMLElement).style.color = "#6c757d";
-              }
-            }}
+        onMouseEnter={(e) => {
+          if (activeTab !== tab.id) {
+            (e.target as HTMLElement).style.background = "#eaebeeff";
+            (e.target as HTMLElement).style.color = "black";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (activeTab !== tab.id) {
+            (e.target as HTMLElement).style.background = "transparent";
+            (e.target as HTMLElement).style.color = "black";
+          }
+        }}
           >
-            <span>{tab.icon}</span>
-            <span>{tab.label}</span>
-          </button>
+        <span>{tab.icon}</span>
+        <span>{tab.label}</span>
+      </button>
         ))}
+      <div
+        ref={userMenuRef}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginLeft: "auto"
+        }}
+      >
+        {/*  User icon (visible always) */}
         <div
-          ref={userMenuRef}
+          onClick={() => setUserMenuOpen(!userMenuOpen)}
           style={{
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+            background: "#f1f3f5",
             display: "flex",
             alignItems: "center",
-            marginLeft: "auto"
+            justifyContent: "center",
+            cursor: "pointer",
+            fontSize: "20px",
+            color: "#343a40",
+            transition: "background 0.3s ease",
           }}
+          title="User Menu"
+          onMouseEnter={(e) => ((e.currentTarget.style.background = "#e9ecef"))}
+          onMouseLeave={(e) => ((e.currentTarget.style.background = "#f1f3f5"))}
         >
-          {/*  User icon (visible always) */}
-          <div
-            onClick={() => setUserMenuOpen(!userMenuOpen)}
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              background: "#f1f3f5",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              fontSize: "20px",
-              color: "#343a40",
-              transition: "background 0.3s ease",
-            }}
-            title="User Menu"
-            onMouseEnter={(e) => ((e.currentTarget.style.background = "#e9ecef"))}
-            onMouseLeave={(e) => ((e.currentTarget.style.background = "#f1f3f5"))}
-          >
-            👤
-          </div>
+          👤
+        </div>
 
-          {/* Dropdown menu: User info + Logout */}
-          {userMenuOpen && (
+        {/* Dropdown menu: User info + Logout */}
+        {userMenuOpen && (
+          <div
+            style={{
+              position: "absolute",
+              top: "110%",
+              right: 0,
+              background: "white",
+              border: "1px solid #dee2e6",
+              borderRadius: "10px",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+              padding: "12px",
+              zIndex: 1000,
+              minWidth: "200px",
+            }}
+          >
             <div
               style={{
-                position: "absolute",
-                top: "110%",
-                right: 0,
-                background: "white",
-                border: "1px solid #dee2e6",
-                borderRadius: "10px",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-                padding: "12px",
-                zIndex: 1000,
-                minWidth: "200px",
+                textAlign: "center",
+                marginBottom: "10px",
               }}
             >
-              <div
-                style={{
-                  textAlign: "center",
-                  marginBottom: "10px",
-                }}
-              >
-                <div style={{ fontWeight: "bold", color: "#212529" }}>{userName}</div>
-                {/* <div style={{ fontSize: "13px", color: "#6c757d" }}>
+              <div style={{ fontWeight: "bold", color: "#212529" }}>{userName}</div>
+              {/* <div style={{ fontSize: "13px", color: "#6c757d" }}>
                   user@example.com
                 </div> */}
-              </div>
-
-              <hr style={{ border: "none", borderTop: "1px solid #e9ecef" }} />
-
-              <button
-                onClick={onLogout}
-                style={{
-                  background: "#bd5560",
-                  color: "white",
-                  border: "none",
-                  padding: "8px 16px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: "14px",
-                  width: "100%",
-                  transition: "background 0.2s ease",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.target as HTMLButtonElement).style.background = "#a74550")
-                }
-                onMouseLeave={(e) =>
-                  ((e.target as HTMLButtonElement).style.background = "#bd5560")
-                }
-              >
-                Logout
-              </button>
             </div>
-          )}
-        </div>
-      </nav>
+
+            <hr style={{ border: "none", borderTop: "1px solid #e9ecef" }} />
+
+            <button
+              onClick={onLogout}
+              style={{
+                background: "#bd5560",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "14px",
+                width: "100%",
+                transition: "background 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                ((e.target as HTMLButtonElement).style.background = "#a74550")
+              }
+              onMouseLeave={(e) =>
+                ((e.target as HTMLButtonElement).style.background = "#bd5560")
+              }
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </nav>
     </div>
   );
 }

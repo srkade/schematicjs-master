@@ -13,7 +13,8 @@ import {
   CrankingSystem,
   ChargingSystem
 } from "./components/Schematic/tests";
-import {  DTC_StarterCoolDown,DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
+import WelcomePage from "./components/HomePage";
+import { DTC_StarterCoolDown, DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
 import LoginPage from "./components/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
 
@@ -31,7 +32,6 @@ const allSchematics = {
   S9: wrapSchematic(S9),
   CrankingSystem: wrapSchematic(CrankingSystem),
   ChargingSystem: wrapSchematic(ChargingSystem),
-  
   DTC_StarterCoolDown: wrapSchematic(DTC_StarterCoolDown),
   DTC_StarterRelayPower: wrapSchematic(DTC_StarterRelayPower),
   DTC_StarterRelayGround: wrapSchematic(DTC_StarterRelayGround),
@@ -81,7 +81,7 @@ export type DashboardItem = {
 // ===============================
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false); // track login state
-  const [activeTab, setActiveTab] = useState<string>("components");
+  const [activeTab, setActiveTab] = useState<string>("");
   const [selectedItem, setSelectedItem] = useState<DashboardItem | null>(null);
 
 
@@ -92,7 +92,7 @@ export default function App() {
   );
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
+  const [showWelcome, setShowWelcome] = useState(true);
   useEffect(() => {
     const handleResize = () => {
       const nowMobile = window.innerWidth <= 768;
@@ -133,7 +133,6 @@ export default function App() {
         return false;
     }
   });
-
   if (!loggedIn) {
     return <LoginPage onLoginSuccess={() => setLoggedIn(true)} />;
   }
@@ -150,52 +149,65 @@ export default function App() {
       {/* Navigation Tabs */}
       <NavigationTabs
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tabId) => {
+          setActiveTab(tabId);
+          setShowWelcome(false); //  hides welcome page when a tab is clicked
+        }}
         onLogout={() => setLoggedIn(false)}
         userName="admin"
       />
 
-      {/* Main Content */}
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-        {/* Left Panel */}
-        <LeftPanel
-          activeTab={activeTab}
-          data={filteredItems}
-          onItemSelect={(item) => {
-            setSelectedItem(item);
-            setMergedSchematic(null); // Reset merge if new single selected
+      {showWelcome ? (
+        <WelcomePage
+          onStart={() => {
+            setShowWelcome(false);
+            setActiveTab("components"); 
           }}
-          selectedItem={selectedItem}
-          selectedCodes={selectedCodes}
-          setSelectedCodes={setSelectedCodes}
-          onViewSchematic={handleViewSchematic}
-          isMobile={isMobile}
         />
-        {!isMobile && selectedItem?.schematicData && (
-          <Schematic data={selectedItem.schematicData}  activeTab={activeTab}/>
-        )}
+      ) : (
+        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+          {/* Left Panel */}
+          <LeftPanel
+            activeTab={activeTab}
+            data={filteredItems}
+            onItemSelect={(item) => {
+              setSelectedItem(item);
+              setMergedSchematic(null); // Reset merge if new single selected
+            }}
+            selectedItem={selectedItem}
+            selectedCodes={selectedCodes}
+            setSelectedCodes={setSelectedCodes}
+            onViewSchematic={handleViewSchematic}
+            isMobile={isMobile}
+          />
+          {!isMobile && selectedItem?.schematicData && (
+            <Schematic data={selectedItem.schematicData} activeTab={activeTab} />
+          )}
 
-        {/* Main Panel */}
-        <MainPanel
-          // If merged schematic is present, show that; otherwise single selection
-          selectedItem={
-            mergedSchematic
-              ? {
-                code: "MERGED",
-                name: "Merged Schematic",
-                type: "Merged",
-                status: "Active",
-                voltage: "12V",
-                description: "Merged view of selected schematics",
-                schematicData: mergedSchematic,
-              }
-              : selectedItem
-          }
-          activeTab={activeTab}
-          isMultipleComponents={!!mergedSchematic}
-          isMobile={isMobile}
-        />
-      </div>
+          {/* Main Panel */}
+          <MainPanel
+            // If merged schematic is present, show that; otherwise single selection
+            selectedItem={
+              mergedSchematic
+                ? {
+                  code: "MERGED",
+                  name: "Merged Schematic",
+                  type: "Merged",
+                  status: "Active",
+                  voltage: "12V",
+                  description: "Merged view of selected schematics",
+                  schematicData: mergedSchematic,
+                }
+                : selectedItem
+            }
+            activeTab={activeTab}
+            isMultipleComponents={!!mergedSchematic}
+            isMobile={isMobile}
+          />
+        </div>
+      )
+      }
+
     </div>
   );
 }
