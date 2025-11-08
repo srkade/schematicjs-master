@@ -671,7 +671,7 @@ export default function Schematic({
                         <rect
                           x={getXForComponent(comp)}
                           y={
-                            getYForComponent(comp) < viewBox.y + viewBox.h / 2
+                            getYForComponent(comp) < fitViewBox.y + fitViewBox.h / 2
                               ? getYForComponent(comp) - 60
                               : getYForComponent(comp) + 60
                           }
