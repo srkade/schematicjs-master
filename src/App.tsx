@@ -4,6 +4,7 @@ import LeftPanel from "./components/LeftPanel";
 import MainPanel from "./components/MainPanel";
 import Schematic from "./components/Schematic/Schematic";
 import { SchematicData } from "./components/Schematic/SchematicTypes";
+import "../src/global.css"
 import {
   ICC,
   S4,
