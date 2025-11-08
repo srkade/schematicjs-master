@@ -74,7 +74,7 @@ const S9 = {
       gender: "Female"
     },
     {
-      id: "LC",
+      id: "X90",
       label: "Load center",
       category: "Transformer",
       shape: "rectangle",
@@ -99,7 +99,7 @@ const S9 = {
       gender: "Female"
     },
     {
-      id: "HR",
+      id: "K3",
       label: "Headlight relay",
       category: "Instrument",
       shape: "rectangle",
@@ -171,7 +171,7 @@ const S9 = {
     {
       color: "yellow",
       from: {
-        componentId: "LC",
+        componentId: "X90",
         connectorId: "X90",
         cavity: "47",
         gender: "female"
@@ -257,7 +257,7 @@ const S9 = {
     {
       color: "green",
       from: {
-        componentId: "HR",
+        componentId: "K3",
         connectorId: "XK3",
         cavity: "19",
         gender: ""
