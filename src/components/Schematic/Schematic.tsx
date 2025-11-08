@@ -21,6 +21,7 @@ import PopupWireDetails from "../popup/PopupWireDetails";
 import PopupConnectorDetails from "../popup/PopupConnectorDetails";
 import { resetView, handleWheel, zoom, enterFullscreen, exitFullscreen } from "./SchematicViews";
 import { ZoomIn, ZoomOut, RotateCcw, Maximize, Minimize } from "lucide-react";
+import { DTC_MAP } from "./tests/DTCs";
 // ...existing code...
 const colors = {
   OG: "orange",
@@ -33,7 +34,7 @@ export default function Schematic({
 }: {
   data: SchematicData;
   scale?: number;
-  activeTab?:string;
+  activeTab?: string;
 }) {
   const svgWrapperRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -58,6 +59,7 @@ export default function Schematic({
     x: 0,
     y: 0,
   });
+  const [selectedDTC, setSelectedDTC] = useState<any>(null);
 
   //states to manage the wire selection
   const [selectedWires, setSelectedWires] = useState<string[]>([]);
@@ -83,8 +85,6 @@ export default function Schematic({
     const cavityCount = calculateCavityCountForConnector(connector, data);
     setPopupComponent(null);
     setPopupWire(null);
-
-
     setPopupConnector({
       componentCode: comp.label || comp.id,
       connectorCode: connector.label || connector.id,
@@ -97,6 +97,29 @@ export default function Schematic({
     });
     setPopupWire(null);
   };
+  useEffect(() => {
+    if (!popupConnector || !popupConnector.connectorCode) return;
+
+    const connectorCode = popupConnector.connectorCode.toUpperCase();
+    // console.log("Clicked connector:", connectorCode);
+
+    const dtcData = Object.values(DTC_MAP).find((dtc: any) =>
+      dtc.connections.some(
+        (conn: any) =>
+          conn.from.connectorId.toUpperCase() === connectorCode ||
+          conn.to.connectorId.toUpperCase() === connectorCode
+      )
+    );
+
+    if (dtcData) {
+      //console.log(" Matched DTC:", dtcData.code);
+      setSelectedDTC(dtcData);
+    } else {
+      //console.warn(" No DTC details found for this connector:", connectorCode);
+      setSelectedDTC(null);
+    }
+
+  }, [popupConnector]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -502,7 +525,7 @@ export default function Schematic({
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
           <div
             style={{
-              position: "absolute", 
+              position: "absolute",
               top: 4,
               left: 4,
               padding: 8,
@@ -642,6 +665,7 @@ export default function Schematic({
                         onClick={() => {
                           console.log("Rectangle clicked!", comp.id);
                         }}
+                        style={{ cursor: "pointer" }}
                       />
                       {selectedComponentIds.includes(comp.id) && (
                         <rect
@@ -759,7 +783,8 @@ export default function Schematic({
                         fill={selectedConnector?.id === conn.id ? "#3390FF" : "lightgreen"} // highlight selected
                         stroke="black"
                         strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
-                        onClick={(e) => handleConnectorClick(e, conn, comp)} // <-- add this
+                        onClick={(e) => handleConnectorClick(e, conn, comp)}
+                        style={{ cursor: "pointer" }}
                       />
                     )}
 
@@ -1037,6 +1062,7 @@ export default function Schematic({
         />
         <PopupConnectorDetails
           popupConnector={popupConnector}
+          selectedDTC={selectedDTC}
           onClose={(e) => {
             e.stopPropagation();
             setPopupConnector(null);

@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import { PopupConnectorType } from "../Schematic/SchematicTypes";
-
+import { DTC_MAP } from "../Schematic/tests/DTCs";
 
 interface PopupConnectorDetailsProps {
   popupConnector: PopupConnectorType | null;
   onClose: (e: React.MouseEvent) => void;
   selectedTab?: string;
+  dtcCode?: string;
+  selectedDTC?: any;
 }
 
 export default function PopupConnectorDetails({
   popupConnector,
   onClose,
-  selectedTab
+  selectedTab,
+  dtcCode,
+  selectedDTC,
 }: PopupConnectorDetailsProps) {
   const [activeTab, setActiveTab] = useState<"connection" | "dtc">("connection");
   if (!popupConnector) return null;
@@ -22,7 +26,7 @@ export default function PopupConnectorDetails({
     top: 0, // starts from top of SVG
     right: 0, // sticks to top-right
     width: "350px",
-    height: "65%", // same height as SVG container
+    maxHeight: "91%", // same height as SVG container
     background: "#ffffff",
     borderRadius: "12px 0 0 12px",
     boxShadow: "0px 6px 24px rgba(0,0,0,0.15)",
@@ -34,7 +38,7 @@ export default function PopupConnectorDetails({
   };
 
   const headerContainerStyle: React.CSSProperties = {
-    position: "sticky",
+    position: "relative",
     top: 0,
     background: "#fff",
     zIndex: 2,
@@ -44,6 +48,11 @@ export default function PopupConnectorDetails({
     justifyContent: "space-between",
     alignItems: "center",
     flexShrink: 0,
+  };
+  const tabWrapperStyle: React.CSSProperties = {
+    flex: 1, // make it take up full width
+    display: "flex",
+    justifyContent: "center", // center by default
   };
   const headerTitleStyle: React.CSSProperties = {
     fontSize: "20px",
@@ -63,26 +72,31 @@ export default function PopupConnectorDetails({
 
   const closeIconStyle: React.CSSProperties = {
     //  backgroundColor: "red",
+    position: "absolute",
+    top: "-45px",    
+    right: "-10px",  
     color: "black",
     border: "none",
-    width: "30px",
-    height: "30px",
+    width: "40px",
+    height: "40px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: "18px",
     fontWeight: "bold",
+    background: "transparent",
     cursor: "pointer",
     transition: "transform 0.2s ease",
   };
 
-  const tabContainerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "8px",
-    marginTop: "10px",
-  };
-
+  const tabContainerStyle = (hasDTC: boolean): React.CSSProperties => (
+    {
+      display: "flex",
+      justifyContent: hasDTC ? "flex-end" : "center",
+      gap: "8px",
+      marginTop: "10px",
+    }
+  )
   const tabButtonStyle = (active: boolean): React.CSSProperties => ({
     padding: "6px 12px",
     cursor: "pointer",
@@ -126,30 +140,35 @@ export default function PopupConnectorDetails({
     boxShadow: "0px 3px 8px rgba(0,123,255,0.3)",
     transition: "all 0.3s ease",
   };
+  const dtcData = DTC_MAP[dtcCode || ""] || null;
 
   // ---------- Component JSX ----------
   return (
     <div style={containerStyle}>
-      <div style={{ marginBottom: "10px" ,fontWeight:"bold",fontSize:"20px",textAlign:"center"}}>Connector Information</div>
+      <div style={{ marginBottom: "10px", fontWeight: "bold", fontSize: "20px", textAlign: "center" }}>Connector Information</div>
       {/* HEADER */}
       {/* HEADER SECTION */}
       <div style={headerContainerStyle}>
-        <div style={tabContainerStyle}>
-          <button
-            style={tabButtonStyle(activeTab === "connection")}
-            onClick={() => setActiveTab("connection")}
-          >
-            Connection Details
-          </button>
-          {selectedTab === "DTC" && (
+        <div style={tabWrapperStyle}>
+          <div style={tabContainerStyle(selectedTab === "DTC")}>
             <button
-              style={tabButtonStyle(activeTab === "dtc")}
-              onClick={() => setActiveTab("dtc")}
+              style={tabButtonStyle(activeTab === "connection")}
+              onClick={() => setActiveTab("connection")}
             >
-              DTC Steps
+              Connection Details
             </button>
-          )}
+
+            {selectedTab === "DTC" && (
+              <button
+                style={tabButtonStyle(activeTab === "dtc")}
+                onClick={() => setActiveTab("dtc")}
+              >
+                DTC Steps
+              </button>
+            )}
+          </div>
         </div>
+
         <button
           onClick={onClose}
           style={closeIconStyle}
@@ -164,6 +183,7 @@ export default function PopupConnectorDetails({
           ×
         </button>
       </div>
+
       {/* Popup Connector Image */}
       <div style={{ marginTop: '16px', textAlign: 'center' }}>
         <img
@@ -256,28 +276,81 @@ export default function PopupConnectorDetails({
       )}
 
       {activeTab === "dtc" && (
-        <div style={{
-          marginTop: "16px",
-          fontSize: "14px",
-          color: "#333"
-        }}>
-          <h4 style={{
-            marginBottom: "8px",
-            color: "#0d0d0eff",
-          }}>
-            DTC Steps
-          </h4>
-          <p><b>Step 1:</b> Scan for codes.</p>
-          <p><b>Step 2:</b> Perform a visual inspection.</p>
-          <p><b>Step 3:</b> Use a multimeter<br></br>
-            <ul>
-              <li> Set the Mutlimeter.</li>
-              <li>Measure resistance.</li>
-              <li>Check continuity.</li>
-            </ul>
-          </p>
+        <div style={{ marginTop: "16px", fontSize: "14px", color: "#333" }}>
+          {selectedDTC ? (
+            (() => {
+              const dtc = {
+                ...selectedDTC,
+                probableCauses:
+                  selectedDTC.probableCauses ||
+                  selectedDTC.problableCauses ||
+                  [],
+                diagnosticSteps:
+                  selectedDTC.diagnosticSteps ||
+                  selectedDTC.steps ||
+                  [],
+                videoUrl:
+                  selectedDTC.videoUrl ||
+                  selectedDTC.vedioUrl ||
+                  null,
+              };
+
+              return (
+                <>
+                  <h3 style={{ color: "#0d0d0e", fontWeight: "bold" }}>
+                    {dtc.name || dtc.title || "Unnamed DTC"}
+                  </h3>
+
+                  <p style={{ marginBottom: "8px", color: "#666" }}>
+                    <b>Code:</b> {dtc.code}
+                  </p>
+
+                  {/* Probable Causes */}
+                  {dtc.probableCauses.length > 0 && (
+                    <>
+                      <h4 style={{ marginTop: "16px", color: "#007bff" }}>Probable Causes:</h4>
+                      <ul style={{ paddingLeft: "20px" }}>
+                        {dtc.probableCauses.map((cause: string, i: number) => (
+                          <li key={i}>{cause}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {/* Diagnostic Steps */}
+                  {dtc.diagnosticSteps.length > 0 && (
+                    <>
+                      <h4 style={{ marginTop: "16px", color: "#007bff" }}>Diagnostic Steps:</h4>
+                      <ol style={{ paddingLeft: "20px" }}>
+                        {dtc.diagnosticSteps.map((step: string, i: number) => (
+                          <li key={i}>{step}</li>
+                        ))}
+                      </ol>
+                    </>
+                  )}
+
+                  {/* Video */}
+                  {dtc.videoUrl && (
+                    <div style={{ marginTop: "16px", textAlign: "center" }}>
+                      <iframe
+                        width="280"
+                        height="160"
+                        src={dtc.videoUrl}
+                        title="Diagnostic Video"
+                        allowFullScreen
+                        style={{ borderRadius: "8px", border: "none" }}
+                      ></iframe>
+                    </div>
+                  )}
+                </>
+              );
+            })()
+          ) : (
+            <p style={{ color: "#999" }}>No DTC details found for this connector.</p>
+          )}
         </div>
       )}
+
 
     </div>
   );

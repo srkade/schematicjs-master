@@ -1,5 +1,5 @@
-const DTC_StarterCoolDown = {
-  code :"ICC 000677.31",
+export const DTC_StarterCoolDown = {
+  code: "ICC 000677.31",
   name: "(E1001) - Starter Cool Down in Process",
   type: "dtcs",
   masterComponents: ["S12"],
@@ -98,13 +98,24 @@ const DTC_StarterCoolDown = {
       label: "",
     },
   ],
+  problableCauses: [
+    "open circuit in connector XSP_500",
+    "corroded connector XS12 cavity A",
+    "Loose ground near horn circuit"
+  ],
+  steps: [
+    "check continuity between ICC XJ! cavity 6 and splice XSP_500.",
+    "Inspect connector XS1 for corrosion.",
+    "Verify horn ground connection."
+  ],
+  vedioUrl: "https://www.youtube.com/embed/gaelXhngh5A"
 };
 
-const DTC_StarterRelayPower = {
-  code :"ICC 000677.03",
+export const DTC_StarterRelayPower = {
+  code: "ICC 000677.03",
   name: "(E1007) - Starter Relay Short to Power",
   type: "dtcs",
-  masterComponents: ["K3","K6"],
+  masterComponents: ["K3", "K6"],
   components: [
     {
       id: "K6",
@@ -123,7 +134,7 @@ const DTC_StarterRelayPower = {
       connector_part_number: "",
       gender: "Male"
     },
-    
+
     {
       id: "ICC",
       label: "Instrument Cluster Controller",
@@ -206,8 +217,8 @@ const DTC_StarterRelayPower = {
       connector_part_number: "57M7264",
       gender: ""
     },
-    
-    
+
+
   ],
   connections: [
     {
@@ -408,17 +419,32 @@ const DTC_StarterRelayPower = {
         }
       }
     }
-  ]
+  ],
+  probableCauses: [
+    "Faulty Starter Relay (K6)",
+    "Loose or corroded connections at XSP_100B or XK6",
+    "Instrument Cluster Controller (ICC) sending incorrect signals",
+    "Damaged wiring in MAIN WIRING HARNESS (H8)",
+    "Short circuit between circuits 100D or 100AG"
+  ],
+  steps: [
+    "Inspect Starter Relay (K6) and its connector XK6 for damage or corrosion",
+    "Check continuity of wiring from XK6 to splice XSP_100B",
+    "Verify Instrument Cluster Controller (ICC) output signals at connector XJ1",
+    "Check MAIN WIRING HARNESS (H8) for shorts or open circuits",
+    "Test circuit numbers 100D and 100AG for correct voltage and continuity"
+  ],
+  vedioUrl: "https://www.youtube.com/embed/gaelXhngh5A"
 };
 
 
-const DTC_StarterRelayGround = {
-  code :"ICC 000677.04",
+export const DTC_StarterRelayGround = {
+  code: "ICC 000677.04",
   name: "(E1006) - Starter Relay Short to Ground",
   type: "dtcs",
   masterComponents: [
-   "G2",
-  
+    "G2",
+
   ],
   components: [
     {
@@ -707,12 +733,28 @@ const DTC_StarterRelayGround = {
         }
       }
     }
-  ]
+  ],
+  probableCauses: [
+    "Faulty Alternator (G2) or internal short",
+    "Damaged or corroded connections at XM1 or XG2-1/XG2-3",
+    "Short circuit in MAIN WIRING HARNESS (W1)",
+    "Loose or damaged splices (XSP_500, XSP_201_FL, XSP_FUEL_FL, XSP_GLOW_FL)",
+    "Instrument Cluster Controller (ICC) providing incorrect signal"
+  ],
+  steps: [
+    "Inspect Alternator (G2) and its connectors XG2-1 and XG2-3 for damage or corrosion",
+    "Check Starter Motor (M1) connector XM1 for secure connection",
+    "Verify continuity of wiring from Alternator to Starter Motor (circuit 200D)",
+    "Inspect splices (XSP_500, XSP_201_FL, XSP_FUEL_FL, XSP_GLOW_FL) for shorts or loose connections",
+    "Test MAIN WIRING HARNESS (W1) for shorts to ground",
+    "Check Instrument Cluster Controller (ICC) signals at XJ1 for proper operation"
+  ],
+  vedioUrl: "https://www.youtube.com/embed/gaelXhngh5A"
 };
 
 
-const DTC_ICC = {
-  code :"ICC 000677.05",
+export const DTC_ICC = {
+  code: "ICC 000677.05",
   name: "(E1012) - Starter Relay Open Circuit",
   type: "dtcs",
   masterComponents: ["ICC"],
@@ -2616,10 +2658,29 @@ const DTC_ICC = {
         }
       }
     }
-  ]
+  ],
+  probableCauses: [
+    "Open or damaged wiring between ICC and Starter Relay",
+    "Loose, corroded, or damaged connectors at ICC, relay, or splices",
+    "Faulty Starter Relay with internal open circuit",
+    "Instrument Cluster Controller (ICC) not providing output signal",
+    "Blown fuse or protection circuit in starter relay control"
+  ],
+  steps: [
+    "Visually inspect wiring from ICC to Starter Relay for cuts, chafing, or damage",
+    "Check connectors at ICC (XJ1/XJ2), Starter Relay, and splice points (e.g., SPL11, SPL12) for corrosion or poor fit",
+    "Check continuity of wires from ICC output to Starter Relay coil",
+    "Test Starter Relay separately to ensure proper switching",
+    "Check ICC output signal at cavity 13 (XJ1) when attempting to start",
+    "Repair damaged wires or connectors, replace faulty relay, or replace ICC if necessary",
+    "Clear DTC and attempt engine start to verify repair"
+  ],
+  vedioUrl: "https://www.youtube.com/embed/gaelXhngh5A"
 };
 
-
-export {
-  DTC_StarterCoolDown,DTC_StarterRelayPower, DTC_StarterRelayGround,DTC_ICC
+export const DTC_MAP: Record<string, any> = {
+  "ICC 000677.31": DTC_StarterCoolDown,
+  "ICC 000677.03": DTC_StarterRelayPower,
+  "ICC 000677.04": DTC_StarterRelayGround,
+  "ICC 000677.05": DTC_ICC,
 };
