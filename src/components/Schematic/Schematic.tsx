@@ -901,15 +901,22 @@ export default function Schematic({
               connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
 
               let intermediateY;
-              const offset = getConnectionOffset(
-                i,
-                data.connections.length,
-                fromY,
-                toY,
-                20
-              );
-              let min = Math.min(fromY, toY);
-              intermediateY = min + offset;
+              if (isFromMasterComponent && isToMasterComponent) {
+                // Force wire to go below both master components
+                intermediateY = Math.max(fromY, toY) + 40; 
+              } else {
+                // Default behavior
+                const offset = getConnectionOffset(
+                  i,
+                  data.connections.length,
+                  fromY,
+                  toY,
+                  20
+                );
+                let min = Math.min(fromY, toY);
+                intermediateY = min + offset;
+              }
+
 
               // Calculate the positions where the tridents should be
               const fromTridentY = fromY < toY ? intermediateY : fromY - 10; // lift if needed

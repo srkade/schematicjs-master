@@ -38,47 +38,48 @@ interface SchematicConfig {
 export function mergeSchematicConfigs(...configs: SchematicConfig[]): SchematicData {
   const mergedComponents: Component[] = [];
   const mergedConnections: Connection[] = [];
-  
-  // Create a map to track components by ID
+
+  // --- Merge Components ---
   const componentMap = new Map<string, Component>();
-  
-  // Process components from all configs
   const allComponents = configs.flatMap(config => config.components);
   const mergedMasterComponents = configs.flatMap(config => config.masterComponents);
-  
+
   for (const component of allComponents) {
     if (componentMap.has(component.id)) {
       // Component already exists, merge connectors
       const existingComponent = componentMap.get(component.id)!;
-      
-      // Merge connectors, avoiding duplicates
       const existingConnectorIds = new Set(existingComponent.connectors.map(c => c.id));
       const newConnectors = component.connectors.filter(c => !existingConnectorIds.has(c.id));
-      
       existingComponent.connectors.push(...newConnectors);
-      
-      // Update category if different (prioritize more specific categories)
+
+      // Optional: handle category mismatch
       if (existingComponent.category !== component.category) {
-        // You can customize this logic based on your preference
-        // For now, we'll keep the first category encountered
         console.warn(`Category mismatch for component ${component.id}: ${existingComponent.category} vs ${component.category}`);
       }
     } else {
-      // New component, add to map
       componentMap.set(component.id, {
         ...component,
-        connectors: [...component.connectors] // Create a copy of connectors array
+        connectors: [...component.connectors]
       });
     }
   }
-  
-  // Convert map back to array
+
   mergedComponents.push(...Array.from(componentMap.values()));
-  
-  // Merge all connections from all configs
+
+  // --- Merge Connections (avoid duplicates) ---
+  const connectionMap = new Map<string, Connection>();
   const allConnections = configs.flatMap(config => config.connections);
-  mergedConnections.push(...allConnections);
-  
+
+  for (const conn of allConnections) {
+    // Create a unique key based on from/to component+connector
+    const key = `${conn.from.componentId}:${conn.from.connectorId}-${conn.to.componentId}:${conn.to.connectorId}`;
+    if (!connectionMap.has(key)) {
+      connectionMap.set(key, conn);
+    }
+  }
+
+  mergedConnections.push(...Array.from(connectionMap.values()));
+
   return {
     masterComponents: Array.from(new Set(mergedMasterComponents)),
     components: mergedComponents,
@@ -91,6 +92,6 @@ export function mergeB3AndS4Configs() {
   // Import the configs (you'll need to adjust the import paths as needed)
   const B3 = require('../components/Schematic/tests/B3.ts').default;
   const S4 = require('../components/Schematic/tests/S4.ts').default;
-  
+
   return mergeSchematicConfigs(B3, S4);
 }
