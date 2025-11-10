@@ -28,7 +28,7 @@ const ChargingSystem = {
     {
       id: "W1",
       label: "Ground",
-      category: "Component",
+      category: "Ground",
       shape: "rectangle",
       connectors: [
         {

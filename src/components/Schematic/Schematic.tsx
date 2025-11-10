@@ -14,6 +14,7 @@ import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
 import MotorSymbol from "../symbols/MotorSymbol";
 import LampSymbol from "../symbols/Lamp";
+import GroundSymbol from "../symbols/GroundSymbol";
 import { ComponentType, ConnectionType, ConnectorType, ConnectionPoint, SchematicData, WireDetailsType, WirePopupType, PopupConnectorType } from "./SchematicTypes";
 import { spaceForWires, connectionPointKey, getConnectionOffset, getIntersection, getConnectionsForComponent, getConnectionsForConnector, getComponentConnectorTupleFromConnectionPoint, calculateCavityCountForConnector } from "./SchematicUtils";
 import PopupComponentDetails from "../popup/PopupComponentDetails";
@@ -746,6 +747,17 @@ export default function Schematic({
                           color="black"
                         />
                       )}
+                      {comp.category?.toLowerCase() === "ground" && (
+                        <GroundSymbol
+                          x={getXForComponent(comp) } // adjust horizontal position
+                          y={getYForComponent(comp) + 15} // adjust vertical position
+                          width={getWidthForComponent(comp) / 2} // adjust width scaling
+                          height={componentSize.height / 2} // adjust height scaling
+                          stroke="black"
+                          strokeWidth={3}
+                        />
+                      )}
+
 
                     </g>
                   )
@@ -903,7 +915,7 @@ export default function Schematic({
               let intermediateY;
               if (isFromMasterComponent && isToMasterComponent) {
                 // Force wire to go below both master components
-                intermediateY = Math.max(fromY, toY) + 40; 
+                intermediateY = Math.max(fromY, toY) + 40;
               } else {
                 // Default behavior
                 const offset = getConnectionOffset(
@@ -1075,6 +1087,9 @@ export default function Schematic({
             setPopupConnector(null);
             setSelectedConnector(null);
           }}
+
+
+
           selectedTab={activeTab}
         />
       </div>
