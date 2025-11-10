@@ -1238,7 +1238,7 @@ export const DTC_ICC = {
     {
       id: "K5",
       label: "Flasher",
-      category: "Relay",
+      category: "Lamp",
       shape: "rectangle",
       connectors: [
         {
