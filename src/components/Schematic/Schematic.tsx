@@ -15,6 +15,7 @@ import Transformer from "../symbols/Transformer";
 import MotorSymbol from "../symbols/MotorSymbol";
 import LampSymbol from "../symbols/Lamp";
 import GroundSymbol from "../symbols/GroundSymbol";
+import ResistorSymbol from "../symbols/ResistorSymbol";
 import { ComponentType, ConnectionType, ConnectorType, ConnectionPoint, SchematicData, WireDetailsType, WirePopupType, PopupConnectorType } from "./SchematicTypes";
 import { spaceForWires, connectionPointKey, getConnectionOffset, getIntersection, getConnectionsForComponent, getConnectionsForConnector, getComponentConnectorTupleFromConnectionPoint, calculateCavityCountForConnector } from "./SchematicUtils";
 import PopupComponentDetails from "../popup/PopupComponentDetails";
@@ -749,12 +750,20 @@ export default function Schematic({
                       )}
                       {comp.category?.toLowerCase() === "ground" && (
                         <GroundSymbol
-                          x={getXForComponent(comp) } // adjust horizontal position
+                          x={getXForComponent(comp)} // adjust horizontal position
                           y={getYForComponent(comp) + 15} // adjust vertical position
                           width={getWidthForComponent(comp) / 2} // adjust width scaling
                           height={componentSize.height / 2} // adjust height scaling
                           stroke="black"
                           strokeWidth={3}
+                        />
+                      )}
+                      {comp.category?.toLowerCase() === "resistor" && (
+                        <ResistorSymbol
+                          x={getXForComponent(comp)-50}
+                          y={getYForComponent(comp)+13}
+                          width={getWidthForComponent(comp)}
+                          height={40}
                         />
                       )}
 

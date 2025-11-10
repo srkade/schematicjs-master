@@ -270,7 +270,7 @@ const ChargingSystem = {
     {
       id: "R1",
       label: "Glow plugs",
-      category: "Component",
+      category: "Resistor",
       shape: "rectangle",
       connectors: [
         {
