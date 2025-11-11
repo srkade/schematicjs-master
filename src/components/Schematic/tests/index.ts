@@ -6,5 +6,6 @@ import B3 from './B3';
 import S8 from './S8';
 import CrankingSystem from './CrankingSystem';
 import ChargingSystem from './ChargingSystem';
+import HeadLightRelayFuse from './HeadlightRelayFuse';
 
-export { ICC, S4, S9, B3, S8, CrankingSystem , ChargingSystem};
+export { ICC, S4, S9, B3, S8, CrankingSystem , ChargingSystem,HeadLightRelayFuse};

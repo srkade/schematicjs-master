@@ -12,7 +12,8 @@ import {
   S8,
   B3,
   CrankingSystem,
-  ChargingSystem
+  ChargingSystem,
+  HeadLightRelayFuse
 } from "./components/Schematic/tests";
 import WelcomePage from "./components/HomePage";
 import { DTC_StarterCoolDown, DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
@@ -37,6 +38,7 @@ const allSchematics = {
   DTC_StarterRelayPower: wrapSchematic(DTC_StarterRelayPower),
   DTC_StarterRelayGround: wrapSchematic(DTC_StarterRelayGround),
   DTC_ICC: wrapSchematic(DTC_ICC),
+  HeadLightRelayFuse:wrapSchematic(HeadLightRelayFuse)
 };
 const SYSTEM_KEYS = ["CrankingSystem", "ChargingSystem"];
 
@@ -128,6 +130,8 @@ export default function App() {
         return ["Transistor", "Instrument"].includes(item.type);
       case "systems":
         return ["System"].includes(item.type);
+      case "voltage":
+        return ["Supply"].includes(item.type);
       case "DTC":
         return ["dtc"].includes(item.type);
       default:
@@ -162,7 +166,7 @@ export default function App() {
         <WelcomePage
           onStart={() => {
             setShowWelcome(false);
-            setActiveTab("components"); 
+            setActiveTab("components");
           }}
         />
       ) : (
