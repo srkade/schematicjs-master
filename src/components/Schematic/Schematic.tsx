@@ -20,8 +20,10 @@ import PopupComponentDetails from "../popup/PopupComponentDetails";
 import PopupWireDetails from "../popup/PopupWireDetails";
 import PopupConnectorDetails from "../popup/PopupConnectorDetails";
 import { resetView, handleWheel, zoom, enterFullscreen, exitFullscreen } from "./SchematicViews";
-import { ZoomIn, ZoomOut, RotateCcw, Maximize, Minimize } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCcw, Maximize, Minimize,Download } from "lucide-react";
 import { DTC_MAP } from "./tests/DTCs";
+import { schematicExportManager } from './SchematicExport';
+
 // ...existing code...
 const colors = {
   OG: "orange",
@@ -498,6 +500,100 @@ export default function Schematic({
     cursor: "pointer",
   };
 
+
+
+
+  // export function start
+
+  const [isExporting, setIsExporting] = useState(false);
+const [exportError, setExportError] = useState<string | null>(null);
+
+
+const handleExportPDF = async () => {
+  try {
+    setIsExporting(true);
+    setExportError(null);
+
+    const svgElement = svgWrapperRef.current?.querySelector('svg') as SVGSVGElement;
+    if (!svgElement) {
+      throw new Error('SVG element not found');
+    }
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `schematic-export-${timestamp}.pdf`;
+
+    await schematicExportManager.generatePDF(
+      svgElement,
+      data,
+      connectorConnectionCount,
+      {
+        filename,
+        includeJSON: true,
+        resolution: 300,
+        zoom: 1.5,
+      }
+    );
+
+    console.log('PDF export completed successfully');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    setExportError(errorMessage);
+    console.error('PDF export failed:', errorMessage);
+  } finally {
+    setIsExporting(false);
+  }
+};
+
+const handleExportImage = async () => {
+  try {
+    setIsExporting(true);
+    setExportError(null);
+
+    const svgElement = svgWrapperRef.current?.querySelector('svg') as SVGSVGElement;
+    if (!svgElement) {
+      throw new Error('SVG element not found');
+    }
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `schematic-export-${timestamp}.png`;
+
+    await schematicExportManager.exportAsImage(svgElement, {
+      filename,
+      resolution: 300,
+    });
+
+    console.log('Image export completed successfully');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    setExportError(errorMessage);
+    console.error('Image export failed:', errorMessage);
+  } finally {
+    setIsExporting(false);
+  }
+};
+
+const handleExportJSON = () => {
+  try {
+    setExportError(null);
+
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `schematic-data-${timestamp}.json`;
+
+    schematicExportManager.exportAsJSON(
+      data,
+      connectorConnectionCount,
+      filename
+    );
+
+    console.log('JSON export completed successfully');
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    setExportError(errorMessage);
+    console.error('JSON export failed:', errorMessage);
+  }
+};
+  // export function end
+
   return (
     <div
       ref={svgWrapperRef}
@@ -553,6 +649,222 @@ export default function Schematic({
             >
               {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
             </button>
+
+            <div style={{
+  display: 'flex',
+  gap: '8px',
+  alignItems: 'center',
+  padding: '0 12px',
+  borderLeft: '1px solid #ccc',
+}}>
+  {/* Main Export Button */}
+  <button
+    onClick={handleExportPDF}
+    disabled={isExporting}
+    title="Export as PDF with all details"
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '40px',
+      height: '40px',
+      borderRadius: '6px',
+      border: '1px solid #ccc',
+      backgroundColor: '#fff',
+      cursor: isExporting ? 'not-allowed' : 'pointer',
+      opacity: isExporting ? 0.6 : 1,
+      transition: 'all 0.2s ease',
+    }}
+    onMouseEnter={(e) => {
+      if (!isExporting) e.currentTarget.style.backgroundColor = '#f0f0f0';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.backgroundColor = '#fff';
+    }}
+  >
+    <Download size={18} />
+  </button>
+
+  {/* Dropdown Menu for Additional Export Options */}
+  <div style={{
+    position: 'relative',
+    display: 'inline-block',
+  }}>
+    <button
+      onClick={() => {
+        const menu = document.getElementById('export-menu');
+        if (menu) {
+          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+      }}
+      title="More export options"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '40px',
+        height: '40px',
+        borderRadius: '6px',
+        border: '1px solid #ccc',
+        backgroundColor: '#fff',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#f0f0f0';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#fff';
+      }}
+    >
+      ▼
+    </button>
+
+    <div
+      id="export-menu"
+      style={{
+        position: 'absolute',
+        top: '45px',
+        right: 0,
+        backgroundColor: '#fff',
+        border: '1px solid #ccc',
+        borderRadius: '6px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        zIndex: 1000,
+        display: 'none',
+        minWidth: '180px',
+      }}
+    >
+      <button
+        onClick={() => {
+          handleExportPDF();
+          const menu = document.getElementById('export-menu');
+          if (menu) menu.style.display = 'none';
+        }}
+        disabled={isExporting}
+        style={{
+          width: '100%',
+          padding: '12px 16px',
+          textAlign: 'left',
+          border: 'none',
+          backgroundColor: 'transparent',
+          cursor: isExporting ? 'not-allowed' : 'pointer',
+          fontSize: '14px',
+          transition: 'background-color 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          if (!isExporting) e.currentTarget.style.backgroundColor = '#f0f0f0';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
+        📄 Export as PDF
+      </button>
+      <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid #eee' }} />
+      <button
+        onClick={() => {
+          handleExportImage();
+          const menu = document.getElementById('export-menu');
+          if (menu) menu.style.display = 'none';
+        }}
+        disabled={isExporting}
+        style={{
+          width: '100%',
+          padding: '12px 16px',
+          textAlign: 'left',
+          border: 'none',
+          backgroundColor: 'transparent',
+          cursor: isExporting ? 'not-allowed' : 'pointer',
+          fontSize: '14px',
+          transition: 'background-color 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          if (!isExporting) e.currentTarget.style.backgroundColor = '#f0f0f0';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
+        🖼️ Export as PNG
+      </button>
+      <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid #eee' }} />
+      <button
+        onClick={() => {
+          handleExportJSON();
+          const menu = document.getElementById('export-menu');
+          if (menu) menu.style.display = 'none';
+        }}
+        style={{
+          width: '100%',
+          padding: '12px 16px',
+          textAlign: 'left',
+          border: 'none',
+          backgroundColor: 'transparent',
+          cursor: 'pointer',
+          fontSize: '14px',
+          transition: 'background-color 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#f0f0f0';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
+        📋 Export as JSON
+      </button>
+    </div>
+  </div>
+
+  {/* Error Message Display */}
+  {exportError && (
+    <div
+      style={{
+        padding: '8px 12px',
+        backgroundColor: '#f8d7da',
+        color: '#721c24',
+        borderRadius: '4px',
+        fontSize: '12px',
+        maxWidth: '300px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}
+      title={exportError}
+    >
+      ⚠️ {exportError}
+    </div>
+  )}
+
+  {/* Loading Indicator */}
+  {isExporting && (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        padding: '0 12px',
+        color: '#666',
+        fontSize: '12px',
+      }}
+    >
+      <div
+        style={{
+          display: 'inline-block',
+          width: '12px',
+          height: '12px',
+          borderRadius: '50%',
+          border: '2px solid #f3f3f3',
+          borderTop: '2px solid #007bff',
+          animation: 'spin 0.8s linear infinite',
+        }}
+      />
+      Exporting...
+    </div>
+  )}
+</div>
+
 
           </div>
           <svg
@@ -1081,5 +1393,16 @@ export default function Schematic({
     </div>
   );
 }
+// Add at the end of component file
+const spinnerStyle = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const style = document.createElement('style');
+style.textContent = spinnerStyle;
+document.head.appendChild(style);
 
 
