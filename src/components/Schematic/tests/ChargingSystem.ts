@@ -28,7 +28,7 @@ const ChargingSystem = {
     {
       id: "W1",
       label: "Ground",
-      category: "Component",
+      category: "Ground",
       shape: "rectangle",
       connectors: [
         {
@@ -270,7 +270,7 @@ const ChargingSystem = {
     {
       id: "R1",
       label: "Glow plugs",
-      category: "Component",
+      category: "Resistor",
       shape: "rectangle",
       connectors: [
         {

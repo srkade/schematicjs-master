@@ -14,6 +14,8 @@ import Transistor from "../symbols/Transistor";
 import Transformer from "../symbols/Transformer";
 import MotorSymbol from "../symbols/MotorSymbol";
 import LampSymbol from "../symbols/Lamp";
+import GroundSymbol from "../symbols/GroundSymbol";
+import ResistorSymbol from "../symbols/ResistorSymbol";
 import { ComponentType, ConnectionType, ConnectorType, ConnectionPoint, SchematicData, WireDetailsType, WirePopupType, PopupConnectorType } from "./SchematicTypes";
 import { spaceForWires, connectionPointKey, getConnectionOffset, getIntersection, getConnectionsForComponent, getConnectionsForConnector, getComponentConnectorTupleFromConnectionPoint, calculateCavityCountForConnector } from "./SchematicUtils";
 import PopupComponentDetails from "../popup/PopupComponentDetails";
@@ -1058,6 +1060,25 @@ const handleExportJSON = () => {
                           color="black"
                         />
                       )}
+                      {comp.category?.toLowerCase() === "ground" && (
+                        <GroundSymbol
+                          x={getXForComponent(comp)} // adjust horizontal position
+                          y={getYForComponent(comp) + 15} // adjust vertical position
+                          width={getWidthForComponent(comp) / 2} // adjust width scaling
+                          height={componentSize.height / 2} // adjust height scaling
+                          stroke="black"
+                          strokeWidth={3}
+                        />
+                      )}
+                      {comp.category?.toLowerCase() === "resistor" && (
+                        <ResistorSymbol
+                          x={getXForComponent(comp) - 50}
+                          y={getYForComponent(comp) + 13}
+                          width={getWidthForComponent(comp)}
+                          height={40}
+                        />
+                      )}
+
 
                     </g>
                   )
@@ -1215,7 +1236,7 @@ const handleExportJSON = () => {
               let intermediateY;
               if (isFromMasterComponent && isToMasterComponent) {
                 // Force wire to go below both master components
-                intermediateY = Math.max(fromY, toY) + 40; 
+                intermediateY = Math.max(fromY, toY) + 40;
               } else {
                 // Default behavior
                 const offset = getConnectionOffset(
@@ -1239,6 +1260,8 @@ const handleExportJSON = () => {
 
               let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
               let toLabelY = isToTop ? toY - 5 : toY + 15;
+              const fuseX = getXForConnector(from, fromComponent!) + getWidthForConnector(from, fromComponent!) / 2;
+              const fuseY = getYForConnector(from, fromComponent!) - 10; // small offset above connector
 
               let wireElement;
               wireElement = (
@@ -1246,26 +1269,38 @@ const handleExportJSON = () => {
                   {fromComponent?.category?.toLowerCase() !== "splice" && (
                     <>
                       {isFromTop ? (
-                        // top component → trident points UP
-                        <TridentShape
-                          cx={fromX}
-                          cy={fromY - 15}
-                          color={wire.color}
-                          size={10}
-                        />
-                      ) : (
-                        // bottom component → trident points DOWN
-                        <g
-                          transform={`translate(${fromX}, ${fromY + 15
-                            }) scale(1, -1)`}
-                        >
+                        <>
+                          {/* top component → trident points UP */}
                           <TridentShape
-                            cx={0}
-                            cy={0}
+                            cx={fromX}
+                            cy={fromY - 15}
                             color={wire.color}
                             size={10}
                           />
-                        </g>
+
+                          {/* Fuse symbol for Load Center (flipped when on top) */}
+                          {fromComponent?.category?.toLowerCase() === "supply" &&
+                            fromComponent?.label?.toLowerCase().includes("load center") && (
+                              <g transform={`translate(${fromX}, ${fromY - 45}) scale(1, -1)`}>
+                                <FuseSymbol cx={0} cy={0} size={14} color="black" />
+                              </g>
+                            )}
+                        </>
+                      ) : (
+                        <>
+                          {/* bottom component → trident points DOWN */}
+                          <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
+                            <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                          </g>
+
+                          {/* Fuse symbol (normal orientation below bottom trident) */}
+                          {fromComponent?.category?.toLowerCase() === "supply" &&
+                            fromComponent?.label?.toLowerCase().includes("load center") && (
+                              <g transform={`translate(${fromX - 10}, ${fromY + 20})`}>
+                                <FuseSymbol cx={0} cy={2} size={10} color="black" />
+                              </g>
+                            )}
+                        </>
                       )}
                     </>
                   )}
@@ -1315,29 +1350,42 @@ const handleExportJSON = () => {
                   {toComponent?.category?.toLowerCase() !== "splice" && (
                     <>
                       {isToTop ? (
-                        // top component → trident points UP
-                        <TridentShape
-                          cx={toX}
-                          cy={toY - 15}
-                          color={wire.color}
-                          size={10}
-                        />
-                      ) : (
-                        // bottom component → trident points DOWN
-                        <g
-                          transform={`translate(${toX}, ${toY + 15
-                            }) scale(1, -1)`}
-                        >
+                        <>
                           <TridentShape
-                            cx={0}
-                            cy={0}
+                            cx={toX}
+                            cy={toY - 15}
                             color={wire.color}
                             size={10}
                           />
-                        </g>
+
+                          {/* Fuse flipped when trident on top */}
+                          {toComponent?.category?.toLowerCase() === "supply" &&
+                            toComponent?.label?.toLowerCase().includes("load center") && (
+                              <g transform={`translate(${toX}, ${toY - 10}) scale(1, -1)`}>
+                                <FuseSymbol cx={0} cy={30} size={14} color="black" />
+                              </g>
+                            )}
+                        </>
+                      ) : (
+                        <>
+                          <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
+                            <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                          </g>
+
+                          {toComponent?.category?.toLowerCase() === "supply" &&
+                            toComponent?.label?.toLowerCase().includes("load center") && (
+                              <FuseSymbol
+                                cx={toX}
+                                cy={toY + 35}
+                                size={14}
+                                color="black"
+                              />
+                            )}
+                        </>
                       )}
                     </>
                   )}
+
                   <text
                     x={fromX + 10}
                     y={fromLabelY}
@@ -1366,7 +1414,6 @@ const handleExportJSON = () => {
             })}
           </svg>
         </div>
-
         <PopupComponentDetails
           popupComponent={popupComponent}
           onClose={() => setPopupComponent(null)}
