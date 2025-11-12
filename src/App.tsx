@@ -1,10 +1,10 @@
 import React, { Component, useState, useEffect } from "react";
-import NavigationTabs from "./components/NavigationTabs";
-import LeftPanel from "./components/LeftPanel";
-import MainPanel from "./components/MainPanel";
+import NavigationTabs from "./panels/NavigationTabs";
+import LeftPanel from "./panels/LeftPanel";
+import MainPanel from "./panels/MainPanel";
 import Schematic from "./components/Schematic/Schematic";
 import { SchematicData } from "./components/Schematic/SchematicTypes";
-import "../src/global.css"
+import "../src/Styles/global.css"
 import {
   ICC,
   S4,
@@ -15,9 +15,9 @@ import {
   ChargingSystem,
   HeadLightRelayFuse
 } from "./components/Schematic/tests";
-import WelcomePage from "./components/HomePage";
+import WelcomePage from "./pages/HomePage";
 import { DTC_StarterCoolDown, DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
-import LoginPage from "./components/LoginPage";
+import LoginPage from "./pages/LoginPage";
 import { mergeSchematicConfigs } from './utils/mergeSchematicConfigs';
 
 

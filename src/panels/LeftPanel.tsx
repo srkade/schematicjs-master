@@ -4,7 +4,7 @@ import { DashboardItem } from "../App";
 
 import "../Styles/LeftPanel.css";
 
-import Schematic from "./Schematic/Schematic";
+import Schematic from "../components/Schematic/Schematic";
 import { Layers, CheckSquare } from "lucide-react";
 
 

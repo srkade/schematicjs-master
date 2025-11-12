@@ -1,6 +1,6 @@
 import React from "react";
-import Schematic from "./Schematic/Schematic";
-import { ICC, S4, S9, S8, B3 } from "./Schematic/tests";
+import Schematic from "../components/Schematic/Schematic";
+import { ICC, S4, S9, S8, B3 } from "../components/Schematic/tests";
 import { DashboardItem } from "../App";
 import "../Styles/MainPanel.css"
 
