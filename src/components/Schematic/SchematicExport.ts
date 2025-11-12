@@ -6,7 +6,6 @@ import { SchematicData, ComponentType, ConnectionType, ConnectorType } from "./S
 
 export interface ExportOptions {
   filename?: string;
-  includeJSON?: boolean;
   resolution?: number;
   zoom?: number;
 }
@@ -245,7 +244,6 @@ class SchematicExportManager {
   ): Promise<void> {
     const {
       filename = "schematic-export.pdf",
-      includeJSON = true,
       resolution = 300,
       zoom = 1,
     } = options;
@@ -429,24 +427,7 @@ class SchematicExportManager {
       }
 
       // Add JSON data if requested
-      if (includeJSON) {
-        pdf.addPage();
-        yPosition = margin;
-
-        pdf.setFontSize(14);
-        pdf.setFont(undefined, "bold");
-        pdf.text("JSON DATA EXPORT", margin, yPosition);
-        yPosition += 8;
-
-        pdf.setFontSize(8);
-        pdf.setFont(undefined, "normal");
-        const jsonText = JSON.stringify(data, null, 2);
-        const splitText = pdf.splitTextToSize(jsonText, pageWidth - 2 * margin);
-        pdf.text(splitText, margin, yPosition);
-        
-        console.log("✓ JSON data added to PDF");
-      }
-
+     
       // Save PDF
       pdf.save(filename);
       console.log(`✓✓✓ PDF exported successfully: ${filename}`);
@@ -483,48 +464,6 @@ class SchematicExportManager {
     }
   }
 
-  /**
-   * Export as JSON
-   */
-  public exportAsJSON(
-    data: SchematicData,
-    connectorConnectionCount: { [id: string]: number },
-    filename: string = "schematic-data.json"
-  ): void {
-    try {
-      const components = this.extractComponentDetails(data, connectorConnectionCount);
-      const wires = this.extractWireDetails(data);
-      const connectors = this.extractConnectorDetails(data);
-
-      const exportData = {
-        metadata: {
-          exportDate: new Date().toISOString(),
-          totalComponents: components.length,
-          totalWires: wires.length,
-          totalConnectors: connectors.length,
-        },
-        components,
-        wires,
-        connectors,
-        rawData: data,
-      };
-
-      const json = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([json], { type: "application/json" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-
-      console.log(`✓ JSON exported successfully: ${filename}`);
-    } catch (error) {
-      console.error("Error exporting JSON:", error);
-      throw error;
-    }
-  }
 }
 
 // Export singleton instance

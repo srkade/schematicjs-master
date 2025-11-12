@@ -559,7 +559,6 @@ export default function Schematic({
         connectorConnectionCount,
         {
           filename,
-          includeJSON: true,
           resolution: 300,
           zoom: 1.5,
         }
@@ -607,29 +606,8 @@ export default function Schematic({
     }
   };
 
-  const handleExportJSON = () => {
-    try {
-      setExportError(null);
 
-      const timestamp = new Date().toISOString().slice(0, 10);
-      const filename = `schematic-data-${timestamp}.json`;
-
-      schematicExportManager.exportAsJSON(
-        data,
-        connectorConnectionCount,
-        filename
-      );
-
-      console.log("JSON export completed successfully");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      setExportError(errorMessage);
-      console.error("JSON export failed:", errorMessage);
-    }
-  };
   // export function end
-
   return (
     <div
       ref={svgWrapperRef}
@@ -854,31 +832,6 @@ export default function Schematic({
                       borderTop: "1px solid #eee",
                     }}
                   />
-                  <button
-                    onClick={() => {
-                      handleExportJSON();
-                      const menu = document.getElementById("export-menu");
-                      if (menu) menu.style.display = "none";
-                    }}
-                    style={{
-                      width: "100%",
-                      padding: "12px 16px",
-                      textAlign: "left",
-                      border: "none",
-                      backgroundColor: "transparent",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                      transition: "background-color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f0f0f0";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    📋 Export as JSON
-                  </button>
                 </div>
               </div>
 
