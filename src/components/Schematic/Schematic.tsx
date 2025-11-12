@@ -760,8 +760,8 @@ export default function Schematic({
                       )}
                       {comp.category?.toLowerCase() === "resistor" && (
                         <ResistorSymbol
-                          x={getXForComponent(comp)-50}
-                          y={getYForComponent(comp)+13}
+                          x={getXForComponent(comp) - 50}
+                          y={getYForComponent(comp) + 13}
                           width={getWidthForComponent(comp)}
                           height={40}
                         />
@@ -948,6 +948,8 @@ export default function Schematic({
 
               let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
               let toLabelY = isToTop ? toY - 5 : toY + 15;
+              const fuseX = getXForConnector(from, fromComponent!) + getWidthForConnector(from, fromComponent!) / 2;
+              const fuseY = getYForConnector(from, fromComponent!) - 10; // small offset above connector
 
               let wireElement;
               wireElement = (
@@ -955,26 +957,38 @@ export default function Schematic({
                   {fromComponent?.category?.toLowerCase() !== "splice" && (
                     <>
                       {isFromTop ? (
-                        // top component → trident points UP
-                        <TridentShape
-                          cx={fromX}
-                          cy={fromY - 15}
-                          color={wire.color}
-                          size={10}
-                        />
-                      ) : (
-                        // bottom component → trident points DOWN
-                        <g
-                          transform={`translate(${fromX}, ${fromY + 15
-                            }) scale(1, -1)`}
-                        >
+                        <>
+                          {/* top component → trident points UP */}
                           <TridentShape
-                            cx={0}
-                            cy={0}
+                            cx={fromX}
+                            cy={fromY - 15}
                             color={wire.color}
                             size={10}
                           />
-                        </g>
+
+                          {/* Fuse symbol for Load Center (flipped when on top) */}
+                          {fromComponent?.category?.toLowerCase() === "supply" &&
+                            fromComponent?.label?.toLowerCase().includes("load center") && (
+                              <g transform={`translate(${fromX}, ${fromY - 45}) scale(1, -1)`}>
+                                <FuseSymbol cx={0} cy={0} size={14} color="black" />
+                              </g>
+                            )}
+                        </>
+                      ) : (
+                        <>
+                          {/* bottom component → trident points DOWN */}
+                          <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
+                            <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                          </g>
+
+                          {/* Fuse symbol (normal orientation below bottom trident) */}
+                          {fromComponent?.category?.toLowerCase() === "supply" &&
+                            fromComponent?.label?.toLowerCase().includes("load center") && (
+                              <g transform={`translate(${fromX - 10}, ${fromY + 20})`}>
+                                <FuseSymbol cx={0} cy={2} size={10} color="black" />
+                              </g>
+                            )}
+                        </>
                       )}
                     </>
                   )}
@@ -1024,29 +1038,42 @@ export default function Schematic({
                   {toComponent?.category?.toLowerCase() !== "splice" && (
                     <>
                       {isToTop ? (
-                        // top component → trident points UP
-                        <TridentShape
-                          cx={toX}
-                          cy={toY - 15}
-                          color={wire.color}
-                          size={10}
-                        />
-                      ) : (
-                        // bottom component → trident points DOWN
-                        <g
-                          transform={`translate(${toX}, ${toY + 15
-                            }) scale(1, -1)`}
-                        >
+                        <>
                           <TridentShape
-                            cx={0}
-                            cy={0}
+                            cx={toX}
+                            cy={toY - 15}
                             color={wire.color}
                             size={10}
                           />
-                        </g>
+
+                          {/* Fuse flipped when trident on top */}
+                          {toComponent?.category?.toLowerCase() === "supply" &&
+                            toComponent?.label?.toLowerCase().includes("load center") && (
+                              <g transform={`translate(${toX}, ${toY - 10}) scale(1, -1)`}>
+                                <FuseSymbol cx={0} cy={30} size={14} color="black" />
+                              </g>
+                            )}
+                        </>
+                      ) : (
+                        <>
+                          <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
+                            <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                          </g>
+
+                          {toComponent?.category?.toLowerCase() === "supply" &&
+                            toComponent?.label?.toLowerCase().includes("load center") && (
+                              <FuseSymbol
+                                cx={toX}
+                                cy={toY + 35}
+                                size={14}
+                                color="black"
+                              />
+                            )}
+                        </>
                       )}
                     </>
                   )}
+
                   <text
                     x={fromX + 10}
                     y={fromLabelY}
@@ -1075,7 +1102,6 @@ export default function Schematic({
             })}
           </svg>
         </div>
-
         <PopupComponentDetails
           popupComponent={popupComponent}
           onClose={() => setPopupComponent(null)}
@@ -1096,9 +1122,6 @@ export default function Schematic({
             setPopupConnector(null);
             setSelectedConnector(null);
           }}
-
-
-
           selectedTab={activeTab}
         />
       </div>
