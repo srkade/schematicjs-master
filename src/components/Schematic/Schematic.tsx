@@ -682,34 +682,7 @@ export default function Schematic({
                 borderLeft: "1px solid #ccc",
               }}
             >
-              {/* Main Export Button */}
-              <button
-                onClick={handleExportPDF}
-                disabled={isExporting}
-                title="Export as PDF with all details"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "6px",
-                  border: "1px solid #ccc",
-                  backgroundColor: "#fff",
-                  cursor: isExporting ? "not-allowed" : "pointer",
-                  opacity: isExporting ? 0.6 : 1,
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isExporting)
-                    e.currentTarget.style.backgroundColor = "#f0f0f0";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#fff";
-                }}
-              >
-                <Download size={18} />
-              </button>
+              
 
               {/* Dropdown Menu for Additional Export Options */}
               <div
