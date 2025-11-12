@@ -16,15 +16,46 @@ import MotorSymbol from "../symbols/MotorSymbol";
 import LampSymbol from "../symbols/Lamp";
 import GroundSymbol from "../symbols/GroundSymbol";
 import ResistorSymbol from "../symbols/ResistorSymbol";
-import { ComponentType, ConnectionType, ConnectorType, ConnectionPoint, SchematicData, WireDetailsType, WirePopupType, PopupConnectorType } from "./SchematicTypes";
-import { spaceForWires, connectionPointKey, getConnectionOffset, getIntersection, getConnectionsForComponent, getConnectionsForConnector, getComponentConnectorTupleFromConnectionPoint, calculateCavityCountForConnector } from "./SchematicUtils";
+import {
+  ComponentType,
+  ConnectionType,
+  ConnectorType,
+  ConnectionPoint,
+  SchematicData,
+  WireDetailsType,
+  WirePopupType,
+  PopupConnectorType,
+} from "./SchematicTypes";
+import {
+  spaceForWires,
+  connectionPointKey,
+  getConnectionOffset,
+  getIntersection,
+  getConnectionsForComponent,
+  getConnectionsForConnector,
+  getComponentConnectorTupleFromConnectionPoint,
+  calculateCavityCountForConnector,
+} from "./SchematicUtils";
 import PopupComponentDetails from "../popup/PopupComponentDetails";
 import PopupWireDetails from "../popup/PopupWireDetails";
 import PopupConnectorDetails from "../popup/PopupConnectorDetails";
-import { resetView, handleWheel, zoom, enterFullscreen, exitFullscreen } from "./SchematicViews";
-import { ZoomIn, ZoomOut, RotateCcw, Maximize, Minimize,Download } from "lucide-react";
+import {
+  resetView,
+  handleWheel,
+  zoom,
+  enterFullscreen,
+  exitFullscreen,
+} from "./SchematicViews";
+import {
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Maximize,
+  Minimize,
+  Download,
+} from "lucide-react";
 import { DTC_MAP } from "./tests/DTCs";
-import { schematicExportManager } from './SchematicExport';
+import { schematicExportManager } from "./SchematicExport";
 
 // ...existing code...
 const colors = {
@@ -34,7 +65,7 @@ const colors = {
 export default function Schematic({
   data,
   scale = 1,
-  activeTab
+  activeTab,
 }: {
   data: SchematicData;
   scale?: number;
@@ -74,8 +105,10 @@ export default function Schematic({
   }>({ x: 0, y: 0 });
 
   //state to manange the connector selection
-  const [selectedConnector, setSelectedConnector] = useState<ConnectorType | null>(null);
-  const [popupConnector, setPopupConnector] = useState<PopupConnectorType | null>(null);
+  const [selectedConnector, setSelectedConnector] =
+    useState<ConnectorType | null>(null);
+  const [popupConnector, setPopupConnector] =
+    useState<PopupConnectorType | null>(null);
 
   const handleConnectorClick = (
     e: React.MouseEvent<SVGRectElement, MouseEvent>,
@@ -83,7 +116,7 @@ export default function Schematic({
     comp: ComponentType
   ) => {
     e.stopPropagation();
-    setSelectedComponentIds([]);  // deselect any selected component
+    setSelectedComponentIds([]); // deselect any selected component
     setSelectedWires([]);
     setSelectedConnector(connector);
     const cavityCount = calculateCavityCountForConnector(connector, data);
@@ -122,7 +155,6 @@ export default function Schematic({
       //console.warn(" No DTC details found for this connector:", connectorCode);
       setSelectedDTC(null);
     }
-
   }, [popupConnector]);
 
   useEffect(() => {
@@ -166,10 +198,9 @@ export default function Schematic({
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
 
-
   const handleClosePopup = (e: React.MouseEvent) => {
-    e.stopPropagation();        // prevent outside-click effect
-    setPopupConnector(null);    // close popup
+    e.stopPropagation(); // prevent outside-click effect
+    setPopupConnector(null); // close popup
     setSelectedConnector(null); // clear highlight
   };
 
@@ -414,10 +445,10 @@ export default function Schematic({
     const y = isMasterComponent
       ? padding
       : padding +
-      componentSize.height +
-      spaceForWires(data) +
-      componentSize.height +
-      padding;
+        componentSize.height +
+        spaceForWires(data) +
+        componentSize.height +
+        padding;
     return y;
   }
 
@@ -502,98 +533,101 @@ export default function Schematic({
     cursor: "pointer",
   };
 
-
-
-
   // export function start
 
   const [isExporting, setIsExporting] = useState(false);
-const [exportError, setExportError] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+      setExportError(null);
 
-const handleExportPDF = async () => {
-  try {
-    setIsExporting(true);
-    setExportError(null);
-
-    const svgElement = svgWrapperRef.current?.querySelector('svg') as SVGSVGElement;
-    if (!svgElement) {
-      throw new Error('SVG element not found');
-    }
-
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `schematic-export-${timestamp}.pdf`;
-
-    await schematicExportManager.generatePDF(
-      svgElement,
-      data,
-      connectorConnectionCount,
-      {
-        filename,
-        includeJSON: true,
-        resolution: 300,
-        zoom: 1.5,
+      const svgElement = svgWrapperRef.current?.querySelector(
+        "svg"
+      ) as SVGSVGElement;
+      if (!svgElement) {
+        throw new Error("SVG element not found");
       }
-    );
 
-    console.log('PDF export completed successfully');
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    setExportError(errorMessage);
-    console.error('PDF export failed:', errorMessage);
-  } finally {
-    setIsExporting(false);
-  }
-};
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const filename = `schematic-export-${timestamp}.pdf`;
 
-const handleExportImage = async () => {
-  try {
-    setIsExporting(true);
-    setExportError(null);
+      await schematicExportManager.generatePDF(
+        svgElement,
+        data,
+        connectorConnectionCount,
+        {
+          filename,
+          includeJSON: true,
+          resolution: 300,
+          zoom: 1.5,
+        }
+      );
 
-    const svgElement = svgWrapperRef.current?.querySelector('svg') as SVGSVGElement;
-    if (!svgElement) {
-      throw new Error('SVG element not found');
+      console.log("PDF export completed successfully");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      setExportError(errorMessage);
+      console.error("PDF export failed:", errorMessage);
+    } finally {
+      setIsExporting(false);
     }
+  };
 
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `schematic-export-${timestamp}.png`;
+  const handleExportImage = async () => {
+    try {
+      setIsExporting(true);
+      setExportError(null);
 
-    await schematicExportManager.exportAsImage(svgElement, {
-      filename,
-      resolution: 300,
-    });
+      const svgElement = svgWrapperRef.current?.querySelector(
+        "svg"
+      ) as SVGSVGElement;
+      if (!svgElement) {
+        throw new Error("SVG element not found");
+      }
 
-    console.log('Image export completed successfully');
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    setExportError(errorMessage);
-    console.error('Image export failed:', errorMessage);
-  } finally {
-    setIsExporting(false);
-  }
-};
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const filename = `schematic-export-${timestamp}.png`;
 
-const handleExportJSON = () => {
-  try {
-    setExportError(null);
+      await schematicExportManager.exportAsImage(svgElement, {
+        filename,
+        resolution: 300,
+      });
 
-    const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `schematic-data-${timestamp}.json`;
+      console.log("Image export completed successfully");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      setExportError(errorMessage);
+      console.error("Image export failed:", errorMessage);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
-    schematicExportManager.exportAsJSON(
-      data,
-      connectorConnectionCount,
-      filename
-    );
+  const handleExportJSON = () => {
+    try {
+      setExportError(null);
 
-    console.log('JSON export completed successfully');
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    setExportError(errorMessage);
-    console.error('JSON export failed:', errorMessage);
-  }
-};
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const filename = `schematic-data-${timestamp}.json`;
+
+      schematicExportManager.exportAsJSON(
+        data,
+        connectorConnectionCount,
+        filename
+      );
+
+      console.log("JSON export completed successfully");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      setExportError(errorMessage);
+      console.error("JSON export failed:", errorMessage);
+    }
+  };
   // export function end
 
   return (
@@ -611,13 +645,11 @@ const handleExportJSON = () => {
         maxHeight: isFullscreen ? undefined : "100%", // prevent growing heights
       }}
     >
-
       <div
         style={{
           flex: 1, // Dynamically takes all available vertical space
           overflow: "hidden",
           display: "flex",
-
         }}
       >
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -636,239 +668,270 @@ const handleExportJSON = () => {
               flexShrink: 0,
             }}
           >
-            <button onClick={() => resetView(svgWrapperRef, fitViewBox, setViewBox)} style={buttonStyle}>
+            <button
+              onClick={() => resetView(svgWrapperRef, fitViewBox, setViewBox)}
+              style={buttonStyle}
+            >
               <RotateCcw size={18} />
             </button>
-            <button onClick={() => zoom("in", viewBox, setViewBox)} style={buttonStyle}>
+            <button
+              onClick={() => zoom("in", viewBox, setViewBox)}
+              style={buttonStyle}
+            >
               <ZoomIn size={18} />
             </button>
-            <button onClick={() => zoom("out", viewBox, setViewBox)} style={buttonStyle}>
+            <button
+              onClick={() => zoom("out", viewBox, setViewBox)}
+              style={buttonStyle}
+            >
               <ZoomOut size={18} />
             </button>
             <button
-              onClick={() => (isFullscreen ? exitFullscreen() : enterFullscreen(svgWrapperRef))}
+              onClick={() =>
+                isFullscreen ? exitFullscreen() : enterFullscreen(svgWrapperRef)
+              }
               style={buttonStyle}
             >
               {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
             </button>
 
-            <div style={{
-  display: 'flex',
-  gap: '8px',
-  alignItems: 'center',
-  padding: '0 12px',
-  borderLeft: '1px solid #ccc',
-}}>
-  {/* Main Export Button */}
-  <button
-    onClick={handleExportPDF}
-    disabled={isExporting}
-    title="Export as PDF with all details"
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '40px',
-      height: '40px',
-      borderRadius: '6px',
-      border: '1px solid #ccc',
-      backgroundColor: '#fff',
-      cursor: isExporting ? 'not-allowed' : 'pointer',
-      opacity: isExporting ? 0.6 : 1,
-      transition: 'all 0.2s ease',
-    }}
-    onMouseEnter={(e) => {
-      if (!isExporting) e.currentTarget.style.backgroundColor = '#f0f0f0';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.backgroundColor = '#fff';
-    }}
-  >
-    <Download size={18} />
-  </button>
+            <div
+              style={{
+                display: "flex",
+                gap: "8px",
+                alignItems: "center",
+                padding: "0 12px",
+                borderLeft: "1px solid #ccc",
+              }}
+            >
+              {/* Main Export Button */}
+              <button
+                onClick={handleExportPDF}
+                disabled={isExporting}
+                title="Export as PDF with all details"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  backgroundColor: "#fff",
+                  cursor: isExporting ? "not-allowed" : "pointer",
+                  opacity: isExporting ? 0.6 : 1,
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isExporting)
+                    e.currentTarget.style.backgroundColor = "#f0f0f0";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#fff";
+                }}
+              >
+                <Download size={18} />
+              </button>
 
-  {/* Dropdown Menu for Additional Export Options */}
-  <div style={{
-    position: 'relative',
-    display: 'inline-block',
-  }}>
-    <button
-      onClick={() => {
-        const menu = document.getElementById('export-menu');
-        if (menu) {
-          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        }
-      }}
-      title="More export options"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '40px',
-        height: '40px',
-        borderRadius: '6px',
-        border: '1px solid #ccc',
-        backgroundColor: '#fff',
-        cursor: 'pointer',
-        transition: 'all 0.2s ease',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#f0f0f0';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#fff';
-      }}
-    >
-      ▼
-    </button>
+              {/* Dropdown Menu for Additional Export Options */}
+              <div
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                }}
+              >
+                <button
+                  onClick={() => {
+                    const menu = document.getElementById("export-menu");
+                    if (menu) {
+                      menu.style.display =
+                        menu.style.display === "none" ? "block" : "none";
+                    }
+                  }}
+                  title="More export options"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "6px",
+                    border: "1px solid #ccc",
+                    backgroundColor: "#fff",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f0f0f0";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff";
+                  }}
+                >
+                  ▼
+                </button>
 
-    <div
-      id="export-menu"
-      style={{
-        position: 'absolute',
-        top: '45px',
-        right: 0,
-        backgroundColor: '#fff',
-        border: '1px solid #ccc',
-        borderRadius: '6px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        zIndex: 1000,
-        display: 'none',
-        minWidth: '180px',
-      }}
-    >
-      <button
-        onClick={() => {
-          handleExportPDF();
-          const menu = document.getElementById('export-menu');
-          if (menu) menu.style.display = 'none';
-        }}
-        disabled={isExporting}
-        style={{
-          width: '100%',
-          padding: '12px 16px',
-          textAlign: 'left',
-          border: 'none',
-          backgroundColor: 'transparent',
-          cursor: isExporting ? 'not-allowed' : 'pointer',
-          fontSize: '14px',
-          transition: 'background-color 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          if (!isExporting) e.currentTarget.style.backgroundColor = '#f0f0f0';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-        }}
-      >
-        📄 Export as PDF
-      </button>
-      <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid #eee' }} />
-      <button
-        onClick={() => {
-          handleExportImage();
-          const menu = document.getElementById('export-menu');
-          if (menu) menu.style.display = 'none';
-        }}
-        disabled={isExporting}
-        style={{
-          width: '100%',
-          padding: '12px 16px',
-          textAlign: 'left',
-          border: 'none',
-          backgroundColor: 'transparent',
-          cursor: isExporting ? 'not-allowed' : 'pointer',
-          fontSize: '14px',
-          transition: 'background-color 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          if (!isExporting) e.currentTarget.style.backgroundColor = '#f0f0f0';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-        }}
-      >
-        🖼️ Export as PNG
-      </button>
-      <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid #eee' }} />
-      <button
-        onClick={() => {
-          handleExportJSON();
-          const menu = document.getElementById('export-menu');
-          if (menu) menu.style.display = 'none';
-        }}
-        style={{
-          width: '100%',
-          padding: '12px 16px',
-          textAlign: 'left',
-          border: 'none',
-          backgroundColor: 'transparent',
-          cursor: 'pointer',
-          fontSize: '14px',
-          transition: 'background-color 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#f0f0f0';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-        }}
-      >
-        📋 Export as JSON
-      </button>
-    </div>
-  </div>
+                <div
+                  id="export-menu"
+                  style={{
+                    position: "absolute",
+                    top: "45px",
+                    right: 0,
+                    backgroundColor: "#fff",
+                    border: "1px solid #ccc",
+                    borderRadius: "6px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    zIndex: 1000,
+                    display: "none",
+                    minWidth: "180px",
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      handleExportPDF();
+                      const menu = document.getElementById("export-menu");
+                      if (menu) menu.style.display = "none";
+                    }}
+                    disabled={isExporting}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      textAlign: "left",
+                      border: "none",
+                      backgroundColor: "transparent",
+                      cursor: isExporting ? "not-allowed" : "pointer",
+                      fontSize: "14px",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isExporting)
+                        e.currentTarget.style.backgroundColor = "#f0f0f0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    📄 Export as PDF
+                  </button>
+                  <hr
+                    style={{
+                      margin: "4px 0",
+                      border: "none",
+                      borderTop: "1px solid #eee",
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      handleExportImage();
+                      const menu = document.getElementById("export-menu");
+                      if (menu) menu.style.display = "none";
+                    }}
+                    disabled={isExporting}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      textAlign: "left",
+                      border: "none",
+                      backgroundColor: "transparent",
+                      cursor: isExporting ? "not-allowed" : "pointer",
+                      fontSize: "14px",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isExporting)
+                        e.currentTarget.style.backgroundColor = "#f0f0f0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    🖼️ Export as PNG
+                  </button>
+                  <hr
+                    style={{
+                      margin: "4px 0",
+                      border: "none",
+                      borderTop: "1px solid #eee",
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      handleExportJSON();
+                      const menu = document.getElementById("export-menu");
+                      if (menu) menu.style.display = "none";
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      textAlign: "left",
+                      border: "none",
+                      backgroundColor: "transparent",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f0f0f0";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    📋 Export as JSON
+                  </button>
+                </div>
+              </div>
 
-  {/* Error Message Display */}
-  {exportError && (
-    <div
-      style={{
-        padding: '8px 12px',
-        backgroundColor: '#f8d7da',
-        color: '#721c24',
-        borderRadius: '4px',
-        fontSize: '12px',
-        maxWidth: '300px',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-      }}
-      title={exportError}
-    >
-      ⚠️ {exportError}
-    </div>
-  )}
+              {/* Error Message Display */}
+              {exportError && (
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    backgroundColor: "#f8d7da",
+                    color: "#721c24",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    maxWidth: "300px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  title={exportError}
+                >
+                  ⚠️ {exportError}
+                </div>
+              )}
 
-  {/* Loading Indicator */}
-  {isExporting && (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '0 12px',
-        color: '#666',
-        fontSize: '12px',
-      }}
-    >
-      <div
-        style={{
-          display: 'inline-block',
-          width: '12px',
-          height: '12px',
-          borderRadius: '50%',
-          border: '2px solid #f3f3f3',
-          borderTop: '2px solid #007bff',
-          animation: 'spin 0.8s linear infinite',
-        }}
-      />
-      Exporting...
-    </div>
-  )}
-</div>
-
-
+              {/* Loading Indicator */}
+              {isExporting && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "0 12px",
+                    color: "#666",
+                    fontSize: "12px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "inline-block",
+                      width: "12px",
+                      height: "12px",
+                      borderRadius: "50%",
+                      border: "2px solid #f3f3f3",
+                      borderTop: "2px solid #007bff",
+                      animation: "spin 0.8s linear infinite",
+                    }}
+                  />
+                  Exporting...
+                </div>
+              )}
+            </div>
           </div>
+          <div id="export" style={{ width: "100%", height: "100%" }}>
+
           <svg
             onClick={(e) => {
               // Only deselect if click is on the SVG itself, not on components
@@ -927,7 +990,9 @@ const handleExportJSON = () => {
                 {comp.category?.toLowerCase() === "splice" ? (
                   <g>
                     <circle
-                      cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
+                      cx={
+                        getXForComponent(comp) + getWidthForComponent(comp) / 2
+                      }
                       cy={getYForComponent(comp) - connectorHeight / 2 - 2}
                       r={componentSize.height / 8} // adjust radius as needed
                       fill="white"
@@ -935,7 +1000,9 @@ const handleExportJSON = () => {
                       strokeWidth={1}
                     />
                     <circle
-                      cx={getXForComponent(comp) + getWidthForComponent(comp) / 2}
+                      cx={
+                        getXForComponent(comp) + getWidthForComponent(comp) / 2
+                      }
                       cy={getYForComponent(comp) - connectorHeight / 2 - 2}
                       r={componentSize.height / 10}
                       fill="black"
@@ -963,7 +1030,9 @@ const handleExportJSON = () => {
                               getWidthForComponent(comp) +
                               900,
                             y:
-                              getYForComponent(comp) + componentSize.height + 100,
+                              getYForComponent(comp) +
+                              componentSize.height +
+                              100,
                           });
                         }
                       }}
@@ -975,7 +1044,9 @@ const handleExportJSON = () => {
                         height={componentSize.height}
                         fill="lightblue"
                         stroke="black"
-                        strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                        strokeDasharray={
+                          componentIndex !== 0 ? "6,4" : undefined
+                        }
                         onClick={() => {
                           console.log("Rectangle clicked!", comp.id);
                         }}
@@ -985,7 +1056,8 @@ const handleExportJSON = () => {
                         <rect
                           x={getXForComponent(comp)}
                           y={
-                            getYForComponent(comp) < fitViewBox.y + fitViewBox.h / 2
+                            getYForComponent(comp) <
+                            fitViewBox.y + fitViewBox.h / 2
                               ? getYForComponent(comp) - 60
                               : getYForComponent(comp) + 60
                           }
@@ -1045,18 +1117,34 @@ const handleExportJSON = () => {
                       )}
                       {comp.category?.toLowerCase() === "motor" && (
                         <MotorSymbol
-                          cx={getXForComponent(comp) + getWidthForComponent(comp) / 5} // center of rectangle
-                          cy={getYForComponent(comp) + componentSize.height / 2}       // center of rectangle
-                          size={Math.min(getWidthForComponent(comp), componentSize.height) * 0.5} // scale to fit rectangle
+                          cx={
+                            getXForComponent(comp) +
+                            getWidthForComponent(comp) / 5
+                          } // center of rectangle
+                          cy={getYForComponent(comp) + componentSize.height / 2} // center of rectangle
+                          size={
+                            Math.min(
+                              getWidthForComponent(comp),
+                              componentSize.height
+                            ) * 0.5
+                          } // scale to fit rectangle
                           color="black"
                           fill="#B0E0E6"
                         />
                       )}
                       {comp.category?.toLowerCase() === "lamp" && (
                         <LampSymbol
-                          cx={getXForComponent(comp) + getWidthForComponent(comp) / 5}
+                          cx={
+                            getXForComponent(comp) +
+                            getWidthForComponent(comp) / 5
+                          }
                           cy={getYForComponent(comp) + componentSize.height / 2}
-                          size={Math.min(getWidthForComponent(comp), componentSize.height) * 0.5}
+                          size={
+                            Math.min(
+                              getWidthForComponent(comp),
+                              componentSize.height
+                            ) * 0.5
+                          }
                           color="black"
                         />
                       )}
@@ -1078,8 +1166,6 @@ const handleExportJSON = () => {
                           height={40}
                         />
                       )}
-
-
                     </g>
                   )
                 )}
@@ -1093,10 +1179,10 @@ const handleExportJSON = () => {
                   y={
                     getYForComponent(comp) +
                     (getYForComponent(comp) + componentSize.height / 2 <
-                      fitViewBox.y + fitViewBox.h / 2
+                    fitViewBox.y + fitViewBox.h / 2
                       ? -componentSize.height / 2 // above component
                       : componentSize.height +
-                      (comp.category?.toLowerCase() === "splice" ? -30 : 30))
+                        (comp.category?.toLowerCase() === "splice" ? -30 : 30))
                   }
                   textAnchor="middle"
                   fontSize="20"
@@ -1113,9 +1199,15 @@ const handleExportJSON = () => {
                         y={getYForConnector(conn, comp)}
                         width={getWidthForConnector(conn, comp)}
                         height={connectorHeight}
-                        fill={selectedConnector?.id === conn.id ? "#3390FF" : "lightgreen"} // highlight selected
+                        fill={
+                          selectedConnector?.id === conn.id
+                            ? "#3390FF"
+                            : "lightgreen"
+                        } // highlight selected
                         stroke="black"
-                        strokeDasharray={componentIndex !== 0 ? "6,4" : undefined}
+                        strokeDasharray={
+                          componentIndex !== 0 ? "6,4" : undefined
+                        }
                         onClick={(e) => handleConnectorClick(e, conn, comp)}
                         style={{ cursor: "pointer" }}
                       />
@@ -1128,7 +1220,8 @@ const handleExportJSON = () => {
                       x={
                         getXForConnector(conn, comp) -
                         (comp.category?.toLowerCase() === "splice" ? -10 : 1) // reduce gap if splice
-                      } y={getYForConnector(conn, comp) + 13}
+                      }
+                      y={getYForConnector(conn, comp) + 13}
                       textAnchor="end" //change to move text at the left
                       dominantBaseline="middle" //change to take text left at middle
                       fontSize="10"
@@ -1146,13 +1239,17 @@ const handleExportJSON = () => {
               const fromConn = wire.from;
               const toConn = wire.to;
 
-              const fromData =
-                getComponentConnectorTupleFromConnectionPoint(fromConn, data);
+              const fromData = getComponentConnectorTupleFromConnectionPoint(
+                fromConn,
+                data
+              );
               const fromComponent = fromData[0];
               const from = fromData[1];
 
-              const toData =
-                getComponentConnectorTupleFromConnectionPoint(toConn, data);
+              const toData = getComponentConnectorTupleFromConnectionPoint(
+                toConn,
+                data
+              );
               const toComponent = toData[0];
               const to = toData[1];
 
@@ -1175,15 +1272,17 @@ const handleExportJSON = () => {
                   from,
                   fromComponent!
                 );
-                const fromConnectorCount = connectorConnectionCount[from.id] || 1;
-                const connIndex = getConnectionsForConnector(from, data).findIndex(
-                  (c) => c === wire
-                );
+                const fromConnectorCount =
+                  connectorConnectionCount[from.id] || 1;
+                const connIndex = getConnectionsForConnector(
+                  from,
+                  data
+                ).findIndex((c) => c === wire);
                 const fromConnectorOffset =
                   fromConnectorCount === 1
                     ? fromConnectorWidth / 2
                     : (fromConnectorWidth / (fromConnectorCount + 1)) *
-                    (connIndex + 1);
+                      (connIndex + 1);
 
                 fromX =
                   fromComponent?.shape === "circle"
@@ -1210,14 +1309,15 @@ const handleExportJSON = () => {
                 const toConnectorX = getXForConnector(to, toComponent!);
                 const toConnectorWidth = getWidthForConnector(to, toComponent!);
                 const toConnectorCount = connectorConnectionCount[to.id] || 1;
-                const connIndexTo = getConnectionsForConnector(to, data).findIndex(
-                  (c) => c === wire
-                );
+                const connIndexTo = getConnectionsForConnector(
+                  to,
+                  data
+                ).findIndex((c) => c === wire);
                 const toConnectorOffset =
                   toConnectorCount === 1
                     ? toConnectorWidth / 2
                     : (toConnectorWidth / (toConnectorCount + 1)) *
-                    (connIndexTo + 1);
+                      (connIndexTo + 1);
 
                 toX =
                   toComponent?.shape === "circle"
@@ -1231,7 +1331,10 @@ const handleExportJSON = () => {
                   : getYForConnector(to, toComponent!);
               }
 
-              connectionPoints[connectionPointKey(wire.to)] = { x: toX, y: toY };
+              connectionPoints[connectionPointKey(wire.to)] = {
+                x: toX,
+                y: toY,
+              };
 
               let intermediateY;
               if (isFromMasterComponent && isToMasterComponent) {
@@ -1250,7 +1353,6 @@ const handleExportJSON = () => {
                 intermediateY = min + offset;
               }
 
-
               // Calculate the positions where the tridents should be
               const fromTridentY = fromY < toY ? intermediateY : fromY - 10; // lift if needed
               const toTridentY = fromY < toY ? toY : intermediateY + 10;
@@ -1260,7 +1362,9 @@ const handleExportJSON = () => {
 
               let fromLabelY = isFromTop ? fromY - 5 : fromY + 15;
               let toLabelY = isToTop ? toY - 5 : toY + 15;
-              const fuseX = getXForConnector(from, fromComponent!) + getWidthForConnector(from, fromComponent!) / 2;
+              const fuseX =
+                getXForConnector(from, fromComponent!) +
+                getWidthForConnector(from, fromComponent!) / 2;
               const fuseY = getYForConnector(from, fromComponent!) - 10; // small offset above connector
 
               let wireElement;
@@ -1279,25 +1383,58 @@ const handleExportJSON = () => {
                           />
 
                           {/* Fuse symbol for Load Center (flipped when on top) */}
-                          {fromComponent?.category?.toLowerCase() === "supply" &&
-                            fromComponent?.label?.toLowerCase().includes("load center") && (
-                              <g transform={`translate(${fromX}, ${fromY - 45}) scale(1, -1)`}>
-                                <FuseSymbol cx={0} cy={0} size={14} color="black" />
+                          {fromComponent?.category?.toLowerCase() ===
+                            "supply" &&
+                            fromComponent?.label
+                              ?.toLowerCase()
+                              .includes("load center") && (
+                              <g
+                                transform={`translate(${fromX}, ${
+                                  fromY - 45
+                                }) scale(1, -1)`}
+                              >
+                                <FuseSymbol
+                                  cx={0}
+                                  cy={0}
+                                  size={14}
+                                  color="black"
+                                />
                               </g>
                             )}
                         </>
                       ) : (
                         <>
                           {/* bottom component → trident points DOWN */}
-                          <g transform={`translate(${fromX}, ${fromY + 15}) scale(1, -1)`}>
-                            <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                          <g
+                            transform={`translate(${fromX}, ${
+                              fromY + 15
+                            }) scale(1, -1)`}
+                          >
+                            <TridentShape
+                              cx={0}
+                              cy={0}
+                              color={wire.color}
+                              size={10}
+                            />
                           </g>
 
                           {/* Fuse symbol (normal orientation below bottom trident) */}
-                          {fromComponent?.category?.toLowerCase() === "supply" &&
-                            fromComponent?.label?.toLowerCase().includes("load center") && (
-                              <g transform={`translate(${fromX - 10}, ${fromY + 20})`}>
-                                <FuseSymbol cx={0} cy={2} size={10} color="black" />
+                          {fromComponent?.category?.toLowerCase() ===
+                            "supply" &&
+                            fromComponent?.label
+                              ?.toLowerCase()
+                              .includes("load center") && (
+                              <g
+                                transform={`translate(${fromX - 10}, ${
+                                  fromY + 20
+                                })`}
+                              >
+                                <FuseSymbol
+                                  cx={0}
+                                  cy={2}
+                                  size={10}
+                                  color="black"
+                                />
                               </g>
                             )}
                         </>
@@ -1360,20 +1497,42 @@ const handleExportJSON = () => {
 
                           {/* Fuse flipped when trident on top */}
                           {toComponent?.category?.toLowerCase() === "supply" &&
-                            toComponent?.label?.toLowerCase().includes("load center") && (
-                              <g transform={`translate(${toX}, ${toY - 10}) scale(1, -1)`}>
-                                <FuseSymbol cx={0} cy={30} size={14} color="black" />
+                            toComponent?.label
+                              ?.toLowerCase()
+                              .includes("load center") && (
+                              <g
+                                transform={`translate(${toX}, ${
+                                  toY - 10
+                                }) scale(1, -1)`}
+                              >
+                                <FuseSymbol
+                                  cx={0}
+                                  cy={30}
+                                  size={14}
+                                  color="black"
+                                />
                               </g>
                             )}
                         </>
                       ) : (
                         <>
-                          <g transform={`translate(${toX}, ${toY + 15}) scale(1, -1)`}>
-                            <TridentShape cx={0} cy={0} color={wire.color} size={10} />
+                          <g
+                            transform={`translate(${toX}, ${
+                              toY + 15
+                            }) scale(1, -1)`}
+                          >
+                            <TridentShape
+                              cx={0}
+                              cy={0}
+                              color={wire.color}
+                              size={10}
+                            />
                           </g>
 
                           {toComponent?.category?.toLowerCase() === "supply" &&
-                            toComponent?.label?.toLowerCase().includes("load center") && (
+                            toComponent?.label
+                              ?.toLowerCase()
+                              .includes("load center") && (
                               <FuseSymbol
                                 cx={toX}
                                 cy={toY + 35}
@@ -1413,6 +1572,7 @@ const handleExportJSON = () => {
               return <g key={i}>{wireElement}</g>;
             })}
           </svg>
+          </div>
         </div>
         <PopupComponentDetails
           popupComponent={popupComponent}
@@ -1448,8 +1608,6 @@ const spinnerStyle = `
   }
 `;
 
-const style = document.createElement('style');
+const style = document.createElement("style");
 style.textContent = spinnerStyle;
 document.head.appendChild(style);
-
-

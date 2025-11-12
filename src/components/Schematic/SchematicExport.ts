@@ -1,35 +1,14 @@
-/**
- * SchematicExport.ts - CORRECTED VERSION
- * Module for capturing and exporting schematic diagrams as PDF
- * Includes high-resolution image capture, component details, and JSON data integration
- * 
- * FIXES APPLIED:
- * 1. SVGSVGElement → HTMLElement type casting for html2canvas
- * 2. Optional chaining with nullish coalescing for undefined properties
- * 3. Import jsPDF with autoTable plugin
- * 4. Type-safe data extraction with fallbacks
- */
 
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import html2canvas from "html2canvas";
-import { SchematicData, ComponentType, ConnectionType, ConnectorType, WireDetailsType } from "./SchematicTypes";
+import { SchematicData, ComponentType, ConnectionType, ConnectorType } from "./SchematicTypes";
 
 export interface ExportOptions {
   filename?: string;
   includeJSON?: boolean;
   resolution?: number;
   zoom?: number;
-}
-
-export interface SchematicExportData {
-  projectTitle: string;
-  schematicImage: string;
-  components: ExportedComponentDetail[];
-  wires: ExportedWireDetail[];
-  connectors: ExportedConnectorDetail[];
-  jsonData: any;
-  metadata: ExportMetadata;
 }
 
 export interface ExportedComponentDetail {
@@ -100,66 +79,65 @@ export interface ExportMetadata {
 
 class SchematicExportManager {
   /**
-   * Capture SVG element as high-resolution canvas image
+   * Capture the #export div directly as image
    */
-  private async captureSVGAsImage(
-    svgElement: SVGSVGElement,
-    options: ExportOptions = {}
-  ): Promise<string> {
-    const { resolution = 300, zoom = 1 } = options;
-
+  private async captureSchematicDiv(resolution: number = 300, zoom: number = 1): Promise<string> {
     try {
-      // Create a container for rendering
-      const container = document.createElement("div");
-      container.style.position = "absolute";
-      container.style.left = "-9999px";
-      container.style.top = "-9999px";
+      console.log("Capturing schematic from #export div...");
 
-      // Clone the SVG for manipulation
-      const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+      // Get the export div
+      const exportDiv = document.getElementById("export");
+      if (!exportDiv) {
+        throw new Error("Export div not found. Make sure your SVG is wrapped in <div id='export'>");
+      }
 
-      // Calculate dimensions based on resolution
-      const bbox = svgElement.getBBox();
-      const scale = resolution / 96; // 96 DPI to resolution conversion
-      const width = bbox.width * scale * zoom;
-      const height = bbox.height * scale * zoom;
+      // Wait for rendering to complete
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-      svgClone.setAttribute("width", width.toString());
-      svgClone.setAttribute("height", height.toString());
+      // Calculate scale for high resolution
+      const scale = (resolution / 96) * zoom;
 
-      container.appendChild(svgClone);
-      document.body.appendChild(container);
+      console.log(`Rendering at ${resolution} DPI with ${zoom}x zoom (scale: ${scale})...`);
 
-      // Convert to canvas with higher resolution
-      // Cast SVGElement to HTMLElement for html2canvas compatibility
-      const canvas = await html2canvas(svgClone as unknown as HTMLElement, {
-        scale: scale * zoom,
+      // Capture the div with html2canvas
+      const canvas = await html2canvas(exportDiv, {
+        scale: scale,
         useCORS: true,
+        allowTaint: true,
         logging: false,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#e5e5e5", // Match your SVG background
+        imageTimeout: 0,
+        removeContainer: true,
       });
 
-      // Convert canvas to base64 PNG
-      const imageData = canvas.toDataURL("image/png");
+      // Validate canvas
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error("Canvas rendering produced invalid dimensions");
+      }
 
-      // Cleanup
-      document.body.removeChild(container);
+      // Convert to PNG
+      const imageData = canvas.toDataURL("image/png", 1.0);
 
+      if (!imageData || imageData.length < 100) {
+        throw new Error("Failed to generate valid image data");
+      }
+
+      console.log("✓ Schematic captured successfully!");
       return imageData;
     } catch (error) {
-      console.error("Error capturing SVG as image:", error);
-      throw new Error("Failed to capture schematic image");
+      console.error("Error capturing schematic:", error);
+      throw error;
     }
   }
 
   /**
-   * Extract component details for export
+   * Extract component details
    */
   private extractComponentDetails(
     data: SchematicData,
     connectorConnectionCount: { [id: string]: number }
   ): ExportedComponentDetail[] {
-    return data.components.map((comp) => ({
+    return (data.components ?? []).map((comp) => ({
       id: comp.id ?? "",
       label: comp.label ?? "",
       category: comp.category ?? "",
@@ -178,7 +156,7 @@ class SchematicExportManager {
   }
 
   /**
-   * Extract wire details for export
+   * Extract wire details
    */
   private extractWireDetails(data: SchematicData): ExportedWireDetail[] {
     return (data.connections ?? []).map((wire) => {
@@ -212,7 +190,7 @@ class SchematicExportManager {
   }
 
   /**
-   * Extract connector details for export
+   * Extract connector details
    */
   private extractConnectorDetails(data: SchematicData): ExportedConnectorDetail[] {
     const connectorDetails: ExportedConnectorDetail[] = [];
@@ -245,12 +223,9 @@ class SchematicExportManager {
   }
 
   /**
-   * Calculate cavity count for connector
+   * Calculate cavity count
    */
-  private calculateCavityCount(
-    connector: ConnectorType,
-    data: SchematicData
-  ): number {
+  private calculateCavityCount(connector: ConnectorType, data: SchematicData): number {
     const connections = (data.connections ?? []).filter(
       (conn) =>
         conn.from?.connectorId === connector.id ||
@@ -260,10 +235,10 @@ class SchematicExportManager {
   }
 
   /**
-   * Generate PDF from schematic data
+   * Generate PDF from schematic
    */
   public async generatePDF(
-    svgElement: SVGSVGElement,
+    svgElement: SVGSVGElement | null, // Not used, kept for compatibility
     data: SchematicData,
     connectorConnectionCount: { [id: string]: number },
     options: ExportOptions = {}
@@ -276,17 +251,14 @@ class SchematicExportManager {
     } = options;
 
     try {
-      // Capture schematic image
-      const schematicImage = await this.captureSVGAsImage(svgElement, {
-        resolution,
-        zoom,
-      });
+      console.log("=== Starting PDF Export ===");
+
+      // Capture schematic from #export div
+      const schematicImage = await this.captureSchematicDiv(resolution, zoom);
 
       // Extract all data
-      const components = this.extractComponentDetails(
-        data,
-        connectorConnectionCount
-      );
+      console.log("Extracting component data...");
+      const components = this.extractComponentDetails(data, connectorConnectionCount);
       const wires = this.extractWireDetails(data);
       const connectors = this.extractConnectorDetails(data);
 
@@ -299,7 +271,9 @@ class SchematicExportManager {
         totalConnectors: connectors.length,
       };
 
-      // Create PDF - Type assertion for autoTable
+      console.log("Creating PDF document...");
+
+      // Create PDF
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
@@ -314,11 +288,13 @@ class SchematicExportManager {
 
       // Title
       pdf.setFontSize(20);
+      pdf.setFont(undefined, "bold");
       pdf.text("ELECTRICAL SCHEMATIC DIAGRAM", margin, yPosition);
       yPosition += 10;
 
       // Metadata
       pdf.setFontSize(10);
+      pdf.setFont(undefined, "normal");
       pdf.text(
         `Export Date: ${metadata.exportDate} | Time: ${metadata.exportTime}`,
         margin,
@@ -336,144 +312,121 @@ class SchematicExportManager {
       const imgWidth = pageWidth - 2 * margin;
       const imgHeight = (imgWidth / 16) * 9; // 16:9 aspect ratio
 
-      pdf.addImage(
-        schematicImage,
-        "PNG",
-        margin,
-        yPosition,
-        imgWidth,
-        imgHeight
-      );
+      try {
+        pdf.addImage(schematicImage, "PNG", margin, yPosition, imgWidth, imgHeight);
+        console.log("✓ Schematic image added to PDF");
+      } catch (imgError) {
+        console.warn("Warning: Could not add image to PDF:", imgError);
+      }
 
       // Add new page for tables
       pdf.addPage();
       yPosition = margin;
 
-      // Components Table
-      pdf.setFontSize(14);
-      pdf.text("COMPONENT DETAILS", margin, yPosition);
-      yPosition += 8;
+      // Check if autoTable is available
+      if (typeof pdf.autoTable === "function") {
+        // Components Table
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, "bold");
+        pdf.text("COMPONENT DETAILS", margin, yPosition);
+        yPosition += 8;
 
-      const componentRows = components.map((comp) => [
-        comp.id,
-        comp.label,
-        comp.category,
-        comp.manufacturer,
-        comp.partNumber,
-        comp.harnessName,
-        comp.connectors.map((c) => c.label).join(", "),
-      ]);
+        const componentRows = components.map((comp) => [
+          comp.id,
+          comp.label,
+          comp.category,
+          comp.manufacturer,
+          comp.partNumber,
+          comp.harnessName,
+          comp.connectors.map((c) => c.label).join(", "),
+        ]);
 
-      pdf.autoTable({
-        startY: yPosition,
-        head: [
-          [
-            "ID",
-            "Label",
-            "Category",
-            "Manufacturer",
-            "Part #",
-            "Harness",
-            "Connectors",
-          ],
-        ],
-        body: componentRows,
-        margin: margin,
-        fontSize: 8,
-        theme: "grid",
-        styles: { cellPadding: 2 },
-        headStyles: { fillColor: [0, 123, 255], textColor: [255, 255, 255] },
-      });
+        pdf.autoTable({
+          startY: yPosition,
+          head: [["ID", "Label", "Category", "Manufacturer", "Part #", "Harness", "Connectors"]],
+          body: componentRows,
+          margin: margin,
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [0, 123, 255], textColor: [255, 255, 255], fontStyle: "bold" },
+          theme: "grid",
+        });
 
-      yPosition = pdf.lastAutoTable.finalY + 10;
+        yPosition = pdf.lastAutoTable.finalY + 10;
 
-      // Wires Table (on new page if needed)
-      if (yPosition > pageHeight - 50) {
-        pdf.addPage();
-        yPosition = margin;
+        // Wires Table
+        if (yPosition > pageHeight - 50) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+
+        pdf.setFontSize(14);
+        pdf.text("WIRE CONNECTIONS", margin, yPosition);
+        yPosition += 8;
+
+        const wireRows = wires.map((wire) => [
+          wire.circuitNumber,
+          wire.wireColor,
+          wire.wireSize.toString(),
+          wire.wireLength.toString(),
+          wire.from.component,
+          wire.to.component,
+          wire.from.cavity,
+          wire.to.cavity,
+          wire.wireType,
+        ]);
+
+        pdf.autoTable({
+          startY: yPosition,
+          head: [["Circuit", "Color", "Size", "Length", "From", "To", "From Cavity", "To Cavity", "Type"]],
+          body: wireRows,
+          margin: margin,
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [40, 167, 69], textColor: [255, 255, 255], fontStyle: "bold" },
+          theme: "grid",
+        });
+
+        yPosition = pdf.lastAutoTable.finalY + 10;
+
+        // Connectors Table
+        if (yPosition > pageHeight - 50) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+
+        pdf.setFontSize(14);
+        pdf.text("CONNECTOR DETAILS", margin, yPosition);
+        yPosition += 8;
+
+        const connectorRows = connectors.map((conn) => [
+          conn.componentCode,
+          conn.connectorCode,
+          conn.partNumber,
+          conn.gender,
+          conn.cavityCount.toString(),
+          conn.manufacturer,
+          conn.harnessName,
+        ]);
+
+        pdf.autoTable({
+          startY: yPosition,
+          head: [["Component", "Connector", "Part #", "Gender", "Cavities", "Manufacturer", "Harness"]],
+          body: connectorRows,
+          margin: margin,
+          styles: { fontSize: 8, cellPadding: 2 },
+          headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0], fontStyle: "bold" },
+          theme: "grid",
+        });
+
+        console.log("✓ Tables added to PDF");
+      } else {
+        console.warn("autoTable not available, adding text summary instead");
+        pdf.setFontSize(12);
+        pdf.text(`Total Components: ${components.length}`, margin, yPosition);
+        yPosition += 7;
+        pdf.text(`Total Wires: ${wires.length}`, margin, yPosition);
+        yPosition += 7;
+        pdf.text(`Total Connectors: ${connectors.length}`, margin, yPosition);
       }
-
-      pdf.setFontSize(14);
-      pdf.text("WIRE CONNECTIONS", margin, yPosition);
-      yPosition += 8;
-
-      const wireRows = wires.map((wire) => [
-        wire.circuitNumber,
-        wire.wireColor,
-        wire.wireSize.toString(),
-        wire.wireLength.toString(),
-        wire.from.component,
-        wire.to.component,
-        wire.from.cavity,
-        wire.to.cavity,
-        wire.wireType,
-      ]);
-
-      pdf.autoTable({
-        startY: yPosition,
-        head: [
-          [
-            "Circuit",
-            "Color",
-            "Size",
-            "Length",
-            "From",
-            "To",
-            "From Cavity",
-            "To Cavity",
-            "Type",
-          ],
-        ],
-        body: wireRows,
-        margin: margin,
-        fontSize: 8,
-        theme: "grid",
-        styles: { cellPadding: 2 },
-        headStyles: { fillColor: [40, 167, 69], textColor: [255, 255, 255] },
-      });
-
-      yPosition = pdf.lastAutoTable.finalY + 10;
-
-      // Connectors Table (on new page if needed)
-      if (yPosition > pageHeight - 50) {
-        pdf.addPage();
-        yPosition = margin;
-      }
-
-      pdf.setFontSize(14);
-      pdf.text("CONNECTOR DETAILS", margin, yPosition);
-      yPosition += 8;
-
-      const connectorRows = connectors.map((conn) => [
-        conn.componentCode,
-        conn.connectorCode,
-        conn.partNumber,
-        conn.gender,
-        conn.cavityCount.toString(),
-        conn.manufacturer,
-        conn.harnessName,
-      ]);
-
-      pdf.autoTable({
-        startY: yPosition,
-        head: [
-          [
-            "Component",
-            "Connector",
-            "Part #",
-            "Gender",
-            "Cavities",
-            "Manufacturer",
-            "Harness",
-          ],
-        ],
-        body: connectorRows,
-        margin: margin,
-        fontSize: 8,
-        theme: "grid",
-        styles: { cellPadding: 2 },
-        headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] },
-      });
 
       // Add JSON data if requested
       if (includeJSON) {
@@ -481,37 +434,41 @@ class SchematicExportManager {
         yPosition = margin;
 
         pdf.setFontSize(14);
+        pdf.setFont(undefined, "bold");
         pdf.text("JSON DATA EXPORT", margin, yPosition);
         yPosition += 8;
 
-        pdf.setFontSize(9);
+        pdf.setFontSize(8);
+        pdf.setFont(undefined, "normal");
         const jsonText = JSON.stringify(data, null, 2);
         const splitText = pdf.splitTextToSize(jsonText, pageWidth - 2 * margin);
-        pdf.text(splitText, margin, yPosition, { maxWidth: pageWidth - 2 * margin });
+        pdf.text(splitText, margin, yPosition);
+        
+        console.log("✓ JSON data added to PDF");
       }
 
       // Save PDF
       pdf.save(filename);
-      console.log(`PDF exported successfully: ${filename}`);
+      console.log(`✓✓✓ PDF exported successfully: ${filename}`);
+      console.log("=== Export Complete ===");
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("❌ Error generating PDF:", error);
       throw error;
     }
   }
 
   /**
-   * Export schematic as high-resolution PNG image
+   * Export as PNG image
    */
   public async exportAsImage(
-    svgElement: SVGSVGElement,
+    svgElement: SVGSVGElement | null, // Not used, kept for compatibility
     options: ExportOptions = {}
   ): Promise<void> {
     const { filename = "schematic-export.png", resolution = 300 } = options;
 
     try {
-      const imageData = await this.captureSVGAsImage(svgElement, { resolution });
+      const imageData = await this.captureSchematicDiv(resolution);
 
-      // Create download link
       const link = document.createElement("a");
       link.href = imageData;
       link.download = filename;
@@ -519,7 +476,7 @@ class SchematicExportManager {
       link.click();
       document.body.removeChild(link);
 
-      console.log(`Image exported successfully: ${filename}`);
+      console.log(`✓ Image exported successfully: ${filename}`);
     } catch (error) {
       console.error("Error exporting image:", error);
       throw error;
@@ -527,7 +484,7 @@ class SchematicExportManager {
   }
 
   /**
-   * Export data as JSON file
+   * Export as JSON
    */
   public exportAsJSON(
     data: SchematicData,
@@ -535,10 +492,7 @@ class SchematicExportManager {
     filename: string = "schematic-data.json"
   ): void {
     try {
-      const components = this.extractComponentDetails(
-        data,
-        connectorConnectionCount
-      );
+      const components = this.extractComponentDetails(data, connectorConnectionCount);
       const wires = this.extractWireDetails(data);
       const connectors = this.extractConnectorDetails(data);
 
@@ -565,7 +519,7 @@ class SchematicExportManager {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
 
-      console.log(`JSON exported successfully: ${filename}`);
+      console.log(`✓ JSON exported successfully: ${filename}`);
     } catch (error) {
       console.error("Error exporting JSON:", error);
       throw error;
