@@ -1,6 +1,6 @@
 
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import "jspdf-autotable";  // registers the plugin automatically
 import html2canvas from "html2canvas";
 import { SchematicData, ComponentType, ConnectionType, ConnectorType } from "./SchematicTypes";
 
@@ -339,17 +339,19 @@ class SchematicExportManager {
           comp.connectors.map((c) => c.label).join(", "),
         ]);
 
-        pdf.autoTable({
+        (pdf as any).autoTable({
           startY: yPosition,
           head: [["ID", "Label", "Category", "Manufacturer", "Part #", "Harness", "Connectors"]],
           body: componentRows,
-          margin: margin,
+          margin: { left: margin },
           styles: { fontSize: 8, cellPadding: 2 },
           headStyles: { fillColor: [0, 123, 255], textColor: [255, 255, 255], fontStyle: "bold" },
           theme: "grid",
         });
 
-        yPosition = pdf.lastAutoTable.finalY + 10;
+        yPosition = (pdf as any).lastAutoTable.finalY + 10;
+
+
 
         // Wires Table
         if (yPosition > pageHeight - 50) {
@@ -373,18 +375,17 @@ class SchematicExportManager {
           wire.wireType,
         ]);
 
-        pdf.autoTable({
+        (pdf as any).autoTable({
           startY: yPosition,
           head: [["Circuit", "Color", "Size", "Length", "From", "To", "From Cavity", "To Cavity", "Type"]],
           body: wireRows,
-          margin: margin,
+          margin: { left: margin },
           styles: { fontSize: 8, cellPadding: 2 },
           headStyles: { fillColor: [40, 167, 69], textColor: [255, 255, 255], fontStyle: "bold" },
           theme: "grid",
         });
 
-        yPosition = pdf.lastAutoTable.finalY + 10;
-
+        yPosition = (pdf as any).lastAutoTable.finalY + 10;
         // Connectors Table
         if (yPosition > pageHeight - 50) {
           pdf.addPage();
@@ -405,15 +406,17 @@ class SchematicExportManager {
           conn.harnessName,
         ]);
 
-        pdf.autoTable({
+        (pdf as any).autoTable({
           startY: yPosition,
           head: [["Component", "Connector", "Part #", "Gender", "Cavities", "Manufacturer", "Harness"]],
           body: connectorRows,
-          margin: margin,
+          margin: { left: margin },
           styles: { fontSize: 8, cellPadding: 2 },
           headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0], fontStyle: "bold" },
           theme: "grid",
         });
+
+        yPosition = (pdf as any).lastAutoTable.finalY + 10;
 
         console.log("✓ Tables added to PDF");
       } else {
@@ -427,7 +430,7 @@ class SchematicExportManager {
       }
 
       // Add JSON data if requested
-     
+
       // Save PDF
       pdf.save(filename);
       console.log(`✓✓✓ PDF exported successfully: ${filename}`);
