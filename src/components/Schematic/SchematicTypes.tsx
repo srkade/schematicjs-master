@@ -139,3 +139,75 @@ export type PopupConnectorType = {
   termPartNo?: string;
   sealPartNo?: string;
 };
+
+export interface ExportOptions {
+  filename?: string;
+  resolution?: number;
+  zoom?: number;
+}
+
+export interface ExportedComponentDetail {
+  id: string;
+  label: string;
+  category: string;
+  engineeringName: string;
+  manufacturer: string;
+  partNumber: string;
+  harnessName: string;
+  connectorPartNumber: string;
+  gender: string;
+  connectors: ConnectorMapping[];
+}
+
+export interface ExportedWireDetail {
+  circuitNumber: string;
+  wireColor: string;
+  wireSize: number;
+  wireLength: number;
+  wireType: string;
+  from: {
+    component: string;
+    connector: string;
+    cavity: string;
+    partNumber: string;
+  };
+  to: {
+    component: string;
+    connector: string;
+    cavity: string;
+    partNumber: string;
+  };
+  twistId: string;
+  shieldId: string;
+  mark: string;
+}
+
+export interface ExportedConnectorDetail {
+  componentCode: string;
+  connectorCode: string;
+  label: string;
+  harnessName: string;
+  partNumber: string;
+  gender: string;
+  cavityCount: number;
+  color: string;
+  connectorType: string;
+  manufacturer: string;
+  terminalPartNumber: string;
+  sealPartNumber: string;
+}
+
+export interface ConnectorMapping {
+  id: string;
+  label: string;
+  connectionCount: number;
+}
+
+export interface ExportMetadata {
+  exportDate: string;
+  exportTime: string;
+  zoomLevel: number;
+  totalComponents: number;
+  totalWires: number;
+  totalConnectors: number;
+}

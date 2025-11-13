@@ -2,133 +2,82 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";  // registers the plugin automatically
 import html2canvas from "html2canvas";
-import { SchematicData, ComponentType, ConnectionType, ConnectorType } from "./SchematicTypes";
-
-export interface ExportOptions {
-  filename?: string;
-  resolution?: number;
-  zoom?: number;
-}
-
-export interface ExportedComponentDetail {
-  id: string;
-  label: string;
-  category: string;
-  engineeringName: string;
-  manufacturer: string;
-  partNumber: string;
-  harnessName: string;
-  connectorPartNumber: string;
-  gender: string;
-  connectors: ConnectorMapping[];
-}
-
-export interface ExportedWireDetail {
-  circuitNumber: string;
-  wireColor: string;
-  wireSize: number;
-  wireLength: number;
-  wireType: string;
-  from: {
-    component: string;
-    connector: string;
-    cavity: string;
-    partNumber: string;
-  };
-  to: {
-    component: string;
-    connector: string;
-    cavity: string;
-    partNumber: string;
-  };
-  twistId: string;
-  shieldId: string;
-  mark: string;
-}
-
-export interface ExportedConnectorDetail {
-  componentCode: string;
-  connectorCode: string;
-  label: string;
-  harnessName: string;
-  partNumber: string;
-  gender: string;
-  cavityCount: number;
-  color: string;
-  connectorType: string;
-  manufacturer: string;
-  terminalPartNumber: string;
-  sealPartNumber: string;
-}
-
-export interface ConnectorMapping {
-  id: string;
-  label: string;
-  connectionCount: number;
-}
-
-export interface ExportMetadata {
-  exportDate: string;
-  exportTime: string;
-  zoomLevel: number;
-  totalComponents: number;
-  totalWires: number;
-  totalConnectors: number;
-}
+import {
+  SchematicData,
+  ComponentType,
+  ConnectionType,
+  ConnectorType,
+  ExportOptions,
+  ExportedComponentDetail,
+  ExportedWireDetail,
+  ExportedConnectorDetail,
+  ConnectorMapping,
+  ExportMetadata,
+} from "./SchematicTypes";
 
 class SchematicExportManager {
   /**
    * Capture the #export div directly as image
    */
-  private async captureSchematicDiv(resolution: number = 300, zoom: number = 1): Promise<string> {
+  private async captureSchematicDiv(
+    resolution: number = 300,
+    zoom: number = 1
+  ): Promise<string> {
     try {
-      console.log("Capturing schematic from #export div...");
+      console.log("Capturing full schematic SVG using bounding box...");
 
-      // Get the export div
-      const exportDiv = document.getElementById("export");
-      if (!exportDiv) {
-        throw new Error("Export div not found. Make sure your SVG is wrapped in <div id='export'>");
-      }
+      const svgElement = document.querySelector("#export svg") as SVGSVGElement;
+      if (!svgElement) throw new Error("SVG not found inside #export div");
 
-      // Wait for rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Get the actual bounding box of the entire schematic
+      const bbox = svgElement.getBBox();
+      const fullWidth = bbox.width + Math.abs(bbox.x);
+      const fullHeight = bbox.height + Math.abs(bbox.y);
 
-      // Calculate scale for high resolution
+      // Clone the SVG to safely modify it
+      const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
+      clonedSvg.setAttribute("width", `${fullWidth}`);
+      clonedSvg.setAttribute("height", `${fullHeight}`);
+      clonedSvg.setAttribute("viewBox", `${bbox.x} ${bbox.y} ${fullWidth} ${fullHeight}`);
+
+      // Serialize the cloned SVG
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(clonedSvg);
+      const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+
+      // Prepare the canvas
       const scale = (resolution / 96) * zoom;
+      const canvas = document.createElement("canvas");
+      canvas.width = fullWidth * scale;
+      canvas.height = fullHeight * scale;
 
-      console.log(`Rendering at ${resolution} DPI with ${zoom}x zoom (scale: ${scale})...`);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not get 2D context");
 
-      // Capture the div with html2canvas
-      const canvas = await html2canvas(exportDiv, {
-        scale: scale,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: "#e5e5e5", // Match your SVG background
-        imageTimeout: 0,
-        removeContainer: true,
+      // Load the image and draw it onto the canvas
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+
+      return await new Promise<string>((resolve, reject) => {
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          const imageData = canvas.toDataURL("image/png", 1.0);
+          console.log("✓ Full schematic captured successfully (bounding box export)");
+          resolve(imageData);
+        };
+        img.onerror = (e) => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Failed to load SVG image: " + e));
+        };
+        img.src = url;
       });
-
-      // Validate canvas
-      if (!canvas || canvas.width === 0 || canvas.height === 0) {
-        throw new Error("Canvas rendering produced invalid dimensions");
-      }
-
-      // Convert to PNG
-      const imageData = canvas.toDataURL("image/png", 1.0);
-
-      if (!imageData || imageData.length < 100) {
-        throw new Error("Failed to generate valid image data");
-      }
-
-      console.log("✓ Schematic captured successfully!");
-      return imageData;
     } catch (error) {
       console.error("Error capturing schematic:", error);
       throw error;
     }
   }
-
   /**
    * Extract component details
    */
@@ -436,7 +385,7 @@ class SchematicExportManager {
       console.log(`✓✓✓ PDF exported successfully: ${filename}`);
       console.log("=== Export Complete ===");
     } catch (error) {
-      console.error("❌ Error generating PDF:", error);
+      console.error(" Error generating PDF:", error);
       throw error;
     }
   }
@@ -445,29 +394,204 @@ class SchematicExportManager {
    * Export as PNG image
    */
   public async exportAsImage(
-    svgElement: SVGSVGElement | null, // Not used, kept for compatibility
+    svgElement: SVGSVGElement | null,
     options: ExportOptions = {}
   ): Promise<void> {
-    const { filename = "schematic-export.png", resolution = 300 } = options;
+    const { filename = "schematic-export.png", resolution = 300, zoom = 1 } = options;
 
-    try {
-      const imageData = await this.captureSchematicDiv(resolution);
-
+    // helper to trigger download
+    const downloadDataUrl = (dataUrl: string, name: string) => {
       const link = document.createElement("a");
-      link.href = imageData;
-      link.download = filename;
+      link.href = dataUrl;
+      link.download = name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    };
 
-      console.log(`✓ Image exported successfully: ${filename}`);
-    } catch (error) {
-      console.error("Error exporting image:", error);
-      throw error;
+    // fallback: inline computed styles for every element (deep)
+    const inlineComputedStyles = (svg: SVGSVGElement) => {
+      const win = document.defaultView || (window as any);
+      const all = svg.querySelectorAll("*");
+      for (let i = 0; i < all.length; i++) {
+        const el = all[i] as Element;
+        const style = win.getComputedStyle(el);
+        if (!style) continue;
+
+        // build style string of only useful properties (avoid very long)
+        const props = [
+          "fill", "fill-opacity", "stroke", "stroke-width",
+          "font-size", "font-family", "font-weight", "font-style",
+          "text-anchor", "opacity", "display", "visibility",
+          "stroke-linecap", "stroke-linejoin", "stroke-dasharray"
+        ];
+        const styleTextParts: string[] = [];
+        for (const p of props) {
+          const v = style.getPropertyValue(p);
+          if (v) styleTextParts.push(`${p}:${v};`);
+        }
+        if (styleTextParts.length) {
+          (el as HTMLElement).setAttribute("style", styleTextParts.join(""));
+        }
+      }
+    };
+    const inlineExternalImages = async (svg: SVGSVGElement): Promise<SVGSVGElement> => {
+      const cloned = svg.cloneNode(true) as SVGSVGElement;
+      const images = Array.from(cloned.querySelectorAll("image")) as unknown as SVGImageElement[];
+
+      for (const imgEl of images) {
+        // href could be in xlink:href or href
+        const href = imgEl.getAttribute("href") || imgEl.getAttributeNS("http://www.w3.org/1999/xlink", "href");
+        if (!href) continue;
+        // ignore data: already
+        if (href.startsWith("data:")) continue;
+
+        try {
+          // fetch the image as blob 
+          const resp = await fetch(href, { mode: "cors" });
+          if (!resp.ok) throw new Error(`image fetch failed: ${resp.status}`);
+          const blob = await resp.blob();
+
+          // draw to a temporary canvas to get dataURL
+          const bitmap = await createImageBitmap(blob);
+          const canvas = document.createElement("canvas");
+          canvas.width = bitmap.width;
+          canvas.height = bitmap.height;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(bitmap, 0, 0);
+          const dataUrl = canvas.toDataURL("image/png");
+          imgEl.setAttribute("href", dataUrl);
+        } catch (e) {
+          console.warn("Failed to inline external image (CORS?):", href, e);
+        }
+      }
+      return cloned;
+    };
+
+    const svgToDataUrl = (svg: SVGSVGElement) => {
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svg);
+      const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+      return URL.createObjectURL(blob);
+    };
+    const openSerializedSvgInNewTab = (svg: SVGSVGElement) => {
+      try {
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svg);
+        const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank")?.focus();
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+      } catch (e) {
+        console.warn("openSerializedSvgInNewTab failed:", e);
+      }
+    };
+
+    try {
+      console.log("=== Starting Image Export (robust) ===");
+      try {
+        if ((document as any).fonts && (document as any).fonts.ready) {
+          await (document as any).fonts.ready;
+        }
+      } catch { }
+
+      try {
+        console.log("Attempting full SVG capture (bounding box method)");
+        const svg = document.querySelector("#export svg") as SVGSVGElement | null;
+        if (!svg) throw new Error("SVG not found inside #export div");
+
+        const bbox = svg.getBBox();
+        const fullWidth = bbox.width + Math.abs(bbox.x);
+        const fullHeight = bbox.height + Math.abs(bbox.y);
+
+        const clonedSvg = svg.cloneNode(true) as SVGSVGElement;
+        clonedSvg.setAttribute("width", `${fullWidth}`);
+        clonedSvg.setAttribute("height", `${fullHeight}`);
+        clonedSvg.setAttribute("viewBox", `${bbox.x} ${bbox.y} ${fullWidth} ${fullHeight}`);
+
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(clonedSvg);
+        const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = (err) => reject(new Error("Failed to load serialized SVG image: " + err));
+          img.src = url;
+        });
+
+        const scale = (resolution / 96) * zoom;
+        const canvas = document.createElement("canvas");
+        canvas.width = fullWidth * scale;
+        canvas.height = fullHeight * scale;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Could not get 2D context");
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+
+        const dataUrl = canvas.toDataURL("image/png", 1.0);
+        downloadDataUrl(dataUrl, filename);
+        console.log("✓ Full schematic PNG exported successfully");
+        return;
+      } catch (err) {
+        console.warn("SVG capture failed, falling back to html2canvas:", err);
+      }
+      const svg = svgElement || (document.querySelector("#export svg") as SVGSVGElement | null);
+      if (!svg) throw new Error("SVG not found inside #export div (fallback)");
+
+      // Clone and inline images
+      const svgWithImages = await inlineExternalImages(svg);
+
+      // Inline computed styles (deep)
+      inlineComputedStyles(svgWithImages);
+
+      // Compute bounding box (use original svg's bbox for consistency)
+      let bbox;
+      try { bbox = svg.getBBox(); } catch (e) { bbox = { x: 0, y: 0, width: svg.clientWidth || 1000, height: svg.clientHeight || 800 }; }
+      const fullWidth = bbox.width + Math.abs(bbox.x);
+      const fullHeight = bbox.height + Math.abs(bbox.y);
+      svgWithImages.setAttribute("width", `${fullWidth}`);
+      svgWithImages.setAttribute("height", `${fullHeight}`);
+      svgWithImages.setAttribute("viewBox", `${bbox.x} ${bbox.y} ${fullWidth} ${fullHeight}`);
+
+      // serialize and load into image
+      const svgUrl = svgToDataUrl(svgWithImages);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = (err) => reject(new Error("Failed to load serialized SVG image: " + err));
+        img.src = svgUrl;
+      });
+
+      // draw to canvas
+      const scale = (resolution / 96) * zoom;
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(fullWidth * scale));
+      canvas.height = Math.max(1, Math.round(fullHeight * scale));
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not get 2D context");
+
+      // draw
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(svgUrl);
+
+      // export PNG
+      const png = canvas.toDataURL("image/png", 1.0);
+      downloadDataUrl(png, filename);
+      console.log(" Fallback SVG-inlined export successful");
+      return;
+    } catch (err) {
+      console.error(" exportAsImage failed (both methods):", err);
+
+      throw err;
     }
   }
-
 }
-
 // Export singleton instance
 export const schematicExportManager = new SchematicExportManager();
