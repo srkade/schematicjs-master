@@ -279,7 +279,6 @@ class SchematicExportManager {
       const x = pageWidth - logoWidth - margin;
       const y = 0;
       pdf.addImage(img as any, "PNG", x, y, logoWidth, logoHeight);
-      
       pdf.addPage();
       yPosition = margin;
 
@@ -312,9 +311,6 @@ class SchematicExportManager {
         });
 
         yPosition = (pdf as any).lastAutoTable.finalY + 10;
-
-
-
         // Wires Table
         if (yPosition > pageHeight - 50) {
           pdf.addPage();
@@ -390,8 +386,54 @@ class SchematicExportManager {
         yPosition += 7;
         pdf.text(`Total Connectors: ${connectors.length}`, margin, yPosition);
       }
+      // --- Add DTC Probable Causes & Steps ---
+      const causes =
+        (data as any).probableCauses || (data as any).problableCauses || [];
+      const steps = (data as any).steps || [];
 
-      // Add JSON data if requested
+      if (causes.length || steps.length) {
+        pdf.addPage();
+        let y = 10;
+
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, "bold");
+        pdf.text("DTC DETAILS", 10, y);
+        y += 12;
+
+        // Probable Causes
+        if (causes.length) {
+          pdf.setFontSize(13);
+          pdf.setFont(undefined, "bold");
+          pdf.text("Probable Causes:", 10, y);
+          y += 8;
+
+          pdf.setFontSize(11);
+          pdf.setFont(undefined, "normal");
+
+          causes.forEach((cause: string, i: number) => {
+            pdf.text(`${i + 1}. ${cause}`, 15, y);
+            y += 6;
+          });
+
+          y += 6;
+        }
+
+        // Diagnostic Steps
+        if (steps.length) {
+          pdf.setFontSize(13);
+          pdf.setFont(undefined, "bold");
+          pdf.text("Diagnostic Steps:", 10, y);
+          y += 8;
+
+          pdf.setFontSize(11);
+          pdf.setFont(undefined, "normal");
+
+          steps.forEach((step: string, i: number) => {
+            pdf.text(`${i + 1}. ${step}`, 15, y);
+            y += 6;
+          });
+        }
+      }
 
       // Save PDF
       pdf.save(filename);

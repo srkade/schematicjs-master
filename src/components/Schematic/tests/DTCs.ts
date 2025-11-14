@@ -98,7 +98,7 @@ export const DTC_StarterCoolDown = {
       label: "",
     },
   ],
-  problableCauses: [
+  probableCauses: [
     "open circuit in connector XSP_500",
     "corroded connector XS12 cavity A",
     "Loose ground near horn circuit"
