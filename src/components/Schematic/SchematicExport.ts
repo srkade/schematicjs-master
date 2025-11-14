@@ -16,9 +16,6 @@ import {
 } from "./SchematicTypes";
 import logoImage from '../../assets/Images/logo.jpg';
 class SchematicExportManager {
-  /**
-   * Capture the #export div directly as image
-   */
   private async captureSchematicDiv(
     resolution: number = 300,
     zoom: number = 1
@@ -30,17 +27,15 @@ class SchematicExportManager {
       if (!svgElement) throw new Error("SVG not found inside #export div");
 
       // Get the actual bounding box of the entire schematic
-      // Get the actual bounding box of the entire schematic
       let bbox;
       try {
         bbox = svgElement.getBBox();
 
-        // If BBox returns invalid size (common for large SVGs)
         if (!bbox || !bbox.width || !bbox.height) {
           throw new Error("Invalid BBox");
         }
       } catch (e) {
-        console.warn("⚠ getBBox failed, using fallback dimensions");
+        console.warn("getBBox failed, using fallback dimensions");
 
         bbox = {
           x: 0,
@@ -111,9 +106,7 @@ class SchematicExportManager {
       throw error;
     }
   }
-  /**
-   * Extract component details
-   */
+ 
   private extractComponentDetails(
     data: SchematicData,
     connectorConnectionCount: { [id: string]: number }
@@ -136,9 +129,6 @@ class SchematicExportManager {
     }));
   }
 
-  /**
-   * Extract wire details
-   */
   private extractWireDetails(data: SchematicData): ExportedWireDetail[] {
     return (data.connections ?? []).map((wire) => {
       const wireDetails = wire.wireDetails ?? {};
@@ -170,9 +160,6 @@ class SchematicExportManager {
     });
   }
 
-  /**
-   * Extract connector details
-   */
   private extractConnectorDetails(data: SchematicData): ExportedConnectorDetail[] {
     const connectorDetails: ExportedConnectorDetail[] = [];
     const processedConnectors = new Set<string>();
@@ -203,9 +190,6 @@ class SchematicExportManager {
     return connectorDetails;
   }
 
-  /**
-   * Calculate cavity count
-   */
   private calculateCavityCount(connector: ConnectorType, data: SchematicData): number {
     const connections = (data.connections ?? []).filter(
       (conn) =>
@@ -215,9 +199,6 @@ class SchematicExportManager {
     return connections.length;
   }
 
-  /**
-   * Generate PDF from schematic
-   */
   public async generatePDF(
     svgElement: SVGSVGElement | null, // Not used, kept for compatibility
     data: SchematicData,
@@ -478,9 +459,6 @@ class SchematicExportManager {
     }
   }
 
-  /**
-   * Export as PNG image
-   */
   public async exportAsImage(
     svgElement: SVGSVGElement | null,
     options: ExportOptions = {}
@@ -683,5 +661,4 @@ class SchematicExportManager {
     }
   }
 }
-// Export singleton instance
 export const schematicExportManager = new SchematicExportManager();
