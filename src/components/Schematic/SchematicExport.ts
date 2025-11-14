@@ -14,7 +14,7 @@ import {
   ConnectorMapping,
   ExportMetadata,
 } from "./SchematicTypes";
-
+import logoImage from '../../assets/Images/logo.jpg';
 class SchematicExportManager {
   /**
    * Capture the #export div directly as image
@@ -266,7 +266,20 @@ class SchematicExportManager {
         console.warn("Warning: Could not add image to PDF:", imgError);
       }
 
-      // Add new page for tables
+      const img = new Image();
+      img.src = logoImage;
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+      });
+
+      const logoWidth = 30;
+      const logoHeight = 30;
+      const x = pageWidth - logoWidth - margin;
+      const y = 0;
+      pdf.addImage(img as any, "PNG", x, y, logoWidth, logoHeight);
+      
       pdf.addPage();
       yPosition = margin;
 
