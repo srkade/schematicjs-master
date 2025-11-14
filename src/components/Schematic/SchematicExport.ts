@@ -1,6 +1,6 @@
 
 import jsPDF from "jspdf";
-import "jspdf-autotable";  // registers the plugin automatically
+import "jspdf-autotable"; 
 import html2canvas from "html2canvas";
 import {
   SchematicData,
@@ -30,7 +30,25 @@ class SchematicExportManager {
       if (!svgElement) throw new Error("SVG not found inside #export div");
 
       // Get the actual bounding box of the entire schematic
-      const bbox = svgElement.getBBox();
+      // Get the actual bounding box of the entire schematic
+      let bbox;
+      try {
+        bbox = svgElement.getBBox();
+
+        // If BBox returns invalid size (common for large SVGs)
+        if (!bbox || !bbox.width || !bbox.height) {
+          throw new Error("Invalid BBox");
+        }
+      } catch (e) {
+        console.warn("⚠ getBBox failed, using fallback dimensions");
+
+        bbox = {
+          x: 0,
+          y: 0,
+          width: svgElement.scrollWidth || svgElement.clientWidth || 2000,
+          height: svgElement.scrollHeight || svgElement.clientHeight || 1200
+        };
+      }
       const fullWidth = bbox.width + Math.abs(bbox.x);
       const fullHeight = bbox.height + Math.abs(bbox.y);
 
@@ -61,12 +79,27 @@ class SchematicExportManager {
 
       return await new Promise<string>((resolve, reject) => {
         img.onload = () => {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const MAX_PX = 8000;
+
+          let renderWidth = fullWidth;
+          let renderHeight = fullHeight;
+
+          if (renderWidth > MAX_PX || renderHeight > MAX_PX) {
+            const scaleDown = MAX_PX / Math.max(renderWidth, renderHeight);
+            renderWidth = Math.floor(renderWidth * scaleDown);
+            renderHeight = Math.floor(renderHeight * scaleDown);
+          }
+          // Use resized dimensions
+          canvas.width = renderWidth;
+          canvas.height = renderHeight;
+          // Draw final scaled image
+          ctx.drawImage(img, 0, 0, renderWidth, renderHeight);
           URL.revokeObjectURL(url);
-          const imageData = canvas.toDataURL("image/png", 1.0);
-          console.log("✓ Full schematic captured successfully (bounding box export)");
+          // Export JPEG (MUCH smaller, prevents RangeError)
+          const imageData = canvas.toDataURL("image/jpeg", 0.92);
           resolve(imageData);
         };
+
         img.onerror = (e) => {
           URL.revokeObjectURL(url);
           reject(new Error("Failed to load SVG image: " + e));
@@ -555,7 +588,9 @@ class SchematicExportManager {
         const svg = document.querySelector("#export svg") as SVGSVGElement | null;
         if (!svg) throw new Error("SVG not found inside #export div");
 
-        const bbox = svg.getBBox();
+        let bbox;
+        try { bbox = svg.getBBox(); }
+        catch (e) { bbox = { x: 0, y: 0, width: svg.clientWidth, height: svg.clientHeight }; }
         const fullWidth = bbox.width + Math.abs(bbox.x);
         const fullHeight = bbox.height + Math.abs(bbox.y);
 
