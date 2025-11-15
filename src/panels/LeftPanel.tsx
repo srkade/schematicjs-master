@@ -74,8 +74,8 @@ export default function LeftPanel({
     }
   };
 
-  //  CHANGE: decide if checkboxes should be shown for this tab
-  const showCheckbox = activeTab === "components" || activeTab === "DTC";
+  // decide if checkboxes should be shown for this tab
+  const showCheckbox = activeTab === "components" || activeTab === "DTC" || activeTab === "voltage";
 
   return (
     <div
@@ -145,7 +145,7 @@ export default function LeftPanel({
             gap: "8px",
           }}
         >
-         
+
 
           {selectedCodes.length > 0 && (
             <button
