@@ -1,6 +1,6 @@
 
 import jsPDF from "jspdf";
-import "jspdf-autotable"; 
+import "jspdf-autotable";
 import html2canvas from "html2canvas";
 import {
   SchematicData,
@@ -106,7 +106,6 @@ class SchematicExportManager {
       throw error;
     }
   }
- 
   private extractComponentDetails(
     data: SchematicData,
     connectorConnectionCount: { [id: string]: number }
@@ -205,11 +204,10 @@ class SchematicExportManager {
     connectorConnectionCount: { [id: string]: number },
     options: ExportOptions = {}
   ): Promise<void> {
-    const {
-      filename = "schematic-export.pdf",
-      resolution = 300,
-      zoom = 1,
-    } = options;
+    const resolution = options.resolution || 300;
+    const zoom = options.zoom || 1;
+    const filename = `${data.name || "Unnamed Schematic"}.pdf`;
+
 
     try {
       console.log("=== Starting PDF Export ===");
@@ -250,7 +248,7 @@ class SchematicExportManager {
       // Title
       pdf.setFontSize(20);
       pdf.setFont(undefined, "bold");
-      pdf.text("ELECTRICAL SCHEMATIC DIAGRAM", margin, yPosition);
+      pdf.text(`Schematic :${data.name || "Unnamed Scheamtic"}`, margin, yPosition);
       yPosition += 10;
 
       // Metadata
@@ -461,10 +459,12 @@ class SchematicExportManager {
 
   public async exportAsImage(
     svgElement: SVGSVGElement | null,
-    options: ExportOptions = {}
+    options: ExportOptions = {},
+    data: SchematicData
   ): Promise<void> {
-    const { filename = "schematic-export.png", resolution = 300, zoom = 1 } = options;
-
+    const resolution = options.resolution || 300;
+    const zoom = options.zoom || 1;
+    const filename = `${data.name || "Unnamed Schematic"}.png`;
     // helper to trigger download
     const downloadDataUrl = (dataUrl: string, name: string) => {
       const link = document.createElement("a");

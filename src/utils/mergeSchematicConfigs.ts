@@ -32,6 +32,7 @@ interface SchematicConfig {
   masterComponents: string[];
   components: Component[];
   connections: Connection[];
+  name: string;
 }
 
 
@@ -83,7 +84,8 @@ export function mergeSchematicConfigs(...configs: SchematicConfig[]): SchematicD
   return {
     masterComponents: Array.from(new Set(mergedMasterComponents)),
     components: mergedComponents,
-    connections: mergedConnections
+    connections: mergedConnections,
+    name: configs.length > 1 ? "Merged Schematic" : configs[0].name,
   };
 }
 

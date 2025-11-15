@@ -33,12 +33,13 @@ export type ConnectionType = {
   from: ConnectionPoint;
   to: ConnectionPoint;
   label: string;
-  wireDetails?: WireDetailsType; // Add this
+  wireDetails?: WireDetailsType; 
 };
 export type SchematicData = {
   masterComponents: string[];
   components: ComponentType[];
   connections: ConnectionType[];
+  name:string;
 };
 
 export type WirePopupType = {

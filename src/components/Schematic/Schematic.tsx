@@ -593,7 +593,9 @@ export default function Schematic({
       await schematicExportManager.exportAsImage(svgElement, {
         filename,
         resolution: 300,
-      });
+      },
+      data
+    );
 
       console.log("Image export completed successfully");
     } catch (error) {
