@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../Styles/NavigationTabs.css"
 import logo from "../assets/Images/logo.jpg"
+import {
+  Wrench,
+  Cpu,
+  Layers,
+  Zap,
+  AlertTriangle,
+  Cable
+} from "lucide-react";
+
 
 interface NavigationTabsProps {
   activeTab: string;
@@ -10,13 +19,13 @@ interface NavigationTabsProps {
 }
 
 const tabs = [
-  { id: "components", label: "Components", icon: "🔧" },
-  { id: "controllers", label: "Control Unit", icon: "⚙️" },
-  { id: "systems", label: "Systems", icon: "🔗" },
-  { id: "voltage", label: "Supply", icon: "⚡" },
-  { id: "DTC", label: "Trouble Code", icon: "⚠️" },
-  { id: "signals", label: "Wires", icon: "📶" },
-  { id: "harnesses", label: "Harnesses", icon: "🔌" },
+  { id: "components", label: "Components", icon: Wrench },
+  { id: "controllers", label: "Control Unit", icon: Cpu },
+  { id: "systems", label: "Systems", icon: Layers },
+  { id: "voltage", label: "Supply", icon: Zap },
+  { id: "DTC", label: "Trouble Code", icon: AlertTriangle },
+  { id: "signals", label: "Wires", icon: Cable },
+  { id: "harnesses", label: "Harnesses", icon: Cable },
 ];
 
 export default function NavigationTabs({ activeTab, onTabChange, onLogout, userName }: NavigationTabsProps) {
@@ -74,7 +83,9 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout, userN
           </h1>
         </div>
 
-        {tabs.map((tab) => (
+      {tabs.map((tab) => {
+        const Icon = tab.icon;
+        return (
           <button
             key={tab.id}
             className={`nav-tab ${activeTab === tab.id ? "active" : ""}`}
@@ -103,23 +114,24 @@ export default function NavigationTabs({ activeTab, onTabChange, onLogout, userN
               outline: "none",
               userSelect: "none",
             }}
-        onMouseEnter={(e) => {
-          if (activeTab !== tab.id) {
-            (e.target as HTMLElement).style.background = "#eaebeeff";
-            (e.target as HTMLElement).style.color = "black";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (activeTab !== tab.id) {
-            (e.target as HTMLElement).style.background = "transparent";
-            (e.target as HTMLElement).style.color = "black";
-          }
-        }}
+          onMouseEnter={(e) => {
+            if (activeTab !== tab.id) {
+              (e.target as HTMLElement).style.background = "#eaebeeff";
+              (e.target as HTMLElement).style.color = "black";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (activeTab !== tab.id) {
+              (e.target as HTMLElement).style.background = "transparent";
+              (e.target as HTMLElement).style.color = "black";
+            }
+          }}
           >
-        <span>{tab.icon}</span>
-        <span>{tab.label}</span>
-      </button>
-        ))}
+            <span><Icon size={18} /></span>
+            <span>{tab.label}</span>
+          </button>
+        );
+      })}
       <div
         ref={userMenuRef}
         style={{
