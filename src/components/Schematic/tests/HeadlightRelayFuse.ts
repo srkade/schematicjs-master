@@ -75,6 +75,7 @@ const HeadlightRelayFuse = {
         wireColor: "YE",
         wireLength: 571,
         wireType: "Regular",
+        fuse: { code: "F2", ampere: "10A" },
         from: {
           connectorNumber: "X90",
           devName: "Load Center",
@@ -116,6 +117,7 @@ const HeadlightRelayFuse = {
         wireColor: "YE",
         wireLength: 174,
         wireType: "Regular",
+        fuse: { code: "F3", ampere: "15A" },
         from: {
           connectorNumber: "XS9",
           devName: "Load Center",
@@ -157,6 +159,7 @@ const HeadlightRelayFuse = {
         wireColor: "YE",
         wireLength: 174,
         wireType: "Regular",
+        fuse: { code: "F4", ampere: "20A" },
         from: {
           connectorNumber: "XS9",
           devName: "Load Center",
@@ -198,22 +201,23 @@ const HeadlightRelayFuse = {
         wireColor: "YE",
         wireLength: 174,
         wireType: "Regular",
+        fuse: { code: "F5", ampere: "25A" }, 
         from: {
-          connectorNumber: "X90",
-          devName: "Load Center",
-          connPartNumber: "57M13428",
-          termPartNo: "57M7401",
-          sealPartNo: "57M9219",
-          cavity: "2"
-        },
-        to: {
-          connectorNumber: "SP_401",
-          devName: "Splice",
-          connPartNumber: "57M9219",
-          termPartNo: "",
-          sealPartNo: "",
-          cavity: ""
-        }
+      connectorNumber: "X90",
+      devName: "Load Center",
+      connPartNumber: "57M13428",
+      termPartNo: "57M7401",
+      sealPartNo: "57M9219",
+      cavity: "2"
+    },
+    to: {
+      connectorNumber: "SP_401",
+      devName: "Splice",
+      connPartNumber: "57M9219",
+      termPartNo: "",
+      sealPartNo: "",
+      cavity: ""
+    }
       }
     }
   ]

@@ -14,13 +14,17 @@ export type ComponentType = {
   manufacturer?: string;
   connector_part_number?: string;
   gender?: string;
-
 };
+export interface FuseInfo {
+  code: string;
+  ampere: string | number;
+}
 export type ConnectorType = {
   id: string;
   label: string;
   color?: string;
   gender?: string;
+  fuse?: FuseInfo;
 };
 export type ConnectionPoint = {
   componentId: string;
@@ -33,13 +37,13 @@ export type ConnectionType = {
   from: ConnectionPoint;
   to: ConnectionPoint;
   label: string;
-  wireDetails?: WireDetailsType; 
+  wireDetails?: WireDetailsType;
 };
 export type SchematicData = {
   masterComponents: string[];
   components: ComponentType[];
   connections: ConnectionType[];
-  name:string;
+  name: string;
 };
 
 export type WirePopupType = {
@@ -78,6 +82,7 @@ export type WirePopupType = {
       shieldId?: string;
       wireOption?: string;
       mark?: string;
+      fuse?: FuseInfo;
       from?: {
         connectorNumber?: string;
         devName?: string;
@@ -109,6 +114,7 @@ export type WireDetailsType = {
   shieldId: string;
   wireOption: string;
   mark: string;
+  fuse?: FuseInfo;
   from: {
     connectorNumber: string;
     devName: string;
@@ -127,7 +133,7 @@ export type WireDetailsType = {
   };
 };
 export type PopupConnectorType = {
-   componentCode?: string;
+  componentCode?: string;
   connectorCode?: string;
   label?: string;
   harnessName?: string;

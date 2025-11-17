@@ -414,6 +414,19 @@ export default function Schematic({
   }
   function getWidthForComponent(component: ComponentType): number {
     const defaultWidth = componentNameWidths[component.id] + padding;
+
+    //  check if any connector in any connection has a fuse
+    const hasFuse = data.connections.some(
+      (wire) =>
+        (wire.from.componentId === component.id || wire.to.componentId === component.id) &&
+        wire.wireDetails?.fuse
+    );
+
+    // Increase width if a fuse is present
+    if (hasFuse) {
+      return defaultWidth + 150;
+    }
+
     if (component.shape === "rectangle") {
       let connectionCount = getConnectionsForComponent(component, data).length;
       if (connectionCount > 1) {
@@ -424,8 +437,10 @@ export default function Schematic({
         return Math.max(width, defaultWidth);
       }
     }
+
     return defaultWidth;
   }
+
 
   function getXForComponent(component: ComponentType): number {
     let index = data.components.findIndex((c) => c.id === component.id);
@@ -496,23 +511,33 @@ export default function Schematic({
       ? getYForComponent(component) + componentSize.height
       : getYForComponent(component) - 20;
   }
-  function getWidthForConnector(
-    conn: ConnectorType,
-    comp: ComponentType
-  ): number {
+  function getWidthForConnector(conn: ConnectorType, comp: ComponentType): number {
     let connections = getConnectionsForConnector(conn, data);
+    let originalWidth: number;
+
     if (comp.shape === "rectangle") {
-      let interConnectionSpacing = 30;
+      let interConnectionSpacing = 60;
       let connectionsBasedWidth =
         (connections.length + 1) * interConnectionSpacing;
-      return Math.max(
+      originalWidth = Math.max(
         connectionsBasedWidth,
         connectorNameWidths[conn.id] + connectorNamePadding,
         100
       );
+    } else {
+      originalWidth = connectorNameWidths[conn.id] + connectorNamePadding;
     }
-    return connectorNameWidths[conn.id] + connectorNamePadding;
+
+    // Add fuse extra width safely
+    // if (conn.fuse) {
+    //   return originalWidth + 40; // try 40 instead of 400
+    // }
+
+    return originalWidth;
   }
+
+
+
   function getXForWireToSplice(
     component: ComponentType,
     wireIndex: number,
@@ -1097,12 +1122,12 @@ export default function Schematic({
                         )}
                         {comp.category?.toLowerCase() === "battery" && (
                           <Battery
-                            x={getXForComponent(comp)+10}
-                            y={getYForComponent(comp)+10}
+                            x={getXForComponent(comp) + 10}
+                            y={getYForComponent(comp) + 10}
                             width={30}
-                            height={40}          
-                            leadLength={5}       
-                            centralLineRatio={3} 
+                            height={40}
+                            leadLength={5}
+                            centralLineRatio={3}
                           />
                         )}
                       </g>
@@ -1305,6 +1330,8 @@ export default function Schematic({
                   getXForConnector(from, fromComponent!) +
                   getWidthForConnector(from, fromComponent!) / 2;
                 const fuseY = getYForConnector(from, fromComponent!) - 10; // small offset above connector
+                const allowedCavities = [42, 46, 43, 47, 44, 48, 36, 40, 35, 39, 34, 38, 26, 30];
+                const fromCavity = Number(wire.from.cavity); // get cavity of "from" connector
 
                 let wireElement;
                 wireElement = (
@@ -1321,24 +1348,50 @@ export default function Schematic({
                               size={10}
                             />
 
-                            {/* Fuse symbol for Load Center (flipped when on top) */}
-                            {fromComponent?.category?.toLowerCase() ===
-                              "supply" &&
-                              fromComponent?.label
-                                ?.toLowerCase()
-                                .includes("load center") && (
-                                <g
-                                  transform={`translate(${fromX}, ${fromY - 45
-                                    }) scale(1, -1)`}
-                                >
-                                  <FuseSymbol
-                                    cx={0}
-                                    cy={0}
-                                    size={14}
-                                    color="black"
-                                  />
+
+                            {fromComponent?.category?.toLowerCase() === "supply" &&
+                              fromComponent?.label?.toLowerCase().includes("load center") &&
+                              wire.wireDetails?.fuse &&
+                              allowedCavities.includes(fromCavity) && (  // ✅ only show for allowed cavities
+                                <g transform={`translate(${fromX}, ${fromY - 45})`}>
+
+                                  {/* LEFT NORMAL TEXT (not flipped) */}
+                                  {wire.wireDetails.fuse.code && (
+                                    <text
+                                      x={-10}
+                                      y={4}
+                                      textAnchor="end"
+                                      fontSize="10"
+                                      fill="black"
+                                      fontWeight="bold"
+                                      alignmentBaseline="middle"
+                                    >
+                                      {wire.wireDetails.fuse.code}
+                                    </text>
+                                  )}
+
+                                  {/* FLIPPED SYMBOL ONLY */}
+                                  <g transform="scale(1, -1)">
+                                    <FuseSymbol cx={0} cy={0} size={12} color="black" />
+                                  </g>
+
+                                  {/* RIGHT NORMAL TEXT (not flipped) */}
+                                  {wire.wireDetails.fuse.ampere && (
+                                    <text
+                                      x={10}
+                                      y={4}
+                                      textAnchor="start"
+                                      fontSize="10"
+                                      fill="black"
+                                      fontWeight="bold"
+                                      alignmentBaseline="middle"
+                                    >
+                                      {wire.wireDetails.fuse.ampere}
+                                    </text>
+                                  )}
                                 </g>
                               )}
+
                           </>
                         ) : (
                           <>
@@ -1355,24 +1408,48 @@ export default function Schematic({
                               />
                             </g>
 
-                            {/* Fuse symbol (normal orientation below bottom trident) */}
-                            {fromComponent?.category?.toLowerCase() ===
-                              "supply" &&
-                              fromComponent?.label
-                                ?.toLowerCase()
-                                .includes("load center") && (
-                                <g
-                                  transform={`translate(${fromX - 10}, ${fromY + 20
-                                    })`}
-                                >
-                                  <FuseSymbol
-                                    cx={0}
-                                    cy={2}
-                                    size={10}
-                                    color="black"
-                                  />
+                            {/* Fuse Code + Symbol + Amp (Bottom Side, normal orientation) */}
+                            {fromComponent?.category?.toLowerCase() === "supply" &&
+                              fromComponent?.label?.toLowerCase().includes("load center") &&
+                              wire.wireDetails?.fuse &&
+                              allowedCavities.includes(fromCavity) && (
+                                <g transform={`translate(${fromX}, ${fromY + 28})`}>
+
+                                  {/* CODE (left) */}
+                                  {wire.wireDetails.fuse.code && (
+                                    <text
+                                      x={-22}
+                                      y={4}
+                                      textAnchor="end"
+                                      fontSize="10"
+                                      fill="black"
+                                      fontWeight="bold"
+                                      alignmentBaseline="middle"
+                                    >
+                                      {wire.wireDetails.fuse.code}
+                                    </text>
+                                  )}
+
+                                  {/* Fuse Icon (center) */}
+                                  <FuseSymbol cx={0} cy={0} size={12} color="black" />
+
+                                  {/* AMP (right) */}
+                                  {wire.wireDetails.fuse.ampere && (
+                                    <text
+                                      x={22}
+                                      y={4}
+                                      textAnchor="start"
+                                      fontSize="10"
+                                      fill="black"
+                                      fontWeight="bold"
+                                      alignmentBaseline="middle"
+                                    >
+                                      {wire.wireDetails.fuse.ampere}
+                                    </text>
+                                  )}
                                 </g>
                               )}
+
                           </>
                         )}
                       </>
