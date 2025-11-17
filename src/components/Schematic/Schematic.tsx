@@ -415,31 +415,39 @@ export default function Schematic({
   function getWidthForComponent(component: ComponentType): number {
     const defaultWidth = componentNameWidths[component.id] + padding;
 
-    //  check if any connector in any connection has a fuse
-    const hasFuse = data.connections.some(
-      (wire) =>
-        (wire.from.componentId === component.id || wire.to.componentId === component.id) &&
-        wire.wireDetails?.fuse
-    );
+    // --- Calculate total extra width for all fuses on this component ---
+    let totalFuseWidth = 0;
 
-    // Increase width if a fuse is present
-    if (hasFuse) {
-      return defaultWidth + 150;
-    }
+    const componentConnections = getConnectionsForComponent(component, data);
 
+    componentConnections.forEach((wire) => {
+      if (wire.wireDetails?.fuse) {
+        const fuse = wire.wireDetails.fuse;
+        const codeWidth = (fuse.code?.length || 1) * 8;      
+        const fuseSymbolWidth = 16;                           
+        const spacing = 8;                                    
+
+        totalFuseWidth += codeWidth  + fuseSymbolWidth + spacing;
+      }
+    });
+
+    let width = defaultWidth + totalFuseWidth;
+
+    // --- Handle rectangle with multiple connectors ---
     if (component.shape === "rectangle") {
-      let connectionCount = getConnectionsForComponent(component, data).length;
+      const connectionCount = componentConnections.length;
       if (connectionCount > 1) {
-        let width = connectorSpacing;
+        let connectorWidth = connectorSpacing;
         component.connectors.forEach((conn) => {
-          width += getWidthForConnector(conn, component) + connectorSpacing;
+          connectorWidth += getWidthForConnector(conn, component) + connectorSpacing;
         });
-        return Math.max(width, defaultWidth);
+        width = Math.max(width, connectorWidth, width); // take the largest of fuse width, connectors, default
       }
     }
 
-    return defaultWidth;
+    return width;
   }
+
 
 
   function getXForComponent(component: ComponentType): number {

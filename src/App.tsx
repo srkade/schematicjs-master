@@ -13,7 +13,8 @@ import {
   B3,
   CrankingSystem,
   ChargingSystem,
-  HeadLightRelayFuse
+  LightSwitchFuse,
+  HeadLightRelayFuse,
 } from "./components/Schematic/tests";
 import WelcomePage from "./pages/HomePage";
 import { DTC_StarterCoolDown, DTC_StarterRelayPower, DTC_StarterRelayGround, DTC_ICC } from "./components/Schematic/tests/DTCs"
@@ -38,7 +39,8 @@ const allSchematics = {
   DTC_StarterRelayPower: wrapSchematic(DTC_StarterRelayPower),
   DTC_StarterRelayGround: wrapSchematic(DTC_StarterRelayGround),
   DTC_ICC: wrapSchematic(DTC_ICC),
-  HeadLightRelayFuse:wrapSchematic(HeadLightRelayFuse)
+  LightSwitchFuse: wrapSchematic(LightSwitchFuse),
+  HeadLightRelayFuse: wrapSchematic(HeadLightRelayFuse),
 };
 const SYSTEM_KEYS = ["CrankingSystem", "ChargingSystem"];
 

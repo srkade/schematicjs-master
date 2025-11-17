@@ -117,7 +117,7 @@ const HeadlightRelayFuse = {
         wireColor: "YE",
         wireLength: 174,
         wireType: "Regular",
-        fuse: { code: "F3", ampere: "15A" },
+        fuse: { code: "F3", ampere: "20A" },
         from: {
           connectorNumber: "XS9",
           devName: "Load Center",
@@ -159,7 +159,7 @@ const HeadlightRelayFuse = {
         wireColor: "YE",
         wireLength: 174,
         wireType: "Regular",
-        fuse: { code: "F4", ampere: "20A" },
+        fuse: { code: "F5", ampere: "15A" },
         from: {
           connectorNumber: "XS9",
           devName: "Load Center",

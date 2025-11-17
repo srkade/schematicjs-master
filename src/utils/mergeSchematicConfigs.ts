@@ -73,7 +73,7 @@ export function mergeSchematicConfigs(...configs: SchematicConfig[]): SchematicD
 
   for (const conn of allConnections) {
     // Create a unique key based on from/to component+connector
-    const key = `${conn.from.componentId}:${conn.from.connectorId}-${conn.to.componentId}:${conn.to.connectorId}`;
+    const key = `${conn.from.componentId}:${conn.from.connectorId}:${conn.from.cavity}-${conn.to.componentId}:${conn.to.connectorId}:${conn.to.cavity}`;
     if (!connectionMap.has(key)) {
       connectionMap.set(key, conn);
     }
